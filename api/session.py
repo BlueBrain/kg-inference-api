@@ -18,7 +18,7 @@ class UserForgeSession:
         :return:
         """
         return KnowledgeGraphForge(
-            "./configs/new-forge-config.yml",
+            "https://raw.githubusercontent.com/BlueBrain/nexus-forge/master/examples/notebooks/use-cases/prod-forge-nexus.yml",
             endpoint=self.endpoint,
             bucket=self.bucket,
             token=access_token,

@@ -1,7 +1,5 @@
 from fastapi import FastAPI
 from starsessions import SessionMiddleware, InMemoryBackend
-
-
 from router import rules
 
 app = FastAPI(debug=True)

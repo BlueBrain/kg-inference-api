@@ -2,11 +2,11 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from pydantic import Json
 from starlette.requests import Request
-from dependencies import require_nexus_project, require_user_auth
+from api.dependencies import require_nexus_project, require_user_auth
 from inference_tools.utils import fetch_rules
-from models.rules import Rule
-from rules import RulesHandler
-from utils import get_or_create_forge_session
+from api.models.rules import Rule
+from api.rules import RulesHandler
+from api.utils import get_or_create_forge_session
 
 router = APIRouter()
 
