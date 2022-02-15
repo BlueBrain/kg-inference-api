@@ -3,7 +3,7 @@ from starlette.requests import Request
 from session import UserForgeSession
 
 
-def get_or_create_forge_session(request: Request, username, bucket: str = "", access_token: str = "") -> KnowledgeGraphForge:
+def get_or_create_forge_session(request: Request, username, access_token: str = "") -> KnowledgeGraphForge:
     """
     Returns an existing forge session or creates and returns a new one
 
@@ -18,7 +18,7 @@ def get_or_create_forge_session(request: Request, username, bucket: str = "", ac
     """
     # if a session does not exist with this user
     if username not in request.session:
-        session = UserForgeSession(bucket=bucket, access_token=access_token)
+        session = UserForgeSession(bucket="dke/inference-test", access_token=access_token)
         request.session[username] = session
         return session.forge
     else:
