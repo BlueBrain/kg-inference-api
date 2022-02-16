@@ -1,7 +1,7 @@
 from typing import List
 from inference_tools.utils import get_rule_parameters, check_premises
 from pydantic import Json
-from models.rules import InputParameter, Rule
+from models.rules import InputParameter, RuleOutput
 
 
 class RulesHandler:
@@ -39,14 +39,14 @@ class RulesHandler:
         serialized_rules = []
         for rule in self.rules:
             params = get_rule_parameters(rule)
-            print("Input parameters: ")
             input_parameters = []
             # loop over the input parameters
             for name, payload in params.items():
                 input_parameters.append(InputParameter(name=name, payload=payload))
-            rule = Rule(name=rule["name"],
-                        description=rule["description"],
-                        targetResourceType=rule["targetResourceType"],
-                        inputParameters=input_parameters)
+            rule = RuleOutput(id=rule["@id"],
+                              name=rule["name"],
+                              description=rule["description"],
+                              resource_type=rule["targetResourceType"],
+                              input_parameters=input_parameters)
             serialized_rules.append(rule)
         return serialized_rules

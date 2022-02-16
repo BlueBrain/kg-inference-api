@@ -9,4 +9,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Authentication method using BBP token
-- Endpoint to get all data generalization rules (`/rules`) with several parameters (resource type, filters)
+- Rules endpoint to get all data generalization rules (`/rules`) with several parameters (resource type, filters)
+- Inference endpoint to get inferenced resources (`/infer`) by providing rules and filter
