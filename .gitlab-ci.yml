@@ -1,0 +1,24 @@
+
+include:
+  - project: cs/gitlabci-templates
+    file: /build-image-using-kaniko.yml
+
+deploy-api-in-dev-kubernetes:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      when: on_success
+  variables:
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
+    CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-dev
+
+deploy-api-in-production-kubernetes:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: on_success
+  variables:
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
+    CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-production

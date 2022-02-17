@@ -1,7 +1,7 @@
 from typing import List
 from inference_tools.utils import get_rule_parameters, check_premises
 from pydantic import Json
-from models.rules import InputParameter, RuleOutput
+from api.models.rules import InputParameter, RuleOutput
 
 
 class RulesHandler:

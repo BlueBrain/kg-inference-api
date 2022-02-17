@@ -1,6 +1,6 @@
 from kgforge.core import KnowledgeGraphForge
 from starlette.requests import Request
-from session import UserForgeSession
+from api.session import UserForgeSession
 
 
 def get_or_create_forge_session(request: Request, username, access_token: str = "") -> KnowledgeGraphForge:

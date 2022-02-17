@@ -1,6 +1,6 @@
-from kgforge.core import KnowledgeGraphForge
+import api.config
 
-import config
+from kgforge.core import KnowledgeGraphForge
 
 
 class UserForgeSession:

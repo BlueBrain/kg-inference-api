@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from starsessions import SessionMiddleware, InMemoryBackend
-from router import rules, inference
+from api.router import rules, inference
 
 app = FastAPI(debug=True)
 

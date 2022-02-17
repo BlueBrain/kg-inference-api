@@ -2,9 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends
 from inference_tools.utils import apply_rule
 from starlette.requests import Request
-from dependencies import require_user_auth
-from models.inference import InferenceResult, InferenceBody
-from utils import get_or_create_forge_session
+from api.dependencies import require_user_auth
+from api.models.inference import InferenceResult, InferenceBody
+from api.utils import get_or_create_forge_session
 
 router = APIRouter()
 

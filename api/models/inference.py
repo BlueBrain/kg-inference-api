@@ -1,7 +1,7 @@
 from typing import List
 from fastapi_camelcase import CamelModel
 from pydantic import BaseModel
-from models.rules import RuleInput
+from api.models.rules import RuleInput
 
 
 class Resource(BaseModel):

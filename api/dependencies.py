@@ -1,9 +1,9 @@
 import requests
-import config
+import api.config
 
 from fastapi import HTTPException
 from starlette.requests import Request
-from user import User
+from api.user import User
 
 
 async def require_user_auth(request: Request) -> dict:
