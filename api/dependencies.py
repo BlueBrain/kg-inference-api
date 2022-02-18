@@ -1,8 +1,7 @@
 import requests
-import api.config
-
 from fastapi import HTTPException
 from starlette.requests import Request
+from api import config
 from api.user import User
 
 

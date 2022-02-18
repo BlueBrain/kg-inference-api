@@ -1,5 +1,4 @@
-import api.config
-
+from api import config
 from kgforge.core import KnowledgeGraphForge
 
 
