@@ -12,3 +12,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rules endpoint to get all data generalization rules (`/rules`) with several parameters (resource type, filters)
 - Inference endpoint to get inferenced resources (`/infer`) by providing rules and filter
 - CI/CD implementation to deploy in BBP Kubernetes
+- Authorization functionality in swagger documentation
