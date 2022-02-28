@@ -12,6 +12,9 @@ deploy-api-in-dev-kubernetes:
   variables:
     KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
     CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-dev
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
+
 
 deploy-api-in-production-kubernetes:
   stage: deploy
