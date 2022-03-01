@@ -2,25 +2,68 @@ from api import config
 from kgforge.core import KnowledgeGraphForge
 
 
-class UserForgeSession:
+class UserSession:
 
-    def __init__(self, bucket: str, access_token: str) -> None:
+    def __init__(self, token: str) -> None:
         self.endpoint = config.BBP_NEXUS_ENDPOINT
-        self.bucket = bucket
-        self.forge = self.initialize_forge_object(access_token=access_token)
+        # adds the rules bucket
+        self.forges = {
+            config.RULES_BUCKET: KnowledgeGraphForge(
+                "./api/config/forge-config.yaml",
+                endpoint=self.endpoint,
+                bucket=config.RULES_BUCKET,
+                token=token,
+                debug=True)
+        }
+        self.token = token
 
-    def initialize_forge_object(self, access_token: str) -> KnowledgeGraphForge:
+    def get_rules_forge(self):
         """
-        Initializes and returns a forge object
+        Returns the forge object that includes the rules
 
-        :param access_token:
         :return:
         """
-        return KnowledgeGraphForge(
+        return self.forges[config.RULES_BUCKET]
+
+    def get_or_create_forge_session(self, org: str, project: str) -> KnowledgeGraphForge:
+        """
+        Retrieves or creates a forge session for the given organization and project. Then returns the forge object
+
+        :param org:
+        :param project:
+        :return:
+        """
+        bucket = f"{org}/{project}"
+        # if the bucket does not exist in the session
+        if bucket not in self.forges:
+            session = KnowledgeGraphForge(
+                "./api/config/forge-config.yaml",
+                endpoint=self.endpoint,
+                token=self.token,
+                bucket=bucket)
+            self.forges[bucket] = session
+        # if the token stored in the forge is different than the one of the session
+        elif self.forges[bucket]._store.token != self.token:
+            self.forges[bucket] = KnowledgeGraphForge(
+                "./api/config/forge-config.yaml",
+                endpoint=self.endpoint,
+                token=self.token,
+                bucket=bucket)
+        return self.forges[bucket]
+
+    def re_initialize_token(self, new_token: str) -> None:
+        """
+        Re-initializes the session token and the rules bucket
+
+        :param new_token: the new token to re-initialize the values
+        :return:
+        """
+        self.token = new_token
+        self.forges[config.RULES_BUCKET] = KnowledgeGraphForge(
             "./api/config/forge-config.yaml",
             endpoint=self.endpoint,
-            bucket=self.bucket,
-            token=access_token,
+            bucket=config.RULES_BUCKET,
+            token=new_token,
             debug=True)
 
     def forge_is_valid(self, access_token: str) -> bool:
@@ -31,4 +74,4 @@ class UserForgeSession:
         :param access_token: the received access token
         :return: True if it is valid, False otherwise
         """
-        return self.forge._store.token == access_token
+        return self.token == access_token

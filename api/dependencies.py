@@ -1,9 +1,8 @@
 import requests
 from fastapi import HTTPException
-from kgforge.core import KnowledgeGraphForge
 from starlette.requests import Request
 from api import config
-from api.session import UserForgeSession
+from api.session import UserSession
 from api.user import User
 
 
@@ -23,7 +22,7 @@ def retrieve_user(request: Request) -> User:
         return User(username=user.get("preferred_username"), access_token=access_token.replace("Bearer ", ""))
 
 
-async def require_forge_session(request: Request) -> KnowledgeGraphForge:
+async def require_user_session(request: Request) -> UserSession:
     """
     Dependency function to require a forge session.
 
@@ -38,12 +37,12 @@ async def require_forge_session(request: Request) -> KnowledgeGraphForge:
     user = retrieve_user(request)
     # if a session does not exist with this user
     if user.username not in request.session:
-        session = UserForgeSession(bucket="dke/inference-test", access_token=user.access_token)
-        request.session[user.username] = session
-        return session.forge
+        user_session = UserSession(token=user.access_token)
+        request.session[user.username] = user_session
+        return user_session
     else:
-        session = request.session[user.username]
+        user_session = request.session[user.username]
         # if the forge object in the session is not still valid, initializes a new one
-        if not session.forge_is_valid(access_token=user.access_token):
-            session.forge = session.initialize_forge_object(access_token=user.access_token)
-        return session.forge
+        if not user_session.forge_is_valid(access_token=user.access_token):
+            user_session.re_initialize_token(new_token=user.access_token)
+        return user_session

@@ -2,6 +2,7 @@ from typing import List
 from inference_tools.utils import get_rule_parameters, check_premises
 from pydantic import Json
 from api.models.rules import InputParameter, RuleOutput
+from api.session import UserSession
 
 
 class RulesHandler:
@@ -10,19 +11,21 @@ class RulesHandler:
     def __init__(self, rules: List[dict]) -> None:
         self.rules = rules
 
-    def filter_rules(self, input_filters: List[Json], token: str):
+    def filter_rules(self, input_filters: List[Json], user_session: UserSession):
         """
         Filter the rules that satisfy all the input filters
 
+        :param user_session:
         :param input_filters:
-        :param token:
         :return:
         """
         satisfied_rules = []
         for rule in self.rules:
             rule_is_satisfied = True
             for input_filter in input_filters:
-                if not check_premises(rule, input_filter, token):
+                if not check_premises(forge_factory=user_session.get_or_create_forge_session,
+                                      rule=rule,
+                                      parameters=input_filter):
                     rule_is_satisfied = False
                     break
             if rule_is_satisfied:
@@ -33,7 +36,6 @@ class RulesHandler:
         """
         Serializes a list of data generalization rules by returning their models
 
-        :param rules: the list of rules
         :return:
         """
         serialized_rules = []
