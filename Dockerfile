@@ -13,8 +13,7 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 RUN pip install git+https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference
 
 COPY ./api /code/api
-COPY ./scripts /code/scripts
 
 EXPOSE 8080:8080
 
-ENTRYPOINT ["sh", "/code/scripts/launch_app.sh"]
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]

@@ -13,3 +13,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Inference endpoint to get inferenced resources (`/infer`) by providing rules and filter
 - CI/CD implementation to deploy in BBP Kubernetes
 - Authorization functionality in swagger documentation
+- Metadata in swagger documentation

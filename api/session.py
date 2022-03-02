@@ -13,7 +13,7 @@ class UserSession:
                 endpoint=self.endpoint,
                 bucket=config.RULES_BUCKET,
                 token=token,
-                debug=True)
+                debug=config.DEBUG_MODE)
         }
         self.token = token
 
@@ -64,7 +64,7 @@ class UserSession:
             endpoint=self.endpoint,
             bucket=config.RULES_BUCKET,
             token=new_token,
-            debug=True)
+            debug=config.DEBUG_MODE)
 
     def forge_is_valid(self, access_token: str) -> bool:
         """
