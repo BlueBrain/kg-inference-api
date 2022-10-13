@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from inference_tools.utils import apply_rule
 from api.dependencies import require_user_session
@@ -23,13 +23,17 @@ async def infer_resources(inference_body: InferenceBody,
     """
     rules_forge = user_session.get_rules_forge()
     inference_results = []
-    for rule in inference_body.rules:
-        rule_json = rules_forge.as_json(rules_forge.retrieve(rule.id))
-        # apply the rule to the filter
-        results = apply_rule(forge_factory=user_session.get_or_create_forge_session,
-                             rule=rule_json,
-                             parameters=inference_body.input_filter)
-        # if there are results, add it to the returned inference results
-        if results:
-            inference_results.append(InferenceResult(rule=rule.id, results=results))
-    return inference_results
+    try:
+        for rule in inference_body.rules:
+            rule_json = rules_forge.as_json(rules_forge.retrieve(rule.id))
+            # apply the rule to the filter
+            results = apply_rule(forge_factory=user_session.get_or_create_forge_session,
+                                 rule=rule_json,
+                                 parameters=inference_body.input_filter,
+                                 premise_check=False)
+            # if there are results, add it to the returned inference results
+            if results:
+                inference_results.append(InferenceResult(rule=rule.id, results=results))
+        return inference_results
+    except TypeError:
+        raise HTTPException(status_code=400, detail="Something went wrong while applying inference")

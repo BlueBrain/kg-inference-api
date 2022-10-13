@@ -26,4 +26,3 @@ deploy-api-in-production-kubernetes:
     CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-production
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
-
