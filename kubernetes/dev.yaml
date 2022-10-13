@@ -23,7 +23,7 @@ data:
   BBP_NEXUS_ENDPOINT: https://bbp.epfl.ch/nexus/v1
   ENVIRONMENT: PRODUCTION
   RULES_BUCKET: bbp/inference-rules
-  WHITELISTED_CORS_URLS: bluebrainatlas.kcpdev.bbp.epfl.ch/*,bluebrainatlas.kcp.bbp.epfl.ch/*
+  WHITELISTED_CORS_URLS: https://bluebrainatlas.kcpdev.bbp.epfl.ch,https://bluebrainatlas.kcp.bbp.epfl.ch
 ---
 apiVersion: apps/v1
 kind: Deployment
