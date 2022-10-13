@@ -1,3 +1,4 @@
+import logging
 from typing import List
 from inference_tools.utils import get_rule_parameters, check_premises
 from pydantic import Json
@@ -40,15 +41,18 @@ class RulesHandler:
         """
         serialized_rules = []
         for rule in self.rules:
-            params = get_rule_parameters(rule)
-            input_parameters = []
-            # loop over the input parameters
-            for name, payload in params.items():
-                input_parameters.append(InputParameter(name=name, payload=payload))
-            rule = RuleOutput(id=rule["@id"],
-                              name=rule["name"],
-                              description=rule["description"],
-                              resource_type=rule["targetResourceType"],
-                              input_parameters=input_parameters)
-            serialized_rules.append(rule)
+            try:
+                params = get_rule_parameters(rule)
+                input_parameters = []
+                # loop over the input parameters
+                for name, payload in params.items():
+                    input_parameters.append(InputParameter(name=name, payload=payload))
+                rule = RuleOutput(id=rule["@id"],
+                                  name=rule["name"],
+                                  description=rule["description"],
+                                  resource_type=rule["targetResourceType"],
+                                  input_parameters=input_parameters)
+                serialized_rules.append(rule)
+            except KeyError:
+                logging.exception('Rule with id '+rule["name"] + ' could not be parsed')
         return serialized_rules

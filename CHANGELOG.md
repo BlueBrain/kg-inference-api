@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add docker-compose.yaml configuration
 - Add kubernetes configuration files
+- Fix rule fetching when field is missing
 
 ## [0.1.1] - 12/07/2022
 
