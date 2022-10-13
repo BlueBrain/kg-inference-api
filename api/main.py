@@ -1,5 +1,4 @@
 import os
-import uvicorn
 from fastapi import FastAPI
 from starsessions import SessionMiddleware, InMemoryBackend
 from api import config
@@ -43,6 +42,3 @@ app.add_middleware(
 app.include_router(rules.router, prefix="/rules")
 app.include_router(inference.router, prefix="/infer")
 
-
-if __name__ == "__main__":
-    uvicorn.run("__main__:app", host="0.0.0.0", port=8080, reload=True)
