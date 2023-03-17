@@ -10,14 +10,28 @@ services:
         GITLAB_USERNAME: <MY_GITLAB_USERNAME>
         GITLAB_TOKEN: <MY_GITLAB_TOKEN>
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       BBP_NEXUS_ENDPOINT: https://bbp.epfl.ch/nexus/v1
       ENVIRONMENT: LOCAL
       RULES_BUCKET: bbp/inference-rules
+      DATAMODELS_BUCKET: neurosciencegraph/datamodels
       WHITELISTED_CORS_URLS: http://api:8000
+      NEXUS_TOKEN: "TODO"
     networks:
       - bluebrainatlas_default
+  front:
+    build:
+      context: ./kg-inference-frontend
+      target: local
+    ports:
+      - "8050:8050"
+    environment:
+      NEXUS_ENDPOINT: https://bbp.epfl.ch/nexus/v1
+      API_BASE: http://api:8080
+    depends_on:
+      - api
 networks:
   bluebrainatlas_default:
     external: true
+

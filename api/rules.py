@@ -1,9 +1,9 @@
 import logging
 from typing import List
-from inference_tools.utils import get_rule_parameters, check_premises
-from pydantic import Json
+from inference_tools.utils import check_premises, get_query_pipe_params
 from api.models.rules import InputParameter, RuleOutput
 from api.session import UserSession
+from inference_tools.exceptions import InferenceToolsException
 
 
 class RulesHandler:
@@ -12,7 +12,7 @@ class RulesHandler:
     def __init__(self, rules: List[dict]) -> None:
         self.rules = rules
 
-    def filter_rules(self, input_filters: List[Json], user_session: UserSession):
+    def filter_rules(self, input_filters: dict, user_session: UserSession):
         """
         Filter the rules that satisfy all the input filters
 
@@ -20,18 +20,13 @@ class RulesHandler:
         :param input_filters:
         :return:
         """
-        satisfied_rules = []
-        for rule in self.rules:
-            rule_is_satisfied = True
-            for input_filter in input_filters:
-                if not check_premises(forge_factory=user_session.get_or_create_forge_session,
-                                      rule=rule,
-                                      parameters=input_filter):
-                    rule_is_satisfied = False
-                    break
-            if rule_is_satisfied:
-                satisfied_rules.append(rule)
-        self.rules = satisfied_rules
+
+        def rule_is_satisfied(rule):
+            return check_premises(forge_factory=user_session.get_or_create_forge_session,
+                                  rule=rule,
+                                  parameters=input_filters)
+
+        self.rules = [rule for rule in self.rules if rule_is_satisfied(rule)]
 
     def serialize_rules(self):
         """
@@ -42,17 +37,21 @@ class RulesHandler:
         serialized_rules = []
         for rule in self.rules:
             try:
-                params = get_rule_parameters(rule)
-                input_parameters = []
-                # loop over the input parameters
-                for name, payload in params.items():
-                    input_parameters.append(InputParameter(name=name, payload=payload))
-                rule = RuleOutput(id=rule["@id"],
-                                  name=rule["name"],
-                                  description=rule["description"],
-                                  resource_type=rule["targetResourceType"],
-                                  input_parameters=input_parameters)
-                serialized_rules.append(rule)
-            except KeyError:
-                logging.exception('Rule with id '+rule["name"] + ' could not be parsed')
+                params = get_query_pipe_params(rule["searchQuery"])
+            except (KeyError, InferenceToolsException):
+                logging.exception(f'Rule \"{rule["name"]}\" could not be parsed')
+                continue
+
+            input_parameters = [InputParameter(name=name, payload=payload)
+                                for name, payload in params.items()] if params else []
+
+            rule = RuleOutput(id=rule["@id"] if "@id" in rule else rule["id"],
+                              name=rule["name"],
+                              description=rule["description"],
+                              resource_type=rule["targetResourceType"],
+                              input_parameters=input_parameters,
+                              nexus_link=rule["nexus_link"])
+
+            serialized_rules.append(rule)
+
         return serialized_rules

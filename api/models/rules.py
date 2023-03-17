@@ -16,6 +16,7 @@ class RuleOutput(CamelModel):
     description: str
     resource_type: str
     input_parameters: List[InputParameter]
+    nexus_link: str
 
 
 class RuleInput(BaseModel):
@@ -26,4 +27,4 @@ class RuleInput(BaseModel):
 class RulesBody(CamelModel):
     """Request body for rules"""
     resource_types: Optional[List[str]] = None
-    input_filters: Optional[List] = None
+    input_filters: Optional[dict] = None

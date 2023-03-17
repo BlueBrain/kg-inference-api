@@ -4,12 +4,13 @@ include:
 
 deploy-api-in-dev-kubernetes:
   stage: deploy
+  needs: ["test-api"]
   extends: .build-image-using-kaniko
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
       when: on_success
   variables:
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME --target run
     CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-dev
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
@@ -17,12 +18,37 @@ deploy-api-in-dev-kubernetes:
 
 deploy-api-in-production-kubernetes:
   stage: deploy
+  needs: ["test-api"]
   extends: .build-image-using-kaniko
   rules:
     - if: $CI_COMMIT_TAG
       when: on_success
   variables:
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME --target run
     CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-production
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
+
+test-api:
+  stage: test
+  image: python:3.7
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      when: on_success
+    - if: $CI_COMMIT_TAG
+      when: on_success
+  before_script:
+    - apt-get update && apt-get install -y iputils-ping
+    - pip install --no-cache-dir --upgrade -r ./requirements.txt
+    - pip install git+https://$GITLAB_USERNAME:$GITLAB_TOKEN@bbpgitlab.epfl.ch/dke/apps/kg-inference@resource_type_inheritance
+  script:
+    - pytest ./api/test.py -W ignore::DeprecationWarning
+  variables:
+    NEXUS_TOKEN: $NEXUS_TOKEN
+    BBP_NEXUS_ENDPOINT: https://bbp.epfl.ch/nexus/v1
+    ENVIRONMENT: LOCAL
+    RULES_BUCKET: bbp/inference-rules
+    DATAMODELS_BUCKET: neurosciencegraph/datamodels
+    WHITELISTED_CORS_URLS: http://api:8000
+
+# TODO remove the branch from the kg-inference install

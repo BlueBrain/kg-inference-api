@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBearer
 from api.dependencies import require_user_session
-from inference_tools.utils import fetch_rules
+from inference_tools.rules import fetch_rules
 from api.models.rules import RuleOutput, RulesBody
 from api.rules import RulesHandler
 from api.session import UserSession
@@ -25,7 +25,8 @@ async def get_all_rules(user_session: UserSession = Depends(require_user_session
     resource_types = None if rules_body is None else rules_body.resource_types
     rules_view = "https://bbp.epfl.ch/neurosciencegraph/data/rule-view"
     # fetches rules using kg-inference lib
-    rules = fetch_rules(forge=user_session.get_rules_forge(),
+    rules = fetch_rules(forge_rules=user_session.get_rules_forge(),
+                        forge_datamodels=user_session.get_datamodels_forge(),
                         rule_view_id=rules_view,
                         resource_types=resource_types)
     rules_handler = RulesHandler(rules=rules)

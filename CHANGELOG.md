@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.2.0] - 17/03/2023
+- Updated the forge config yaml file in order to use the aggregated elastic and sparql endpoints
+- Created a forge datamodels instance 
+- When inferring, all input filters must be given in a single dictionary to the library, the premise checking will use
+this single dictionary of multiple input parameters 
+(as opposed to the old implementation that called check premises for each input parameter)
+- Updated Rule model to add a nexus link attribute
+- Testing 
+- Refactor getting environment variables: throws exception if a mandatory environment variable is missing
+- Front end 
+
 ## [0.1.2] - 12/10/2022
 
 - Add docker-compose.yaml configuration

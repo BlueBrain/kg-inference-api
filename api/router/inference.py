@@ -35,5 +35,5 @@ async def infer_resources(inference_body: InferenceBody,
             if results:
                 inference_results.append(InferenceResult(rule=rule.id, results=results))
         return inference_results
-    except TypeError:
-        raise HTTPException(status_code=400, detail="Something went wrong while applying inference")
+    except BaseException as e:
+        raise HTTPException(status_code=400, detail=f"Something went wrong while applying inference: {str(e)}")

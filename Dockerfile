@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y iputils-ping
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 RUN pip install git+https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference
+RUN pip install git+https://github.com/BlueBrain/nexus-forge
 
 COPY ./api /code/api
 

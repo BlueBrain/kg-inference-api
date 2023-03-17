@@ -1,4 +1,3 @@
-import os
 from fastapi import FastAPI
 from starsessions import SessionMiddleware, InMemoryBackend
 from api import config
@@ -29,7 +28,7 @@ app.add_middleware(
     autoload=True
 )
 
-whitelisted_cors_urls = list(os.environ.get('WHITELISTED_CORS_URLS', '').split(","))
+whitelisted_cors_urls = list(config.WHITELISTED_CORS_URLS.split(","))
 
 app.add_middleware(
     CORSMiddleware,
