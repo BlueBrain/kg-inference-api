@@ -4,13 +4,13 @@ include:
 
 deploy-api-in-dev-kubernetes:
   stage: deploy
-  needs: ["test-api"]
+#  needs: ["test-api"]
   extends: .build-image-using-kaniko
   rules:
     - if: '$CI_COMMIT_BRANCH == "dev"'
       when: on_success
   variables:
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME --target run
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
     CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-dev
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
@@ -18,37 +18,54 @@ deploy-api-in-dev-kubernetes:
 
 deploy-api-in-production-kubernetes:
   stage: deploy
-  needs: ["test-api"]
+#  needs: ["test-api"]
   extends: .build-image-using-kaniko
   rules:
     - if: $CI_COMMIT_TAG
       when: on_success
   variables:
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME --target run
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
     CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-production
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
-test-api:
-  stage: test
-  image: python:3.7
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
-      when: on_success
-    - if: $CI_COMMIT_TAG
-      when: on_success
-  before_script:
-    - apt-get update && apt-get install -y iputils-ping
-    - pip install --no-cache-dir --upgrade -r ./requirements.txt
-    - pip install git+https://$GITLAB_USERNAME:$GITLAB_TOKEN@bbpgitlab.epfl.ch/dke/apps/kg-inference@resource_type_inheritance
-  script:
-    - pytest ./api/test.py -W ignore::DeprecationWarning
-  variables:
-    NEXUS_TOKEN: $NEXUS_TOKEN
-    BBP_NEXUS_ENDPOINT: https://bbp.epfl.ch/nexus/v1
-    ENVIRONMENT: LOCAL
-    RULES_BUCKET: bbp/inference-rules
-    DATAMODELS_BUCKET: neurosciencegraph/datamodels
-    WHITELISTED_CORS_URLS: http://api:8000
+# TODO: to be added back as soon as we have a SA token
+#test-api:
+#  stage: test
+#  image: python:3.7
+#  rules:
+#    - if: '$CI_COMMIT_BRANCH == "dev"'
+#      when: on_success
+#    - if: $CI_COMMIT_TAG
+#      when: on_success
+#  before_script:
+#    - apt-get update && apt-get install -y iputils-ping
+#    - pip install --no-cache-dir --upgrade -r ./requirements.txt
+#    - pip install git+https://$GITLAB_USERNAME:$GITLAB_TOKEN@bbpgitlab.epfl.ch/dke/apps/kg-inference
+#  script:
+#    - pytest ./api/test.py -W ignore::DeprecationWarning
+#  variables:
+#    NEXUS_TOKEN: $NEXUS_TOKEN
+#    BBP_NEXUS_ENDPOINT: https://bbp.epfl.ch/nexus/v1
+#    ENVIRONMENT: LOCAL
+#    RULES_BUCKET: bbp/inference-rules
+#    DATAMODELS_BUCKET: neurosciencegraph/datamodels
+#    WHITELISTED_CORS_URLS: http://api:8000
 
-# TODO remove the branch from the kg-inference install
+deploy-front-in-kubernetes:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-front-production
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      variables:
+        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-front-dev
+      when: on_success
+  variables:
+    BUILD_PATH: $CI_PROJECT_DIR/kg-inference-frontend
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
+

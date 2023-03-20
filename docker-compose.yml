@@ -23,7 +23,6 @@ services:
   front:
     build:
       context: ./kg-inference-frontend
-      target: local
     ports:
       - "8050:8050"
     environment:

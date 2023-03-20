@@ -18,7 +18,7 @@ def get_env_vars():
     )
 
     environment_variables["DEBUG_MODE"] = \
-        environment_variables["ENVIRONMENT"] == "LOCAL" or environment_variables["DEBUG_MODE"] == "DEV"
+        environment_variables["ENVIRONMENT"] == "LOCAL" or environment_variables["ENVIRONMENT"] == "DEV"
 
     for key, value in environment_variables.items():
         if value is None:
