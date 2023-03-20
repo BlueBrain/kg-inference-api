@@ -2,32 +2,10 @@ include:
   - project: cs/gitlabci-templates
     file: /build-image-using-kaniko.yml
 
-deploy-api-in-dev-kubernetes:
-  stage: deploy
-#  needs: ["test-api"]
-  extends: .build-image-using-kaniko
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
-      when: on_success
-  variables:
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
-    CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-dev
-    KUBERNETES_MEMORY_LIMIT: 4Gi
-    KUBERNETES_MEMORY_REQUEST: 4Gi
-
-
-deploy-api-in-production-kubernetes:
-  stage: deploy
-#  needs: ["test-api"]
-  extends: .build-image-using-kaniko
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: on_success
-  variables:
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
-    CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-production
-    KUBERNETES_MEMORY_LIMIT: 4Gi
-    KUBERNETES_MEMORY_REQUEST: 4Gi
+# stages defines the dependencies between the different stages of the pipeline
+stages:
+  - test
+  - deploy
 
 # TODO: to be added back as soon as we have a SA token
 #test-api:
@@ -52,7 +30,24 @@ deploy-api-in-production-kubernetes:
 #    DATAMODELS_BUCKET: neurosciencegraph/datamodels
 #    WHITELISTED_CORS_URLS: http://api:8000
 
-deploy-front-in-kubernetes:
+build-and-deploy-api-image-in-registry:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      when: on_success
+      variables:
+        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-dev
+    - if: $CI_COMMIT_TAG
+      when: on_success
+      variables:
+        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-production
+  variables:
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
+
+build-and-deploy-client-image-in-registry:
   stage: deploy
   extends: .build-image-using-kaniko
   rules:
