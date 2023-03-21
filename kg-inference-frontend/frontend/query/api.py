@@ -7,7 +7,7 @@ from data.result.result_sparql import ResultSparql
 from data.dict_key import DictKey
 from data.result.result import Result, Attribute
 from data.result.result_resource import ResultResource
-from config import API_BASE
+from config import API_BASE, ENVIRONMENT
 
 
 def request(endpoint_rel, data, token):
@@ -24,7 +24,7 @@ def request(endpoint_rel, data, token):
     headers = {"Authorization": f"Bearer {token}"}
 
     try:
-        r = requests.post(endpoint, json=data, headers=headers)
+        r = requests.post(endpoint, json=data, headers=headers, verify=ENVIRONMENT != "DEV")
     except requests.exceptions.ConnectionError:
         raise APIError("Couldn't reach API")
 

@@ -26,8 +26,7 @@ services:
     ports:
       - "8050:8050"
     environment:
-      NEXUS_ENDPOINT: https://bbp.epfl.ch/nexus/v1
-      API_BASE: http://api:8080
+      ENVIRONMENT: LOCAL
     depends_on:
       - api
 networks:

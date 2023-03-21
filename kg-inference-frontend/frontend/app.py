@@ -31,7 +31,7 @@ app = Dash(
     external_scripts=external_scripts)
 
 app.config.suppress_callback_exceptions = True
-
+app.title = "KG Inference Rules"
 app.layout = page
 
 get_callbacks(app)

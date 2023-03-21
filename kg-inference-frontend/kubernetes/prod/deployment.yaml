@@ -18,6 +18,9 @@ spec:
       containers:
       - image: bbpgitlab.epfl.ch:5050/dke/apps/kg-inference-api/kg-inference-front-production
         name: kg-inference-frontend
+        env:
+          - name: ENVIRONMENT
+            value: PROD
         resources:
           requests:
             memory: "1500Mi"
