@@ -6,8 +6,7 @@ def get_env_vars():
     environment_variables = {
         "API_BASE": "https://kg-inference-api.kcpdev.bbp.epfl.ch",
         "NEXUS_ENDPOINT": "https://bbp.epfl.ch/nexus/v1",
-        "NEXUS_CONFIG_PATH": os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                          "prod-forge-nexus.yaml")
+        "NEXUS_CONFIG_PATH": "./frontend/config/forge-config.yaml"
     }
 
     environment_variables = dict(

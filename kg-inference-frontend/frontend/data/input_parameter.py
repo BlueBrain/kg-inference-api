@@ -5,7 +5,7 @@ from data.utils import get_type
 
 class InputParameterType(Enum):
     STR = "str"
-    SPARQL_LIST = "sparql_List"
+    SPARQL_LIST = "sparql_list"
     URI = "uri"
     LIST = "list"
     SPARQL_VALUE_URI_LIST = "sparql_value_uri_list"
@@ -13,6 +13,7 @@ class InputParameterType(Enum):
     URI_LIST = "uri_list"
     PATH = "path"
     MULTI_PREDICATE_OBJECT_PAIR = "MultiPredicateObjectPair"
+    BOOL = "bool"
 
 
 @dataclass(init=True)
