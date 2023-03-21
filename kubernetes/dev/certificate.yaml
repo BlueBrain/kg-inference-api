@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app: kg-inference-api
+  name: kg-inference-api-certificate
+  namespace: bbp-ou-dke
+spec:
+  secretName: kg-inference-api-cert-secret
+  issuerRef:
+    name: dke-bbp-acme-issuer
+  dnsNames:
+  - kg-inference-api.kcpdev.bbp.epfl.ch

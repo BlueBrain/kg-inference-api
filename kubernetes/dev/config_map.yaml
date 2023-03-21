@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kg-inference-api-config
+  labels:
+    app: kg-inference-api
+data:
+  BBP_NEXUS_ENDPOINT: https://bbp.epfl.ch/nexus/v1
+  ENVIRONMENT: PRODUCTION
+  RULES_BUCKET: bbp/inference-rules
+  DATAMODELS_BUCKET: neurosciencegraph/datamodels
+  WHITELISTED_CORS_URLS: https://bluebrainatlas.kcpdev.bbp.epfl.ch,https://bluebrainatlas.kcp.bbp.epfl.ch,https://kg-inference-frontend.kcpdev.bbp.epfl.ch

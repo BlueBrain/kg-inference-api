@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kg-inference-frontend
+  name: kg-inference-frontend
+  namespace: bbp-ou-dke
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kg-inference-frontend
+  template:
+    metadata:
+      labels:
+        app: kg-inference-frontend
+    spec:
+      containers:
+      - image: bbpgitlab.epfl.ch:5050/dke/apps/kg-inference-api/kg-inference-front-production
+        name: kg-inference-frontend
+        env:
+          - name: ENVIRONMENT
+            value: PROD
+        resources:
+          requests:
+            memory: "1500Mi"
+            cpu: "1500m"
+          limits:
+            memory: "3000Mi"
+            cpu: "3000m"
+        ports:
+          - containerPort: 8050
+      imagePullSecrets:
+      - name: kg-inference-api-read-registry-token

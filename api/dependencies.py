@@ -1,9 +1,8 @@
-import requests
 from fastapi import HTTPException
 from starlette.requests import Request
-from api import config
 from api.session import UserSession
 from api.user import User
+import jwt
 
 
 def retrieve_user(request: Request) -> User:
@@ -13,13 +12,16 @@ def retrieve_user(request: Request) -> User:
     :param request:
     :return:
     """
-    access_token = request.headers.get("authorization")
-    user = requests.get(config.BBP_USERINFO_AUTH_ENDPOINT, headers={"Authorization": access_token}).json()
-    if "error" in user and user["error"] == "invalid_token":
-        raise HTTPException(status_code=401,
-                            detail="Token verification failed. Check if the token is still valid or expired")
-    else:
-        return User(username=user.get("preferred_username"), access_token=access_token.replace("Bearer ", ""))
+    access_token = request.headers.get("authorization").replace("Bearer ", "")
+    try:
+        decoded = jwt.decode(
+            access_token, options={"verify_signature": False}
+        )
+        return User(username=decoded.get("preferred_username"), access_token=access_token)
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Access token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Access token is invalid")
 
 
 async def require_user_session(request: Request) -> UserSession:
@@ -35,14 +37,5 @@ async def require_user_session(request: Request) -> UserSession:
     :return:
     """
     user = retrieve_user(request)
-    # if a session does not exist with this user
-    if user.username not in request.session:
-        user_session = UserSession(token=user.access_token)
-        request.session[user.username] = user_session
-        return user_session
-    else:
-        user_session = request.session[user.username]
-        # if the forge object in the session is not still valid, initializes a new one
-        if not user_session.forge_is_valid(access_token=user.access_token):
-            user_session.re_initialize_token(new_token=user.access_token)
-        return user_session
+    user_session = UserSession(token=user.access_token)
+    return user_session

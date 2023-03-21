@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: kg-inference-api
+  name: kg-inference-api-ingress
+  namespace: bbp-ou-dke
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - kg-inference-api.kcpdev.bbp.epfl.ch
+      secretName: kg-inference-api-cert-secret
+  rules:
+    - host: kg-inference-api.kcpdev.bbp.epfl.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kg-inference-api-service
+                port:
+                  number: 8086
