@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 21/03/2023
+
+- Disabled verification of ssl certificate when requesting from the client to the API
 
 ## [0.2.0] - 20/03/2023
 - Updated the forge config yaml file in order to use the aggregated elastic and sparql endpoints

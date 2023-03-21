@@ -24,7 +24,7 @@ def request(endpoint_rel, data, token):
     headers = {"Authorization": f"Bearer {token}"}
 
     try:
-        r = requests.post(endpoint, json=data, headers=headers, verify=ENVIRONMENT != "DEV")
+        r = requests.post(endpoint, json=data, headers=headers, verify=False)
     except requests.exceptions.ConnectionError:
         raise APIError("Couldn't reach API")
 
