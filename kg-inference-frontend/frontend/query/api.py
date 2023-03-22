@@ -17,7 +17,8 @@ def request(endpoint_rel, data, token):
     @param data: data to be added to the request's body in json format
     @param token: the user authentication token
     @return the body of the response in json format
-    @raises APIError for any error unrelated to the authentication (can't reach the api, API Internal error)
+    @raises APIError for any error unrelated to the authentication (can't reach the api,
+    API Internal error)
     @raise AuthenticationError if the authentication fails (missing or invalid authentication token)
     """
     endpoint = os.path.join(API_BASE, endpoint_rel)
@@ -65,7 +66,8 @@ def get_rules(token, search_filters: dict = None) -> List[Rule]:
     @param token the user authentication token
     @param search_filters, optional a dictionary of filters with keys of type DictKey
     and the value one or a list of ids of an entity that corresponds to the DictKey type
-    @return the list of Rule instances matching the search filters, or all rules if no filters are specified
+    @return the list of Rule instances matching the search filters, or all rules if no filters
+    are specified
     """
     endpoint_rel = "rules"
 
@@ -101,17 +103,22 @@ def get_rules(token, search_filters: dict = None) -> List[Rule]:
 
 
 def infer(rule_id: str, input_parameters: dict, token: str, limit: int, retrieve=True,
-          use_sparql_minds=False) -> Dict[str, Union[ResultResource, Tuple[ResultResource, ResultSparql], None]]:
+          use_sparql_minds=False) \
+        -> Dict[str, Union[ResultResource, Tuple[ResultResource, ResultSparql], None]]:
     """
     Infer Resources by running a rule
     @param rule_id: the id of the rule to be run
     @param input_parameters: the input parameter values, as a dictionary of the rule
     @param token: the user authentication token
     @param limit: the number of results requested
-    @param retrieve whether only the ids are returned or the Resource information is being retrieved too
-    @param use_sparql_minds whether to also run a sparql query to retrieve minds information for the inferred resources
-    @return returns a dictionary with the keys being the ids of the resources that have been inferred,
-    and the values being None if retrieve is False, ResultResources if retrieve is True and use_sparql_minds is False,
+    @param retrieve whether only the ids are returned or the Resource information is being
+    retrieved too
+    @param use_sparql_minds whether to also run a sparql query to retrieve minds information for
+    the inferred resources
+    @return returns a dictionary with the keys being the ids of the resources that have been
+    inferred,
+    and the values being None if retrieve is False, ResultResources if retrieve is True
+    and use_sparql_minds is False,
     pairs of ResultResource and ResultSparql if retrieved is True and use_sparql_minds is True
     """
     endpoint_rel = "infer"
@@ -119,24 +126,29 @@ def infer(rule_id: str, input_parameters: dict, token: str, limit: int, retrieve
         "rules": [{"id": rule_id}],
         "inputFilter": input_parameters
     }
+
     body = request(endpoint_rel=endpoint_rel, data=data, token=token)
 
-    if len(body) == 1 and "results" in body[0]:
-        body = body[0]["results"]
-    else:
+    if len(body) == 0 or "results" not in body[0]:
         return {}
 
+    body = body[0]["results"]
+
+    ids = [body_i["id"] for body_i in body]
+
     if not retrieve:
-        return dict([(body_i["id"], None) for body_i in body])
+        return dict(zip(ids, [None] * len(ids)))
 
-    resources: List[Result] = retrieve_as_result_resource([body_i["id"] for body_i in body], token=token, limit=limit)
+    resources: List[Result] = retrieve_as_result_resource(ids=ids, token=token, limit=limit)
 
-    if use_sparql_minds:  # TODO NOT FINISHED YET (query + downstream usage), implement if ever we switch to this
-        retrievals = zip(resources, minds(ids=[r.get_attribute(Attribute.ID) for r in resources], token=token))
-    else:
-        retrievals = resources
+    # TODO NOT FINISHED YET (query + downstream usage), implement if ever we switch to this
+    # if use_sparql_minds:
+    #     retrievals = zip(resources, minds(ids=[r.get_attribute(Attribute.ID) for r in resources],
+    #                                       token=token))
+    # else:
+    #     retrievals = resources
 
-    return dict(zip(
-        [r.get_attribute(Attribute.ID) for r in resources],
-        [ResultResource.class_to_store(r) for r in retrievals]
-    ))
+    return dict(
+        (r.get_attribute(Attribute.ID), ResultResource.class_to_store(r))
+        for r in resources
+    )

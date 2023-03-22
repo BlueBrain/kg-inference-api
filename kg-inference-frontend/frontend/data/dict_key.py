@@ -6,3 +6,8 @@ class DictKey(Enum):
     CELL_TYPES = "cell_types"
     DATA_TYPES = "data_types"
     CONTRIBUTORS = "contributors"
+    M_TYPES = "m_types"
+    E_TYPES = "e_types"
+    SPECIES = "species"
+
+    # ENTITIES = "entities"

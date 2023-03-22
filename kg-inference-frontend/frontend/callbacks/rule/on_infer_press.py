@@ -5,7 +5,7 @@ from layout.rule.inference_inputs import DEFAULT_LIMIT
 from data.rule import Rule
 from query.api import infer, APIError
 from query.forge import ForgeError
-
+import json
 
 def on_infer_press(app):
     @app.callback(
@@ -45,7 +45,8 @@ def on_infer_press(app):
             input_parameters = dict(zip(form_control_names, values))
 
             try:
-                results = infer(rule_id=rule.id, input_parameters=input_parameters, token=token, limit=limit)
+                results = infer(rule_id=rule.id, input_parameters=input_parameters, token=token,
+                                limit=limit)
             except (APIError, ForgeError) as e:
                 return None, no_update, make_toast(ToastType.ERROR, str(e))
 

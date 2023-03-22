@@ -10,8 +10,8 @@ COPY ./requirements.txt /code/requirements.txt
 RUN apt-get update && apt-get install -y iputils-ping
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-RUN pip install git+https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference
 RUN pip install git+https://github.com/BlueBrain/nexus-forge
+RUN pip install git+https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference@CA1_rule
 RUN pip install pyJWT==2.6.0
 
 COPY ./api /code/api

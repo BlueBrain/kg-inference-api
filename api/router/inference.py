@@ -30,7 +30,7 @@ async def infer_resources(inference_body: InferenceBody,
             results = apply_rule(forge_factory=user_session.get_or_create_forge_session,
                                  rule=rule_json,
                                  parameters=inference_body.input_filter,
-                                 premise_check=False)
+                                 premise_check=False, debug=True)
             # if there are results, add it to the returned inference results
             if results:
                 inference_results.append(InferenceResult(rule=rule.id, results=results))

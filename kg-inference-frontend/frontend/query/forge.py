@@ -7,11 +7,12 @@ from kgforge.core.wrappings.dict import DictWrapper
 from requests.exceptions import HTTPError
 from data.brain_region import BrainRegion
 from data.data_type import DataType
-from data.cell_type import CellType, MType
+from data.cell_type import CellType, MType, EType
 from data.entity import Entity
 from data.result.attribute import Attribute
 from data.result.result_sparql import ResultSparql
 from data.result.result_resource import ResultResource
+from data.species import Species
 from data.utils import get_id
 from query.sdk_layer import fetch as fetch_file
 from config import NEXUS_ENDPOINT, NEXUS_CONFIG_PATH
@@ -72,6 +73,20 @@ def sparql_to_class(query_str, class_name, forge, limit=True):
     return [class_name.source_to_class(c) for c in results] if results else []
 
 
+def get_species(forge):
+    query_str = """
+        SELECT ?id ?name ?_rev
+        WHERE {
+            ?id rdfs:subClassOf Species .
+            ?id label ?name ;
+                <https://bluebrain.github.io/nexus/vocabulary/deprecated> ?_deprecated ;
+                <https://bluebrain.github.io/nexus/vocabulary/rev> ?_rev
+            FILTER (?_deprecated = 'false'^^xsd:boolean)  
+        }
+        """
+    return sparql_to_class(query_str=query_str, class_name=Species, forge=forge)
+
+
 def get_brain_regions(forge):
     query_str = """
         SELECT ?id ?label ?_rev
@@ -128,6 +143,21 @@ def get_m_types(forge):
         }
     """
     return sparql_to_class(query_str=query_str, class_name=MType, forge=forge)
+
+
+def get_e_types(forge):
+    query_str = """
+        SELECT ?id ?name ?_rev
+        WHERE {
+            ?id rdfs:subClassOf* ?a .
+            ?id label ?name ; 
+                _deprecated ?_deprecated ;
+                _rev ?_rev
+            FILTER(?a = bmo:NeuronElectricalType || ?a = nsg:EType)
+            FILTER (?_deprecated = 'false'^^xsd:boolean)  
+        }
+    """
+    return sparql_to_class(query_str=query_str, class_name=EType, forge=forge)
 
 
 def get_entities(forge):
@@ -385,6 +415,8 @@ def retrieve_limit_sort(ids, token, limit, to_result_resource) -> \
     """
     forge = get_forge_bbp_atlas(token)
 
+    print(len(ids))
+
     q = {
         "from": 0, "size": limit,
         "sort": [
@@ -405,7 +437,10 @@ def retrieve_limit_sort(ids, token, limit, to_result_resource) -> \
     }
     resources = forge.elastic(json.dumps(q), debug=False)
 
-    if len(resources) != limit and len(resources) != ids:
+    if resources is None:
+        raise ForgeError("Elastic Search Retrieval was not successful")
+
+    if len(resources) != limit and len(resources) != len(ids):
         raise ForgeError("Elastic Search Retrieval was not successful")
 
     return [ResultResource.to_result_object(element, forge) for element in resources] \
@@ -504,3 +539,5 @@ def download_from_content_url(content_url, path_to_download, org, project, token
     forge._store._download_one(url=content_url, path=path_to_download,
                                store_metadata=DictWrapper({"_project": f"{org}/{project}"}),
                                cross_bucket=True)
+
+

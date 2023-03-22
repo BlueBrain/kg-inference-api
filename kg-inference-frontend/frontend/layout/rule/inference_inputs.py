@@ -8,6 +8,7 @@ from data.cell_type import MType, CellType
 from data.data_type import DataType
 from data.entity import Entity
 from data.rule import Rule
+from data.species import Species
 from query.forge import get_m_types, get_entities, get_forge_neuroscience_datamodels
 DEFAULT_LIMIT = 20
 
@@ -40,8 +41,8 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
     @return
     """
     class_to_func = {
-        MType: get_m_types,
-        Entity: get_entities
+        # MType: get_m_types,
+        # Entity: get_entities
     }
 
     def to_dropdown_format(el_list):
@@ -78,7 +79,7 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
                 multi=multiple,
                 options=to_dropdown_format(all_as_class),
             )
-    else:
+    else: # TODO so far doesn't reach this with extraction of MType and Entity
         if class_name in class_to_func:
             forge = get_forge_neuroscience_datamodels(token)
             data = class_to_func[class_name](forge)
@@ -139,9 +140,12 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str,
 
     special_inputs = {
         "BrainRegionQueryParameter": (DictKey.BRAIN_REGIONS.value, BrainRegion),
+        "BrainRegionQueryParameter_exclude": (DictKey.BRAIN_REGIONS.value, BrainRegion),
         "TypeQueryParameter": (DictKey.DATA_TYPES.value, DataType),
-        "MTypeQueryParameter": (None, MType),
-        "CellTypeQueryParameter": (DictKey.CELL_TYPES.value, CellType)
+        "MTypeQueryParameter": (DictKey.M_TYPES.value, MType),
+        "CellTypeQueryParameter": (DictKey.CELL_TYPES.value, CellType),
+        "SpeciesQueryParameter": (DictKey.SPECIES.value, Species),
+        "SpeciesQueryParameter_exclude": (DictKey.SPECIES.value, Species),
     }
 
     if input_parameter.name in special_inputs.keys():

@@ -34,7 +34,7 @@ build-and-deploy-api-image-in-registry:
   stage: deploy
   extends: .build-image-using-kaniko
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+    - if: '$CI_COMMIT_BRANCH == "features"'
       when: on_success
       variables:
         CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-dev
@@ -55,7 +55,7 @@ build-and-deploy-client-image-in-registry:
       variables:
         CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-front-production
       when: on_success
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+    - if: '$CI_COMMIT_BRANCH == "features"'
       variables:
         CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-front-dev
       when: on_success

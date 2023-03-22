@@ -6,7 +6,7 @@ def get_env_vars():
     environment_variables = {
         "ENVIRONMENT": "LOCAL",
         "NEXUS_ENDPOINT": "https://bbp.epfl.ch/nexus/v1",
-        "NEXUS_CONFIG_PATH": "./frontend/config/forge-config.yaml",
+        "NEXUS_CONFIG_PATH": "./config/forge-config.yaml",
         "API_BASE": None
     }
 
@@ -23,7 +23,7 @@ def get_env_vars():
 
     if environment_variables["API_BASE"] is None and \
             environment_variables["ENVIRONMENT"] is not None:
-        environment_variables["API_BASE"] =  env_to_api.get(
+        environment_variables["API_BASE"] = env_to_api.get(
             environment_variables["ENVIRONMENT"], None)
 
     # print("\n".join([f"{key}: {value}" for key, value in environment_variables.items()]))

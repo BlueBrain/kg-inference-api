@@ -1,8 +1,10 @@
+
 from dataclasses import dataclass
 
 
 @dataclass(init=True)
-class CellType:
+class Species:
+
     name: str
     id: str
 
@@ -12,16 +14,8 @@ class CellType:
 
     @staticmethod
     def source_to_class(ct):
-        return CellType(id=ct["id"], name=ct["name"])
+        return Species(id=ct["id"], name=ct["name"])
 
     @staticmethod
     def store_to_class(ct):
-        return CellType(id=ct["id"], name=ct["name"])
-
-
-class MType(CellType):
-    ...
-
-
-class EType(CellType):
-    ...
+        return Species(id=ct["id"], name=ct["name"])
