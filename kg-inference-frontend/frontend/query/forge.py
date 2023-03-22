@@ -55,8 +55,8 @@ def get_forge_bbp_atlas(token):
 
 def sparql_to_class(query_str, class_name, forge, limit=True):
     """
-    Runs a sparql query, and turns the list dictionaries into a list of instances of the provided class.
-    Optionally enforces a limit onto the query
+    Runs a sparql query, and turns the list dictionaries into a list of instances of the
+    provided class. Optionally enforces a limit onto the query
     @param query_str: the Sparql query string
     @param class_name: the class into which the resulting dictionaries should be converted into
     @param forge: a forge instance to run the query
@@ -167,8 +167,8 @@ def download(resource, follow, path, token, org, project, is_json=True):
                    follow=follow, path=path)
 
 
-def forge_retrieve(ids, token,
-                   to_result=False) -> Union[List[Union[Resource, ResultResource]], Union[Resource, ResultResource]]:
+def forge_retrieve(ids, token, to_result=False) -> \
+        Union[List[Union[Resource, ResultResource]], Union[Resource, ResultResource]]:
     """
         From Resource id(s), retrieves a list or a singular kgforge.core.Resources
         and optionally converts them/it to a ResultResource
@@ -212,7 +212,6 @@ def forge_get_files(file_ids, token, org, project):
     ]
 
 
-
 def forge_download_files(file_ids, token, path_to_download, org, project):
     """
          Using the nexussdk, gets files over http and downloads them into a specified location
@@ -239,13 +238,12 @@ def forge_download_files(file_ids, token, path_to_download, org, project):
     return [el["_filename"] for el in files]
 
 
-
 def get_latest_revisions(result_list: List[dict]) -> List[dict]:
     """
-    Assuming a list of Resources (or rather, a subset of their properties and values) in a dictionary format,
-    which results from a Sparql query, where a single Resource may be retrieved multiple times for different revisions,
-    as specified by their "_rev" field, return only the Resource dictionaries with the latest revisions for each
-    Resource
+    Assuming a list of Resources (or rather, a subset of their properties and values)
+    in a dictionary format, which results from a Sparql query, where a single Resource may be
+    retrieved multiple times for different revisions, as specified by their "_rev" field,
+    return only the Resource dictionaries with the latest revisions for each Resource
     @param result_list: the list of resources as dictionaries
     @return a filtered out list of Resources as dictionaries keeping only the latest revisions
     """
@@ -253,16 +251,19 @@ def get_latest_revisions(result_list: List[dict]) -> List[dict]:
     for val in result_list:  # organize into a dictionary of the same entity indexed by revisions
         temp.setdefault(val["id"], {}).update({val["_rev"]: val})
 
-    return [temp[key][max(value.keys())] for key, value in temp.items()]  # get only the latest revision (max index)
+    return [temp[key][max(value.keys())] for key, value in
+            temp.items()]  # get only the latest revision (max index)
 
 
-def contribution_label_fill(result_resources: List[ResultResource], token: str) -> List[ResultResource]:
+def contribution_label_fill(result_resources: List[ResultResource], token: str) -> \
+        List[ResultResource]:
     """
-    Fill the contribution label for all contributions in a ResultResource: when retrieving a Resource,
-    it may have contributions. When it does, only their id is available. A label is necessary to display the
-    contribution (either the Contribution entity's name or a concatenation of its firstName and lastName).
-    For a list of ResultResources, all contribution entities are retrieved, the appropriate label is built, and the
-    label field is added into the contribution dictionaries located within the ResultResources
+    Fill the contribution label for all contributions in a ResultResource:
+    when retrieving a Resource, it may have contributions. When it does, only their id is
+    available. A label is necessary to display the contribution (either the Contribution entity's
+    name or a concatenation of its firstName and lastName). For a list of ResultResources,
+    all contribution entities are retrieved, the appropriate label is built, and the label field
+    is added into the contribution dictionaries located within the ResultResources
     @param result_resources: the list of ResultResource
     @param token: the user authentication token
     @return the list of ResultResource with the contribution labels added
@@ -281,24 +282,20 @@ def contribution_label_fill(result_resources: List[ResultResource], token: str) 
 
     forge = get_forge_bbp_atlas(token)
     res = [forge.retrieve(id_, cross_bucket=True) for id_ in ids_to_fetch]
-
-    if len(res) != len(ids_to_fetch):
-        raise ForgeError("Retrieval of contributor labels was not successful")
-
-    contributors = forge.as_json(res)
+    contributors = [forge.as_json(el) for el in res if el is not None]
 
     def get_label(contributor_resource):
         if "name" in contributor_resource:
             return contributor_resource["name"]
         if "givenName" in contributor_resource and "familyName" in contributor_resource:
             return f"{contributor_resource['givenName']} {contributor_resource['familyName']}"
-        return "None"
+        return "?"
 
-    id_label_map = dict(zip([get_id(el) for el in contributors], [get_label(el) for el in contributors]))
+    id_label_map = dict((get_id(el), get_label(el)) for el in contributors)
 
     def add_contribution_label(resource):
         return resource.set_contributions([
-            c.set_label(id_label_map[c.id])
+            c.set_label(id_label_map.get(c.id, "?"))
             for c in result_resource.get_attribute(Attribute.CONTRIBUTION)
         ])
 
@@ -307,11 +304,12 @@ def contribution_label_fill(result_resources: List[ResultResource], token: str) 
 
 def stimulus_type_label_fill(result_resources: List[ResultResource], token: str):
     """
-       Fill the stimulus type label for all trace images in a ResultResource: when retrieving a Resource,
-       it may have trace images characterized by stimulus types. When it does, only their id is available.
-       A label is necessary to display the stimulus type.
-       For a list of ResultResources, all stimulus type entities are retrieved, and the label field is added into the
-       stimulus type dictionaries located within the ResultResources
+       Fill the stimulus type label for all trace images in a ResultResource: when retrieving
+        a Resource, it may have trace images characterized by stimulus types. When it does,
+        only their id is available. A label is necessary to display the stimulus type.
+       For a list of ResultResources, all stimulus type entities are retrieved,
+       and the label field is added into the stimulus type dictionaries located within the
+       ResultResources
        @param result_resources: the list of ResultResource
        @param token: the user authentication token
        @return the list of ResultResource with the stimulus type labels added
@@ -332,22 +330,24 @@ def stimulus_type_label_fill(result_resources: List[ResultResource], token: str)
     forge = get_forge_bbp_atlas(token)
     res = [forge.retrieve(id_, cross_bucket=True) for id_ in ids_to_fetch]
 
-    if len(res) != len(ids_to_fetch):
-        raise ForgeError("Retrieval of stimulus types labels was not successful")
-
-    stimuli = forge.as_json(res)
+    stimuli = [forge.as_json(el) for el in res if el is not None]
 
     def get_obj(stimulus_type_resource):
-        return {"id": get_id(stimulus_type_resource), "label": stimulus_type_resource.get("label", "")}
+        return {
+            "id": get_id(stimulus_type_resource),
+            "label": stimulus_type_resource.get("label", get_id(stimulus_type_resource))
+        }
 
-    id_st_map = dict(zip(
-        [get_id(el) for el in stimuli],
-        [get_obj(el) for el in stimuli]
-    ))
+    id_st_map = dict((get_id(el), get_obj(el)) for el in stimuli)
 
     def add_stimulus_type_label(resource):
         return resource.set_images([
-            im.set_stimulus_type(id_st_map[get_id(im.stimulus_type)])
+            im.set_stimulus_type(
+                id_st_map.get(
+                    get_id(im.stimulus_type),
+                    get_obj(im.stimulus_type)
+                )
+            )
             for im in resource.get_attribute(Attribute.IMAGE)
             if im.stimulus_type and "label" not in im.stimulus_type
         ])
@@ -357,9 +357,9 @@ def stimulus_type_label_fill(result_resources: List[ResultResource], token: str)
 
 def retrieve_as_result_resource(ids, token, limit) -> List[ResultResource]:
     """
-    Provided a list of resource ids, and a limit, fetches the most recently updated Resources up until the limit,
-    converts them into ResultResources, and adds missing information, such as contribution labels, and stimulus type
-    labels
+    Provided a list of resource ids, and a limit, fetches the most recently updated Resources
+    up until the limit, converts them into ResultResources, and adds missing information,
+    such as contribution labels, and stimulus type labels
     @param ids: the list of Resource ids
     @param token the user authentication token
     @param limit the number of results requested
@@ -371,7 +371,8 @@ def retrieve_as_result_resource(ids, token, limit) -> List[ResultResource]:
     return retrieved
 
 
-def retrieve_limit_sort(ids, token, limit, to_result_resource) -> Union[List[ResultResource], List[Resource]]:
+def retrieve_limit_sort(ids, token, limit, to_result_resource) -> \
+        Union[List[ResultResource], List[Resource]]:
     """
     Retrieves Resources whose id are in the id list provided, up to a limit,
     only returned the most recently updated ones
@@ -491,7 +492,8 @@ def minds(ids, token) -> List[ResultSparql]:
 
 def download_from_content_url(content_url, path_to_download, org, project, token):
     """
-    Download a file using only its content url, without having to follow a path within the Resource it's attached to
+    Download a file using only its content url, without having to follow a path within
+    the Resource it's attached to
     @param content_url: the file content url
     @param path_to_download: the path where to download the file
     @param org: the organisation the file belongs to
@@ -500,4 +502,5 @@ def download_from_content_url(content_url, path_to_download, org, project, token
     """
     forge = _allocate_forge_session("bbp", "atlas", token=token)
     forge._store._download_one(url=content_url, path=path_to_download,
-                               store_metadata=DictWrapper({"_project": f"{org}/{project}"}), cross_bucket=True)
+                               store_metadata=DictWrapper({"_project": f"{org}/{project}"}),
+                               cross_bucket=True)

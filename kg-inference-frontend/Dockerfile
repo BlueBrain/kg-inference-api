@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
 
 ENV PYTHONPATH "${PYTHONPATH}:${WORKDIR}/code/frontend"
 
-CMD ["gunicorn", "-b", "0.0.0.0:8050", "app:server"]
+CMD ["gunicorn", "-b", "0.0.0.0:8050", "app:server", "--timeout", "90"]
 
 EXPOSE 8050:8050
 
