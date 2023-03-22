@@ -1,5 +1,4 @@
 from typing import Dict, List, Optional
-
 from dash import html, dcc
 from dash.development.base_component import Component
 from data.input_parameter import InputParameter, InputParameterType
@@ -13,18 +12,23 @@ from query.forge import get_m_types, get_entities, get_forge_neuroscience_datamo
 DEFAULT_LIMIT = 20
 
 
-def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool, id_obj: Dict[str, str], token: str,
-                             sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List]) -> Component:
+def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool,
+                             id_obj: Dict[str, str], token: str,
+                             sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List]) \
+        -> Component:
     """
-    Returns the form control for a specific set of input parameter names, those whose user selected value has a type
-    that is known, and therefore whose valid values are known too and can be listed to the user.
-    Additionally, if the form control controls a type that is one of the data types found in the sidebar, and the user
-    already selected a value in the sidebar, the form control will be pre-filled with the sidebar selection.
+    Returns the form control for a specific set of input parameter names, those whose user
+    selected value has a type that is known, and therefore whose valid values are known too and
+    can be listed to the user.
+    Additionally, if the form control controls a type that is one of the data types found in the
+    sidebar, and the user already selected a value in the sidebar, the form control will be
+    pre-filled with the sidebar selection.
 
     @param class_name: the data class of the values that should be listed
-    @param dict_key: if class_name is one of the dataclasses loaded in the sidebar, a dict key is specified,
-    and it is the key into the sidebar loaded data held in sidebar_content, that will lead to the data that
-    will populate the form control. If the dict key is None, then the dataclass is known, but the list of valid values
+    @param dict_key: if class_name is one of the dataclasses loaded in the sidebar, a dict key is
+    specified, and it is the key into the sidebar loaded data held in sidebar_content, that will
+    lead to the data that will populate the form control. If the dict key is None, then the
+    dataclass is known, but the list of valid values
     is not present in the sidebar data, and it will be fetched here.
     @param multiple: whether multiple values can be selected by the form control
     @param id_obj: the id that will be attributed to the form control
@@ -56,7 +60,8 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
         if stored_filters and dict_key in stored_filters and len(stored_filters[dict_key]) > 0:
 
             indexed_entities = dict((entity.id, entity) for entity in all_as_class)
-            selected_filter = stored_filters[dict_key] if not multiple else [stored_filters[dict_key][0]]
+            selected_filter = stored_filters[dict_key] if not multiple \
+                else [stored_filters[dict_key][0]]
             filters_as_class = [indexed_entities[e] for e in selected_filter]
             ddf = to_dropdown_format(filters_as_class)
 
@@ -93,7 +98,8 @@ def build_id(rule_id, name, control_type="basic") -> Dict[str, str]:
     :func:`on_infer_press_callback <callbacks.rule.on_infer_press.on_infer_press>`
 
     @param rule_id: the id of the rule whose input parameter's form control gets this id
-    @param name: the name of the input parameter associated with the form control that will have this id
+    @param name: the name of the input parameter associated with the form control that will have
+    this id
     @param control_type: the id contains a control_type, and the id is attributed to a form control.
     Each control type is associated with some reformatting of the value produced by the form control
     @return
@@ -106,12 +112,13 @@ def build_id(rule_id, name, control_type="basic") -> Dict[str, str]:
     }
 
 
-def get_form_control(input_parameter: InputParameter, rule_id: str, token: str, sidebar_content: Dict[str, Dict],
-                     stored_filters: Dict[str, List]) -> Component:
+def get_form_control(input_parameter: InputParameter, rule_id: str, token: str,
+                     sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List]) \
+        -> Component:
     """
-    Gets a form control for a rule's input parameter.
-    For some input parameter names, the form control will allow for the selection of values from a predefined list,
-    see :func:`get_form_control_special <layout.rule.inference_inputs.get_form_control_special>`
+    Gets a form control for a rule's input parameter. For some input parameter names, the form
+    control will allow for the selection of values from   a predefined list,
+    see :func:`get_form_control_special<layout.rule.inference_inputs.get_form_control_special>`
     For some input parameter types, the form control will allow for selection of multiple values.
 
     @param input_parameter: the input parameter this form control will set the value for
@@ -124,8 +131,9 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str, 
     @return a form control that will set a value for a rule's input parameter
     """
 
-    list_types = [InputParameterType.LIST, InputParameterType.URI_LIST, InputParameterType.SPARQL_LIST,
-                  InputParameterType.SPARQL_VALUE_LIST, InputParameterType.SPARQL_VALUE_URI_LIST]
+    list_types = [InputParameterType.LIST, InputParameterType.URI_LIST,
+                  InputParameterType.SPARQL_LIST, InputParameterType.SPARQL_VALUE_LIST,
+                  InputParameterType.SPARQL_VALUE_URI_LIST]
 
     multiple = input_parameter.type in list_types
 
@@ -140,11 +148,23 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str, 
         dict_key, class_name = special_inputs[input_parameter.name]
         id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
         return get_form_control_special(dict_key=dict_key, class_name=class_name,
-                                        multiple=multiple, id_obj=id_obj, sidebar_content=sidebar_content,
+                                        multiple=multiple, id_obj=id_obj,
+                                        sidebar_content=sidebar_content,
                                         stored_filters=stored_filters, token=token)
 
+    if input_parameter.type == InputParameterType.BOOL:
+        id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
+        return dcc.RadioItems(
+            options={"true": "Yes", "false": "No"},
+            inline=True,
+            value="true",
+            id=id_obj,
+            name=input_parameter.name,
+            className="form-control"
+        )
     if multiple:
-        id_obj = build_id(rule_id=rule_id, name=input_parameter.name, control_type="newline_separated")
+        id_obj = build_id(rule_id=rule_id, name=input_parameter.name,
+                          control_type="newline_separated")
         return dcc.Textarea(id=id_obj, name=input_parameter.name, className="form-control")
     else:
         id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
@@ -153,7 +173,8 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str, 
 
 def get_input_group(form_control: Component, label: str) -> html.Div:
     """
-        Creates an input group from a label and its form control, associated to a rule's input parameter
+        Creates an input group from a label and its form control, associated to a rule's input
+        parameter
 
         @param form_control: the form control to set a value for the input parameter
         @param label: the label describing the input parameter
@@ -175,7 +196,8 @@ def get_limit_form_control(rule_id: str) -> html.Div:
     return html.Div(className="float-end", children=[
         get_input_group(
             label="Number of Results",
-            form_control=dcc.Input(type="number", id=build_id(rule_id, "limitFormControl"), style={"width": "70px"},
+            form_control=dcc.Input(type="number", id=build_id(rule_id, "limitFormControl"),
+                                   style={"width": "70px"},
                                    className="ms-2", value=DEFAULT_LIMIT)
         ),
         html.Small("Only the most recently updated"), html.Br(),
@@ -186,10 +208,11 @@ def get_limit_form_control(rule_id: str) -> html.Div:
 def generic_input_groups(rule: Rule, token: str, sidebar_content: Dict[str, Dict],
                          stored_filters: Dict[str, List]) -> List[html.Div]:
     """
-        Get all input groups for most rules, by iterating over the input parameters and rendering one for each of them.
-        Currently, MULTI_PREDICATE_OBJECT_PAIR (additional filters set by the user) is not supported.
-        An input group being a label and an input control, the input control
-        is chosen according to a logic described in get_input. If a rule required specific handling of its input
+        Get all input groups for most rules, by iterating over the input parameters and rendering
+        one for each of them. Currently, MULTI_PREDICATE_OBJECT_PAIR (additional filters set by
+        the user) is not supported. An input group being a label and an input control, the input
+        control is chosen according to a logic described in get_input. If a rule required
+        specific handling of its input
         parameters, the input groups will be rendered by a specific function in ./custom_rules/..
 
         @param rule: the selected rule
