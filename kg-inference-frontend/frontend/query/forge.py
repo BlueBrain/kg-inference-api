@@ -395,13 +395,13 @@ def retrieve_as_result_resource(ids, token, limit) -> List[ResultResource]:
     @param limit the number of results requested
     @return a list of ResultResources
     """
-    retrieved: List[ResultResource] = retrieve_limit_sort(ids, token, limit, True)
+    retrieved: List[ResultResource] = retrieve_elastic(ids, token, limit, True)
     retrieved = contribution_label_fill(result_resources=retrieved, token=token)
     retrieved = stimulus_type_label_fill(result_resources=retrieved, token=token)
     return retrieved
 
 
-def retrieve_limit_sort(ids, token, limit, to_result_resource) -> \
+def retrieve_elastic(ids, token, limit, to_result_resource) -> \
         Union[List[ResultResource], List[Resource]]:
     """
     Retrieves Resources whose id are in the id list provided, up to a limit,
@@ -415,13 +415,11 @@ def retrieve_limit_sort(ids, token, limit, to_result_resource) -> \
     """
     forge = get_forge_bbp_atlas(token)
 
-    print(len(ids))
-
     q = {
-        "from": 0, "size": limit,
-        "sort": [
-            {"_updatedAt": "desc"},
-        ],
+        #     "from": 0, "size": limit,
+        #     "sort": [
+        #         {"_updatedAt": "desc"},
+        #     ],
         "query": {
             "bool": {
                 "must": [
@@ -539,5 +537,3 @@ def download_from_content_url(content_url, path_to_download, org, project, token
     forge._store._download_one(url=content_url, path=path_to_download,
                                store_metadata=DictWrapper({"_project": f"{org}/{project}"}),
                                cross_bucket=True)
-
-

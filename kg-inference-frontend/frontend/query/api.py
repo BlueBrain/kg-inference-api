@@ -122,6 +122,9 @@ def infer(rule_id: str, input_parameters: dict, token: str, limit: int, retrieve
     pairs of ResultResource and ResultSparql if retrieved is True and use_sparql_minds is True
     """
     endpoint_rel = "infer"
+
+    input_parameters["LimitQueryParameter"] = limit
+
     data = {
         "rules": [{"id": rule_id}],
         "inputFilter": input_parameters
