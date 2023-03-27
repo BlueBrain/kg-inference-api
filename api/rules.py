@@ -1,6 +1,9 @@
 import logging
 from typing import List
-from inference_tools.utils import check_premises, get_query_pipe_params
+
+from inference_tools.datatypes.rule import Rule
+from inference_tools.execution import check_premises
+from inference_tools.utils import get_search_query_parameters
 from api.models.rules import InputParameter, RuleOutput
 from api.session import UserSession
 from inference_tools.exceptions import InferenceToolsException
@@ -9,7 +12,9 @@ from inference_tools.exceptions import InferenceToolsException
 class RulesHandler:
     """A class to manage the rules and their actions"""
 
-    def __init__(self, rules: List[dict]) -> None:
+    rules: List[Rule]
+
+    def __init__(self, rules: List[Rule]) -> None:
         self.rules = rules
 
     def filter_rules(self, input_filters: dict, user_session: UserSession):
@@ -24,34 +29,32 @@ class RulesHandler:
         def rule_is_satisfied(rule):
             return check_premises(forge_factory=user_session.get_or_create_forge_session,
                                   rule=rule,
-                                  parameters=input_filters)
+                                  parameter_values=input_filters)
 
         self.rules = [rule for rule in self.rules if rule_is_satisfied(rule)]
 
-    def serialize_rules(self):
+    def serialize_rules(self) -> List[RuleOutput]:
         """
         Serializes a list of data generalization rules by returning their models
-
         :return:
         """
-        serialized_rules = []
-        for rule in self.rules:
+
+        def rule_formatting(rule: Rule):
             try:
-                params = get_query_pipe_params(rule["searchQuery"])
-            except (KeyError, InferenceToolsException):
-                logging.exception(f'Rule \"{rule["name"]}\" could not be parsed')
-                continue
+                input_parameters = [
+                    InputParameter(name=name, payload=payload)
+                    for name, payload in get_search_query_parameters(rule).items()
+                ]
+            except InferenceToolsException:
+                logging.exception(f'Rule \"{rule.name}\" could not be parsed')
+                return None
 
-            input_parameters = [InputParameter(name=name, payload=payload)
-                                for name, payload in params.items()] if params else []
-
-            rule = RuleOutput(id=rule["@id"] if "@id" in rule else rule["id"],
-                              name=rule["name"],
-                              description=rule["description"],
-                              resource_type=rule["targetResourceType"],
+            return RuleOutput(id=rule.id,
+                              name=rule.name,
+                              description=rule.description,
+                              resource_type=rule.target_resource_type,
                               input_parameters=input_parameters,
-                              nexus_link=rule["nexus_link"])
+                              nexus_link=rule.nexus_link)
 
-            serialized_rules.append(rule)
-
-        return serialized_rules
+        rules = [rule_formatting(rule) for rule in self.rules]
+        return [rule for rule in rules if rule is not None]
