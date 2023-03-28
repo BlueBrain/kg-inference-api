@@ -1,11 +1,13 @@
 from dash import Input, Output, State, no_update, ALL, callback_context
 from dash.exceptions import PreventUpdate
+
+from layout.rule.custom_rules.generalize_hierarchy_rule import GENERALIZE_HIERARCHY_ID, value_map
 from layout.utils import make_toast, ToastType
 from layout.rule.inference_inputs import DEFAULT_LIMIT
 from data.rule import Rule
 from query.api import infer, APIError
 from query.forge import ForgeError
-import json
+
 
 def on_infer_press(app):
     @app.callback(
@@ -29,11 +31,12 @@ def on_infer_press(app):
 
             form_control_names = [fc["id"]["name"] for fc in infer_form_controls]
 
-            idx_limit = form_control_names.index('limitFormControl')
+            idx_limit = form_control_names.index('LimitQueryParameter')
             limit = values[idx_limit]
+
             if limit is None or limit == "":
                 limit = DEFAULT_LIMIT
-            del form_control_names[idx_limit]
+                values[idx_limit] = limit
 
             form_control_types = [fc["id"]["control_type"] for fc in infer_form_controls]
 
@@ -44,9 +47,14 @@ def on_infer_press(app):
 
             input_parameters = dict(zip(form_control_names, values))
 
+            if rule.id == GENERALIZE_HIERARCHY_ID:
+                selected_hierarchy = input_parameters["GeneralizedFieldName"]
+                to_add = dict(list(value_map[selected_hierarchy].items())[2:])
+                input_parameters.update(to_add)
+
             try:
-                results = infer(rule_id=rule.id, input_parameters=input_parameters, token=token,
-                                limit=limit)
+                results = infer(rule_id=rule.id, input_parameters=input_parameters, token=token)
+
             except (APIError, ForgeError) as e:
                 return None, no_update, make_toast(ToastType.ERROR, str(e))
 

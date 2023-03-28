@@ -1,7 +1,7 @@
 from typing import List, Union, Dict, Tuple
 import os
 import requests
-from query.forge import minds, retrieve_as_result_resource
+from query.forge import retrieve_as_result_resource
 from data.rule import Rule
 from data.result.result_sparql import ResultSparql
 from data.dict_key import DictKey
@@ -102,7 +102,7 @@ def get_rules(token, search_filters: dict = None) -> List[Rule]:
     return [Rule.source_to_class(el) for el in body]
 
 
-def infer(rule_id: str, input_parameters: dict, token: str, limit: int, retrieve=True,
+def infer(rule_id: str, input_parameters: dict, token: str, retrieve=True,
           use_sparql_minds=False) \
         -> Dict[str, Union[ResultResource, Tuple[ResultResource, ResultSparql], None]]:
     """
@@ -110,7 +110,6 @@ def infer(rule_id: str, input_parameters: dict, token: str, limit: int, retrieve
     @param rule_id: the id of the rule to be run
     @param input_parameters: the input parameter values, as a dictionary of the rule
     @param token: the user authentication token
-    @param limit: the number of results requested
     @param retrieve whether only the ids are returned or the Resource information is being
     retrieved too
     @param use_sparql_minds whether to also run a sparql query to retrieve minds information for
@@ -123,7 +122,7 @@ def infer(rule_id: str, input_parameters: dict, token: str, limit: int, retrieve
     """
     endpoint_rel = "infer"
 
-    input_parameters["LimitQueryParameter"] = limit
+    print(input_parameters)
 
     data = {
         "rules": [{"id": rule_id}],
@@ -142,7 +141,7 @@ def infer(rule_id: str, input_parameters: dict, token: str, limit: int, retrieve
     if not retrieve:
         return dict(zip(ids, [None] * len(ids)))
 
-    resources: List[Result] = retrieve_as_result_resource(ids=ids, token=token, limit=limit)
+    resources: List[Result] = retrieve_as_result_resource(ids=ids, token=token)
 
     # TODO NOT FINISHED YET (query + downstream usage), implement if ever we switch to this
     # if use_sparql_minds:

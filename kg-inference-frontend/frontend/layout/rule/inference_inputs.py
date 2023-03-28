@@ -200,7 +200,7 @@ def get_limit_form_control(rule_id: str) -> html.Div:
     return html.Div(className="float-end", children=[
         get_input_group(
             label="Number of Results",
-            form_control=dcc.Input(type="number", id=build_id(rule_id, "limitFormControl"),
+            form_control=dcc.Input(type="number", id=build_id(rule_id, "LimitQueryParameter"),
                                    style={"width": "70px"},
                                    className="ms-2", value=DEFAULT_LIMIT)
         ),
