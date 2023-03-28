@@ -31,12 +31,12 @@ def on_infer_press(app):
 
             form_control_names = [fc["id"]["name"] for fc in infer_form_controls]
 
-            idx_limit = form_control_names.index('LimitQueryParameter')
-            limit = values[idx_limit]
-
-            if limit is None or limit == "":
-                limit = DEFAULT_LIMIT
-                values[idx_limit] = limit
+            # idx_limit = form_control_names.index('LimitQueryParameter')
+            # limit = values[idx_limit]
+            #
+            # if limit is None or limit == "":
+            #     limit = DEFAULT_LIMIT
+            #     values[idx_limit] = limit
 
             form_control_types = [fc["id"]["control_type"] for fc in infer_form_controls]
 
@@ -46,6 +46,7 @@ def on_infer_press(app):
             rule = Rule.store_to_class(rule)
 
             input_parameters = dict(zip(form_control_names, values))
+            input_parameters["LimitQueryParameter"] = DEFAULT_LIMIT
 
             if rule.id == GENERALIZE_HIERARCHY_ID:
                 selected_hierarchy = input_parameters["GeneralizedFieldName"]
@@ -56,6 +57,7 @@ def on_infer_press(app):
                 results = infer(rule_id=rule.id, input_parameters=input_parameters, token=token)
 
             except (APIError, ForgeError) as e:
+                print(e)
                 return None, no_update, make_toast(ToastType.ERROR, str(e))
 
             return results, no_update, make_toast(

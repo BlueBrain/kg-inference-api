@@ -10,7 +10,6 @@ from data.data_type import DataType
 from data.cell_type import CellType, MType, EType
 from data.entity import Entity
 from data.result.attribute import Attribute
-from data.result.result_sparql import ResultSparql
 from data.result.result_resource import ResultResource
 from data.species import Species
 from data.utils import get_id
@@ -79,8 +78,8 @@ def get_species(forge):
         WHERE {
             ?id rdfs:subClassOf Species .
             ?id label ?name ;
-                <https://bluebrain.github.io/nexus/vocabulary/deprecated> ?_deprecated ;
-                <https://bluebrain.github.io/nexus/vocabulary/rev> ?_rev
+                _deprecated  ?_deprecated ;
+                _rev ?_rev
             FILTER (?_deprecated = 'false'^^xsd:boolean)  
         }
         """
@@ -89,12 +88,12 @@ def get_species(forge):
 
 def get_brain_regions(forge):
     query_str = """
-        SELECT ?id ?label ?_rev
+        SELECT ?id ?name ?_rev
         WHERE {
             ?id rdfs:subClassOf BrainRegion .
-            ?id label ?label ;
-                <https://bluebrain.github.io/nexus/vocabulary/deprecated> ?_deprecated ;
-                <https://bluebrain.github.io/nexus/vocabulary/rev> ?_rev
+            ?id label ?name ;
+                _deprecated  ?_deprecated ;
+                _rev ?_rev
             FILTER (?_deprecated = 'false'^^xsd:boolean)  
         }
         """
@@ -103,15 +102,15 @@ def get_brain_regions(forge):
 
 def get_cell_types(forge):
     query_str = """
-               SELECT ?id ?name ?_rev
-               WHERE {
-                ?id rdfs:subClassOf* bmo:BrainCellType .
-                ?id label ?name ;
-                    <https://bluebrain.github.io/nexus/vocabulary/deprecated> ?_deprecated ;
-                    <https://bluebrain.github.io/nexus/vocabulary/rev> ?_rev
-                FILTER (?_deprecated = 'false'^^xsd:boolean)  
-               }
-           """
+           SELECT ?id ?name ?_rev
+           WHERE {
+            ?id rdfs:subClassOf* bmo:BrainCellType .
+            ?id label ?name ;
+                _deprecated  ?_deprecated ;
+                _rev ?_rev
+            FILTER (?_deprecated = 'false'^^xsd:boolean)  
+           }
+       """
     return sparql_to_class(query_str=query_str, class_name=CellType, forge=forge)
 
 
@@ -126,7 +125,6 @@ def get_data_types(forge):
             FILTER (?_deprecated = 'false'^^xsd:boolean)  
         }
     """
-
     return sparql_to_class(query_str=query_str, class_name=DataType, forge=forge)
 
 
@@ -134,11 +132,14 @@ def get_m_types(forge):
     query_str = """
         SELECT ?id ?name ?_rev
         WHERE {
-            ?id rdfs:subClassOf* ?a .
+            {
+                {?id rdfs:subClassOf* bmo:NeuronMorphologicalType } 
+                UNION 
+                {?id rdfs:subClassOf* nsg:MType}
+            }
             ?id label ?name ; 
                 _deprecated ?_deprecated ;
                 _rev ?_rev
-            FILTER(?a = bmo:NeuronMorphologicalType || ?a = nsg:MType)
             FILTER (?_deprecated = 'false'^^xsd:boolean)  
         }
     """
@@ -149,11 +150,14 @@ def get_e_types(forge):
     query_str = """
         SELECT ?id ?name ?_rev
         WHERE {
-            ?id rdfs:subClassOf* ?a .
+            {
+                {?id rdfs:subClassOf* bmo:NeuronElectricalType } 
+                UNION 
+                {?id rdfs:subClassOf* nsg:EType}
+            }
             ?id label ?name ; 
                 _deprecated ?_deprecated ;
                 _rev ?_rev
-            FILTER(?a = bmo:NeuronElectricalType || ?a = nsg:EType)
             FILTER (?_deprecated = 'false'^^xsd:boolean)  
         }
     """
@@ -392,7 +396,6 @@ def retrieve_as_result_resource(ids, token) -> List[ResultResource]:
     such as contribution labels, and stimulus type labels
     @param ids: the list of Resource ids
     @param token the user authentication token
-    @param limit the number of results requested
     @return a list of ResultResources
     """
     retrieved: List[ResultResource] = retrieve_elastic(ids, token, True)
@@ -401,14 +404,12 @@ def retrieve_as_result_resource(ids, token) -> List[ResultResource]:
     return retrieved
 
 
-def retrieve_elastic(ids, token, to_result_resource) -> \
-        Union[List[ResultResource], List[Resource]]:
+def retrieve_elastic(ids, token, to_result_resource) -> Union[List[ResultResource], List[Resource]]:
     """
     Retrieves Resources whose id are in the id list provided, up to a limit,
     only returned the most recently updated ones
     @param ids: the list of Resource ids
     @param token: the user authentication token
-    @param limit: the number of Resources to retrieve
     @param to_result_resource: whether to keep the Resource as a kgforge.core.Resource
     or to convert it into a ResultResource
     @return a list of kgforge.core.Resource, or a list of ResultResource
@@ -416,25 +417,24 @@ def retrieve_elastic(ids, token, to_result_resource) -> \
     forge = get_forge_bbp_atlas(token)
 
     q = {
-        "query": {
-            "bool": {
-                "must": [
-                    {
-                        "terms": {"@id": ids}
-                    },
-                    {
-                        "term": {"_deprecated": False}
-                    }
+        'query': {
+            'bool': {
+                'filter': [
+                    {'terms': {'@id': ids}}
+                ],
+                'must': [
+                    {'match': {'_deprecated': False}}
+                ],
+                'must_not': [
+
                 ]
             }
-        }
+        },
     }
+
     resources = forge.elastic(json.dumps(q), debug=False)
 
-    if resources is None or len(resources) != len(ids):
-        print(ids)
-        print(len(ids))
-        print(len(resources))
+    if resources is None:
         raise ForgeError("Elastic Search Retrieval was not successful")
 
     return [ResultResource.to_result_object(element, forge) for element in resources] \

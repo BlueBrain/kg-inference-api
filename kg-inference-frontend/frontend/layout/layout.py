@@ -15,7 +15,6 @@ page = html.Div(children=[
             html.Div(id="toast_container_rules_sidebar"),
             html.Div(id="toast_container_token"),
             html.Div(id="toast_container_sidebar_fetch"),
-            html.Div(id="toast_container_sidebar_build"),
             html.Div(id="toast_container_results_infer"),
             html.Div(id="toast_container_results_table"),
         ])

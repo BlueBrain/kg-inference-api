@@ -121,14 +121,12 @@ def infer(rule_id: str, input_parameters: dict, token: str, retrieve=True,
     pairs of ResultResource and ResultSparql if retrieved is True and use_sparql_minds is True
     """
     endpoint_rel = "infer"
-
-    print(input_parameters)
-
     data = {
         "rules": [{"id": rule_id}],
         "inputFilter": input_parameters
     }
 
+    print(data)
     body = request(endpoint_rel=endpoint_rel, data=data, token=token)
 
     if len(body) == 0 or "results" not in body[0]:

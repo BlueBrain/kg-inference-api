@@ -1,4 +1,6 @@
 from dash import html, dcc
+
+from data.cell_type import EType, MType
 from data.dict_key import DictKey
 from data.brain_region import BrainRegion
 from data.species import Species
@@ -21,7 +23,19 @@ value_map = {
         "class_name": Species,
         "HierarchyRelationship": "SubclassOf",
         "PathToGeneralizedField": "Species"
-    }
+    },
+    "EType": {  # GeneralizedFieldName
+        "dict_key": DictKey.E_TYPES.value,
+        "class_name": EType,
+        "HierarchyRelationship": "SubclassOf",
+        "PathToGeneralizedField": "EType"
+    },
+    "MType": {  # GeneralizedFieldName
+        "dict_key": DictKey.M_TYPES.value,
+        "class_name": MType,
+        "HierarchyRelationship": "SubclassOf",
+        "PathToGeneralizedField": "MType"
+    },
 }
 
 
@@ -35,9 +49,6 @@ def generalise_context_input_groups(rule, token: str, sidebar_content: Dict[str,
     @param stored_filters:
     @return
     """
-
-    def swap(dict_instance):
-        return dict(zip(dict_instance.values(), dict_instance.keys()))
 
     def keys_keys(dict_instance):
         return dict(zip(dict_instance.keys(), dict_instance.keys()))
@@ -56,7 +67,8 @@ def generalise_context_input_groups(rule, token: str, sidebar_content: Dict[str,
         form_control=dcc.RadioItems(
             options=keys_keys(input_parameters["GeneralizedFieldName"].values),
             inline=True,
-            id=build_id(rule_id=rule.id, name="GeneralizedFieldName")
+            id=build_id(rule_id=rule.id, name="GeneralizedFieldName"),
+            labelStyle={"paddingRight": "10px"}
         ),
         label="Hierarchy to use for generalisation"
     )
@@ -84,8 +96,9 @@ def generalise_context_input_groups(rule, token: str, sidebar_content: Dict[str,
         form_control=dcc.RadioItems(
             options=keys_keys(input_parameters["SearchDirectionBlock"].values),
             inline=True,
-            id=build_id(rule_id=rule.id, name="SearchDirectionBlock")
-        ),
+            id=build_id(rule_id=rule.id, name="SearchDirectionBlock"),
+            labelStyle={"paddingRight": "10px"}
+    ),
         label="Generalisation direction"
     )
 

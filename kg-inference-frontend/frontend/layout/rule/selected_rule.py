@@ -7,8 +7,8 @@ from layout.rule.custom_rules.generalize_hierarchy_rule import generalise_contex
 
 
 def build_inputs(rule, token, sidebar_content=None, stored_filters=None):
-    input_groups = [get_limit_form_control(rule.id)]
-
+    # input_groups = [get_limit_form_control(rule.id)]
+    input_groups = []
     if len(rule.input_parameters) > 0:
 
         fc = generalise_context_input_groups if rule.id == GENERALIZE_HIERARCHY_ID \
@@ -27,12 +27,14 @@ def build_selected_rule(rule, token, sidebar_content=None, stored_filters=None):
 
     rule = Rule.store_to_class(rule)
 
-    inputs = build_inputs(rule, token=token, stored_filters=stored_filters, sidebar_content=sidebar_content)
+    inputs = build_inputs(rule, token=token, stored_filters=stored_filters,
+                          sidebar_content=sidebar_content)
 
     return [
         html.H5(children="Description: "),
         html.P(children=rule.description),
-        dcc.Link(children="For feedback, use the Jira tool integrated in the rule page of Nexus Fusion",
+        dcc.Link(children=
+                 "For feedback, use the Jira tool integrated in the rule page of Nexus Fusion",
                  href=rule.nexus_link, target="_blank"),
         html.Hr(),
         inputs,
