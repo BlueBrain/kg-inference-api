@@ -50,14 +50,13 @@ def on_infer_press(app):
 
             if rule.id == GENERALIZE_HIERARCHY_ID:
                 selected_hierarchy = input_parameters["GeneralizedFieldName"]
-                to_add = dict(list(value_map[selected_hierarchy].items())[2:])
+                to_add = dict(list(value_map[selected_hierarchy].items())[1:])
                 input_parameters.update(to_add)
 
             try:
                 results = infer(rule_id=rule.id, input_parameters=input_parameters, token=token)
 
             except (APIError, ForgeError) as e:
-                print(e)
                 return None, no_update, make_toast(ToastType.ERROR, str(e))
 
             return results, no_update, make_toast(

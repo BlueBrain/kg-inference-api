@@ -1,7 +1,7 @@
 from dash import Input, Output, no_update
 from dash.exceptions import PreventUpdate
 from layout.sidebar.sidebar import build_sidebar
-from data.dict_key import DictKey
+from data.dict_key import DictKey, dict_key_class_map
 from data.data_type import DataType
 from data.brain_region import BrainRegion
 from data.cell_type import CellType
@@ -16,20 +16,17 @@ def on_stored_sidebar_content_update(app):
     def on_sidebar_content_update_callback(sidebar_content):
         if sidebar_content is not None:
 
-            brain_regions = [BrainRegion.store_to_class(el)
-                             for el in sidebar_content[DictKey.BRAIN_REGIONS.value]]
-            data_types = [DataType.store_to_class(el)
-                          for el in sidebar_content[DictKey.DATA_TYPES.value]]
-            cell_types = [CellType.store_to_class(el)
-                          for el in sidebar_content[DictKey.CELL_TYPES.value]]
-
-            # contributors = get_contributors(token)
+            def sidebar_content_to_class(dict_key: DictKey):
+                return [
+                    dict_key_class_map[dict_key].store_to_class(el)
+                    for el in sidebar_content[dict_key.value]
+                ]
 
             return (
                 build_sidebar(
-                    brain_regions=brain_regions,
-                    data_types=data_types,
-                    cell_types=cell_types,
+                    brain_regions=sidebar_content_to_class(DictKey.BRAIN_REGIONS),
+                    data_types=sidebar_content_to_class(DictKey.DATA_TYPES),
+                    cell_types=sidebar_content_to_class(DictKey.CELL_TYPES),
                     contributors=None
                 ),
                 no_update

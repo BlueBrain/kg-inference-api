@@ -13,31 +13,27 @@ GENERALIZE_HIERARCHY_ID = \
 
 value_map = {
     "BrainRegion": {  # GeneralizedFieldName
-        "dict_key": DictKey.BRAIN_REGIONS.value,
-        "class_name": BrainRegion,
-        "HierarchyRelationship": "IsPartOf",
+        "dict_key": DictKey.BRAIN_REGIONS,  # on GeneralizedFieldName select, this is how we find
+        # the data to populate the other dropdowns
+        "HierarchyRelationship": "IsPartOf",  # associated parameters values when calling the rule
         "PathToGeneralizedField": "BrainRegion"
     },
     "Species": {  # GeneralizedFieldName
-        "dict_key": DictKey.SPECIES.value,
-        "class_name": Species,
+        "dict_key": DictKey.SPECIES,
         "HierarchyRelationship": "SubclassOf",
         "PathToGeneralizedField": "Species"
     },
     "EType": {  # GeneralizedFieldName
-        "dict_key": DictKey.E_TYPES.value,
-        "class_name": EType,
+        "dict_key": DictKey.E_TYPES,
         "HierarchyRelationship": "SubclassOf",
         "PathToGeneralizedField": "EType"
     },
     "MType": {  # GeneralizedFieldName
-        "dict_key": DictKey.M_TYPES.value,
-        "class_name": MType,
+        "dict_key": DictKey.M_TYPES,
         "HierarchyRelationship": "SubclassOf",
         "PathToGeneralizedField": "MType"
     },
 }
-
 
 def generalise_context_input_groups(rule, token: str, sidebar_content: Dict[str, Dict],
                                     stored_filters: Dict[str, List]) -> List[html.Div]:
@@ -82,24 +78,24 @@ def generalise_context_input_groups(rule, token: str, sidebar_content: Dict[str,
         )
     )
 
-    # ExcludeQueryParameter
-    control4 = html.Div(
-        id="exclude_query_parameter_container",
-        children=get_input_group(
-            form_control=dcc.Dropdown(),
-            label="Elements to exclude"
-        ),
-    )
-
     # SearchDirectionBlock
-    control5 = get_input_group(
+    control4 = get_input_group(
         form_control=dcc.RadioItems(
             options=keys_keys(input_parameters["SearchDirectionBlock"].values),
             inline=True,
             id=build_id(rule_id=rule.id, name="SearchDirectionBlock"),
             labelStyle={"paddingRight": "10px"}
-    ),
+        ),
         label="Generalisation direction"
+    )
+
+    # ExcludeQueryParameter
+    control5 = html.Div(
+        id="exclude_query_parameter_container",
+        children=get_input_group(
+            form_control=dcc.Dropdown(),
+            label="Elements to exclude"
+        ),
     )
 
     # UserContext: ignore

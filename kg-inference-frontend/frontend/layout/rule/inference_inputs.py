@@ -2,14 +2,10 @@ from typing import Dict, List, Optional
 from dash import html, dcc
 from dash.development.base_component import Component
 from data.input_parameter import InputParameter, InputParameterType
-from data.dict_key import DictKey
-from data.brain_region import BrainRegion
-from data.cell_type import MType, CellType
-from data.data_type import DataType
-from data.entity import Entity
+from data.dict_key import DictKey, dict_key_class_map
 from data.rule import Rule
-from data.species import Species
-from query.forge import get_m_types, get_entities, get_forge_neuroscience_datamodels
+from query.forge import get_forge_neuroscience_datamodels
+
 DEFAULT_LIMIT = 20
 
 
@@ -41,8 +37,7 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
     @return
     """
     class_to_func = {
-        # MType: get_m_types,
-        # Entity: get_entities
+
     }
 
     def to_dropdown_format(el_list):
@@ -140,19 +135,21 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str,
     multiple = input_parameter.type in list_types
 
     special_inputs = {
-        "BrainRegionQueryParameter": (DictKey.BRAIN_REGIONS.value, BrainRegion),
-        "BrainRegionQueryParameter_exclude": (DictKey.BRAIN_REGIONS.value, BrainRegion),
-        "TypeQueryParameter": (DictKey.DATA_TYPES.value, DataType),
-        "MTypeQueryParameter": (DictKey.M_TYPES.value, MType),
-        "CellTypeQueryParameter": (DictKey.CELL_TYPES.value, CellType),
-        "SpeciesQueryParameter": (DictKey.SPECIES.value, Species),
-        "SpeciesQueryParameter_exclude": (DictKey.SPECIES.value, Species),
+        "BrainRegionQueryParameter": DictKey.BRAIN_REGIONS,
+        "BrainRegionQueryParameter_exclude": DictKey.BRAIN_REGIONS,
+        "TypeQueryParameter": DictKey.DATA_TYPES,
+        "MTypeQueryParameter": DictKey.M_TYPES,
+        "CellTypeQueryParameter": DictKey.CELL_TYPES,
+        "SpeciesQueryParameter": DictKey.SPECIES,
+        "SpeciesQueryParameter_exclude": DictKey.SPECIES
     }
 
     if input_parameter.name in special_inputs.keys():
-        dict_key, class_name = special_inputs[input_parameter.name]
+        dict_key = special_inputs[input_parameter.name]
+        class_name = dict_key_class_map[dict_key]
+
         id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
-        return get_form_control_special(dict_key=dict_key, class_name=class_name,
+        return get_form_control_special(dict_key=dict_key.value, class_name=class_name,
                                         multiple=multiple, id_obj=id_obj,
                                         sidebar_content=sidebar_content,
                                         stored_filters=stored_filters, token=token)

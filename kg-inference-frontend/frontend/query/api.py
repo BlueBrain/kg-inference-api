@@ -79,22 +79,17 @@ def get_rules(token, search_filters: dict = None) -> List[Rule]:
         if rt is not None and len(rt) > 0:
             data["resourceTypes"] = rt
 
-        local_keys = [
-            DictKey.CELL_TYPES.value,
-            DictKey.CELL_TYPES.value,
-            DictKey.BRAIN_REGIONS.value
-        ]
-        api_keys = [
-            "CellTypeQueryParameter",
-            "MTypeQueryParameter",
-            "BrainRegionQueryParameter"
-        ]
+        api_to_local_keys = {
+            "CellTypeQueryParameter": DictKey.CELL_TYPES,
+            "MTypeQueryParameter": DictKey.CELL_TYPES,
+            "BrainRegionQueryParameter": DictKey.BRAIN_REGIONS
+        }
 
-        if any([key in search_filters for key in local_keys]):
+        if any([key.value in search_filters for key in api_to_local_keys.values()]):
             data["inputFilters"] = dict([
-                (api_key, search_filters[local_key])
-                for local_key, api_key in zip(local_keys, api_keys)
-                if local_key in search_filters and search_filters[local_key]
+                (api_key, search_filters[local_key.value])
+                for api_key, local_key in api_to_local_keys.items()
+                if local_key.value in search_filters and search_filters[local_key.value] is not None
             ])
 
     body = request(endpoint_rel=endpoint_rel, data=data, token=token)

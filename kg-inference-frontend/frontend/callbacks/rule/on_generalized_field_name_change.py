@@ -3,6 +3,7 @@ from dash.exceptions import PreventUpdate
 from layout.rule.custom_rules.generalize_hierarchy_rule import GENERALIZE_HIERARCHY_ID,\
     update_generalized_field_value, value_map
 from layout.rule.inference_inputs import build_id
+from data.dict_key import dict_key_class_map
 
 
 def on_generalized_field_name_change(app):
@@ -26,13 +27,13 @@ def on_generalized_field_name_change(app):
             raise PreventUpdate
 
         dict_key = value_map[new_field_name]["dict_key"]
-        class_name = value_map[new_field_name]["class_name"]
+        class_name = dict_key_class_map[dict_key]
 
         rule_id = selected_rule["id"]
 
         control1 = update_generalized_field_value(
                 id_obj=build_id(rule_id=rule_id, name="GeneralizedFieldValue"),
-                token=token, dict_key=dict_key,
+                token=token, dict_key=dict_key.value,
                 class_name=class_name, sidebar_content=sidebar_content,
                 stored_filters=stored_filters,
                 label="Hierarchy starting value",
@@ -41,7 +42,7 @@ def on_generalized_field_name_change(app):
 
         control2 = update_generalized_field_value(
                 id_obj=build_id(rule_id=rule_id, name="ExcludeQueryParameter"),
-                token=token, dict_key=dict_key,
+                token=token, dict_key=dict_key.value,
                 class_name=class_name, sidebar_content=sidebar_content,
                 stored_filters=stored_filters,
                 label="Elements to exclude",

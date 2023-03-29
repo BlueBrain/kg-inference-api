@@ -38,7 +38,7 @@ class ResultSparql(Result):
 
         def to_symbol_check(el, key):
             return [to_symbol(val) for val in el] \
-            if key not in single_valued and key in keys_to_symbol else el
+                if key not in single_valued and key in keys_to_symbol else el
 
         element = dict((key, to_symbol_check(value, key)) for key, value in element.items())
 
