@@ -6,7 +6,8 @@ def get_env_vars():
     environment_variables = {
         "ENVIRONMENT": "LOCAL",
         "NEXUS_ENDPOINT": "https://bbp.epfl.ch/nexus/v1",
-        "NEXUS_CONFIG_PATH": "./config/forge-config.yaml",
+        "NEXUS_CONFIG_PATH": os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                          "./config/forge-config.yaml"),
         "API_BASE": None
     }
 
