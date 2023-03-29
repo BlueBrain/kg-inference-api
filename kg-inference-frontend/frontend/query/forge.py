@@ -90,7 +90,7 @@ def get_brain_regions(forge):
     query_str = """
         SELECT ?id ?name ?_rev
         WHERE {
-            ?id rdfs:subClassOf BrainRegion .
+            ?id rdfs:subClassOf* BrainRegion .
             ?id label ?name ;
                 _deprecated  ?_deprecated ;
                 _rev ?_rev
@@ -132,11 +132,7 @@ def get_m_types(forge):
     query_str = """
         SELECT ?id ?name ?_rev
         WHERE {
-            {
-                {?id rdfs:subClassOf* bmo:NeuronMorphologicalType } 
-                UNION 
-                {?id rdfs:subClassOf* nsg:MType}
-            }
+            ?id rdfs:subClassOf* bmo:NeuronMorphologicalType .
             ?id label ?name ; 
                 _deprecated ?_deprecated ;
                 _rev ?_rev
@@ -150,11 +146,7 @@ def get_e_types(forge):
     query_str = """
         SELECT ?id ?name ?_rev
         WHERE {
-            {
-                {?id rdfs:subClassOf* bmo:NeuronElectricalType } 
-                UNION 
-                {?id rdfs:subClassOf* nsg:EType}
-            }
+            ?id rdfs:subClassOf* bmo:NeuronElectricalType .
             ?id label ?name ; 
                 _deprecated ?_deprecated ;
                 _rev ?_rev
