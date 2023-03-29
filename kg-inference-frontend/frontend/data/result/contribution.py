@@ -16,7 +16,8 @@ class Contribution:
         contribution_dict = contribution_dict.get("agent", None)
         if not contribution_dict:
             return None
-        return Contribution(id=get_id(contribution_dict), label=contribution_dict.get("label", None))
+        return Contribution(id=get_id(contribution_dict),
+                            label=contribution_dict.get("label", None))
 
     @staticmethod
     def class_to_store(contribution):

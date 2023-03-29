@@ -23,7 +23,7 @@ class Result(ABC):
 
     @staticmethod
     @abstractmethod
-    def to_result_object(obj, forge):
+    def to_result_object(element, forge):
         ...
 
     @abstractmethod

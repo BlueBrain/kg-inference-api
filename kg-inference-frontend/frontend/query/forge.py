@@ -444,8 +444,8 @@ def retrieve_elastic(ids, token, to_result_resource) -> Union[List[ResultResourc
 # TODO finish
 # def minds(ids, token) -> List[ResultSparql]:
 #     """
-#     Retrieve MINDs information of a list of Resources, provided a list of their ids, and formats it
-#     into a ResultSparql instance
+#     Retrieve MINDs information of a list of Resources, provided a list of their ids,
+#     and formats it into a ResultSparql instance
 #     @param ids: the list of Resource ids
 #     @param token: the user authentication token
 #     @return a list of ResultSparql instances, holding MINDs information

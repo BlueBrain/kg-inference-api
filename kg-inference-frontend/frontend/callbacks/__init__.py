@@ -9,4 +9,3 @@ def get_callbacks(app):
     get_rule_callbacks(app)
     get_sidebar_callbacks(app)
     get_result_callbacks(app)
-

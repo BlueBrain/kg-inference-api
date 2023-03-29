@@ -1,8 +1,8 @@
-from query.forge import forge_get_files
+import base64
 from itertools import groupby
 from dash import html, dcc
 from data.result.attribute import Attribute
-import base64
+from query.forge import forge_get_files
 
 
 def trace_images(result_resource, images, token):

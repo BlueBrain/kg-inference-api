@@ -1,7 +1,6 @@
 from dash import Input, Output, no_update
 from dash.exceptions import PreventUpdate
 
-from data.entity import Entity
 from layout.utils import make_toast, ToastType
 from query.forge import get_cell_types, get_data_types, get_brain_regions, ForgeError, \
     get_forge_neuroscience_datamodels, get_m_types, get_e_types, get_entities, get_species
@@ -10,7 +9,7 @@ from data.data_type import DataType
 from data.cell_type import CellType, MType, EType
 from data.dict_key import DictKey
 from data.species import Species
-
+from data.entity import Entity
 
 def on_token_update(app):
     @app.callback(
@@ -35,8 +34,10 @@ def on_token_update(app):
                 return (
                     make_toast(ToastType.INFORMATION, "Loaded sidebar information"),
                     {
-                        DictKey.BRAIN_REGIONS.value: [BrainRegion.class_to_store(br) for br in brain_regions],
-                        DictKey.DATA_TYPES.value: [DataType.class_to_store(dt) for dt in data_types],
+                        DictKey.BRAIN_REGIONS.value: [BrainRegion.class_to_store(br)
+                                                      for br in brain_regions],
+                        DictKey.DATA_TYPES.value: [DataType.class_to_store(dt)
+                                                   for dt in data_types],
                         DictKey.CELL_TYPES.value: [CellType.class_to_store(c) for c in cell_types],
                         DictKey.M_TYPES.value: [MType.class_to_store(c) for c in m_types],
                         DictKey.E_TYPES.value: [EType.class_to_store(c) for c in e_types],

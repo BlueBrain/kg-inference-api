@@ -73,13 +73,14 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
                 options=ddf,
                 value=[el["value"] for el in ddf] if multiple else ddf[0]["value"]
             )
-        else:
-            return dcc.Dropdown(
-                id=id_obj,
-                multi=multiple,
-                options=to_dropdown_format(all_as_class),
-            )
-    else: # TODO so far doesn't reach this with extraction of MType and Entity
+
+        return dcc.Dropdown(
+            id=id_obj,
+            multi=multiple,
+            options=to_dropdown_format(all_as_class),
+        )
+    else:  # TODO so far doesn't reach this with extraction of MType and Entity
+
         if class_name in class_to_func:
             forge = get_forge_neuroscience_datamodels(token)
             data = class_to_func[class_name](forge)
@@ -88,8 +89,8 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
                 multi=multiple,
                 options=to_dropdown_format(data),
             )
-        else:
-            raise ValueError
+
+        raise ValueError
 
 
 def build_id(rule_id, name, control_type="basic") -> Dict[str, str]:
@@ -170,9 +171,9 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str,
         id_obj = build_id(rule_id=rule_id, name=input_parameter.name,
                           control_type="newline_separated")
         return dcc.Textarea(id=id_obj, name=input_parameter.name, className="form-control")
-    else:
-        id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
-        return dcc.Input(id=id_obj, name=input_parameter.name, className="form-control")
+
+    id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
+    return dcc.Input(id=id_obj, name=input_parameter.name, className="form-control")
 
 
 def get_input_group(form_control: Component, label: str) -> html.Div:
