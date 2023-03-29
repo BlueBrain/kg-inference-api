@@ -1,6 +1,6 @@
+from fastapi.testclient import TestClient
 from api.main import app
 from api.config import NEXUS_TOKEN
-from fastapi.testclient import TestClient
 
 client = TestClient(app)
 

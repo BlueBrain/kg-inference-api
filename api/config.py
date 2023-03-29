@@ -1,14 +1,14 @@
 import os
 
-def get_env_vars():
 
+def get_env_vars():
     environment_variables = {
         "BBP_NEXUS_ENDPOINT": None,
         "ENVIRONMENT": None,
         "RULES_BUCKET": None,
         "DATAMODELS_BUCKET": None,
         "WHITELISTED_CORS_URLS": "",  # can be optional
-        "NEXUS_TOKEN": "", # can be optional
+        "NEXUS_TOKEN": "",  # can be optional
     }
 
     environment_variables = dict(
@@ -17,7 +17,8 @@ def get_env_vars():
     )
 
     environment_variables["DEBUG_MODE"] = \
-        environment_variables["ENVIRONMENT"] == "LOCAL" or environment_variables["ENVIRONMENT"] == "DEV"
+        environment_variables["ENVIRONMENT"] == "LOCAL" \
+        or environment_variables["ENVIRONMENT"] == "DEV"
 
     for key, value in environment_variables.items():
         if value is None:
@@ -26,4 +27,5 @@ def get_env_vars():
     return environment_variables.values()
 
 
-BBP_NEXUS_ENDPOINT, ENVIRONMENT, RULES_BUCKET, DATAMODELS_BUCKET, WHITELISTED_CORS_URLS, NEXUS_TOKEN, DEBUG_MODE = get_env_vars()
+BBP_NEXUS_ENDPOINT, ENVIRONMENT, RULES_BUCKET, DATAMODELS_BUCKET, \
+    WHITELISTED_CORS_URLS, NEXUS_TOKEN, DEBUG_MODE = get_env_vars()

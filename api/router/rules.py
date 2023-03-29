@@ -1,8 +1,8 @@
 from typing import List
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBearer
-from api.dependencies import require_user_session
 from inference_tools.rules import fetch_rules
+from api.dependencies import require_user_session
 from api.models.rules import RuleOutput, RulesBody
 from api.rules import RulesHandler
 from api.session import UserSession
@@ -12,7 +12,8 @@ router = APIRouter()
 require_bearer = HTTPBearer()
 
 
-@router.post("", dependencies=[Depends(require_bearer)], response_model=List[RuleOutput], tags=["Rules"])
+@router.post("", dependencies=[Depends(require_bearer)], response_model=List[RuleOutput],
+             tags=["Rules"])
 async def get_all_rules(user_session: UserSession = Depends(require_user_session),
                         rules_body: RulesBody = None):
     """
@@ -32,6 +33,7 @@ async def get_all_rules(user_session: UserSession = Depends(require_user_session
     rules_handler = RulesHandler(rules=rules)
     # if input filters are added in the request
     if rules_body and rules_body.input_filters:
-        rules_handler.filter_rules(input_filters=rules_body.input_filters, user_session=user_session)
+        rules_handler.filter_rules(input_filters=rules_body.input_filters,
+                                   user_session=user_session)
     serialized_rules = rules_handler.serialize_rules()
     return serialized_rules

@@ -1,5 +1,5 @@
-from api import config
 from kgforge.core import KnowledgeGraphForge
+from api import config
 
 
 class UserSession:
@@ -41,7 +41,8 @@ class UserSession:
 
     def get_or_create_forge_session(self, org: str, project: str) -> KnowledgeGraphForge:
         """
-        Retrieves or creates a forge session for the given organization and project. Then returns the forge object
+        Retrieves or creates a forge session for the given organization and project.
+        Then returns the forge object
 
         :param org:
         :param project:
@@ -89,8 +90,8 @@ class UserSession:
 
     def forge_is_valid(self, access_token: str) -> bool:
         """
-        Checks if the existing forge object is still valid by checking if the received access token is the same as
-        the one stored in the forge object
+        Checks if the existing forge object is still valid by checking
+        if the received access token is the same as the one stored in the forge object
 
         :param access_token: the received access token
         :return: True if it is valid, False otherwise

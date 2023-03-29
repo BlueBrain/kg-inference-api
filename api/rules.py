@@ -4,9 +4,9 @@ from typing import List
 from inference_tools.datatypes.rule import Rule
 from inference_tools.execution import check_premises
 from inference_tools.utils import get_search_query_parameters
+from inference_tools.exceptions import InferenceToolsException
 from api.models.rules import InputParameter, RuleOutput
 from api.session import UserSession
-from inference_tools.exceptions import InferenceToolsException
 
 
 class RulesHandler:
