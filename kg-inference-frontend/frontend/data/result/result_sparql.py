@@ -19,7 +19,7 @@ class ResultSparql(Result):
         pass
 
     @staticmethod
-    def to_result_object(obj, forge):
+    def to_result_object(element, forge):
         single_valued = ["name", "id", "_self", "_project"]
 
         def split(el):
@@ -28,7 +28,8 @@ class ResultSparql(Result):
         def split_check(el, key):
             return split(el) if key not in single_valued else el
 
-        obj = dict((key, split_check(obj[key], key)) for key, value in obj.items())  # split values by separator
+        element = dict((key, split_check(element[key], key)) for key, value in element.items())
+        # split values by separator
 
         keys_to_symbol = ["type", "classification_type"]
 
@@ -37,15 +38,15 @@ class ResultSparql(Result):
 
         def to_symbol_check(el, key):
             return [to_symbol(val) for val in el] \
-            if key not in single_valued and key in keys_to_symbol else el
+                if key not in single_valued and key in keys_to_symbol else el
 
-        obj = dict((key, to_symbol_check(value, key)) for key, value in obj.items())
+        element = dict((key, to_symbol_check(value, key)) for key, value in element.items())
 
-        org, project = obj["_project"].split("/")[-2:]
-        obj["org"] = org
-        obj["project"] = project
-        obj["nexus_link"] = obj["_self"]
-        return ResultSparql(json_object=obj)
+        org, project = element["_project"].split("/")[-2:]
+        element["org"] = org
+        element["project"] = project
+        element["nexus_link"] = element["_self"]
+        return ResultSparql(json_object=element)
 
     def paths(self):
         return {

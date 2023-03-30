@@ -7,11 +7,11 @@ from kgforge.core.wrappings.dict import DictWrapper
 from requests.exceptions import HTTPError
 from data.brain_region import BrainRegion
 from data.data_type import DataType
-from data.cell_type import CellType, MType
+from data.cell_type import CellType, MType, EType
 from data.entity import Entity
 from data.result.attribute import Attribute
-from data.result.result_sparql import ResultSparql
 from data.result.result_resource import ResultResource
+from data.species import Species
 from data.utils import get_id
 from query.sdk_layer import fetch as fetch_file
 from config import NEXUS_ENDPOINT, NEXUS_CONFIG_PATH
@@ -72,14 +72,28 @@ def sparql_to_class(query_str, class_name, forge, limit=True):
     return [class_name.source_to_class(c) for c in results] if results else []
 
 
+def get_species(forge):
+    query_str = """
+        SELECT ?id ?name ?_rev
+        WHERE {
+            ?id rdfs:subClassOf Species .
+            ?id label ?name ;
+                _deprecated  ?_deprecated ;
+                _rev ?_rev
+            FILTER (?_deprecated = 'false'^^xsd:boolean)  
+        }
+        """
+    return sparql_to_class(query_str=query_str, class_name=Species, forge=forge)
+
+
 def get_brain_regions(forge):
     query_str = """
-        SELECT ?id ?label ?_rev
+        SELECT ?id ?name ?_rev
         WHERE {
-            ?id rdfs:subClassOf BrainRegion .
-            ?id label ?label ;
-                <https://bluebrain.github.io/nexus/vocabulary/deprecated> ?_deprecated ;
-                <https://bluebrain.github.io/nexus/vocabulary/rev> ?_rev
+            ?id rdfs:subClassOf* BrainRegion .
+            ?id label ?name ;
+                _deprecated  ?_deprecated ;
+                _rev ?_rev
             FILTER (?_deprecated = 'false'^^xsd:boolean)  
         }
         """
@@ -88,15 +102,15 @@ def get_brain_regions(forge):
 
 def get_cell_types(forge):
     query_str = """
-               SELECT ?id ?name ?_rev
-               WHERE {
-                ?id rdfs:subClassOf* bmo:BrainCellType .
-                ?id label ?name ;
-                    <https://bluebrain.github.io/nexus/vocabulary/deprecated> ?_deprecated ;
-                    <https://bluebrain.github.io/nexus/vocabulary/rev> ?_rev
-                FILTER (?_deprecated = 'false'^^xsd:boolean)  
-               }
-           """
+           SELECT ?id ?name ?_rev
+           WHERE {
+            ?id rdfs:subClassOf* bmo:BrainCellType .
+            ?id label ?name ;
+                _deprecated  ?_deprecated ;
+                _rev ?_rev
+            FILTER (?_deprecated = 'false'^^xsd:boolean)  
+           }
+       """
     return sparql_to_class(query_str=query_str, class_name=CellType, forge=forge)
 
 
@@ -111,7 +125,6 @@ def get_data_types(forge):
             FILTER (?_deprecated = 'false'^^xsd:boolean)  
         }
     """
-
     return sparql_to_class(query_str=query_str, class_name=DataType, forge=forge)
 
 
@@ -119,15 +132,28 @@ def get_m_types(forge):
     query_str = """
         SELECT ?id ?name ?_rev
         WHERE {
-            ?id rdfs:subClassOf* ?a .
+            ?id rdfs:subClassOf* bmo:NeuronMorphologicalType .
             ?id label ?name ; 
                 _deprecated ?_deprecated ;
                 _rev ?_rev
-            FILTER(?a = bmo:NeuronMorphologicalType || ?a = nsg:MType)
             FILTER (?_deprecated = 'false'^^xsd:boolean)  
         }
     """
     return sparql_to_class(query_str=query_str, class_name=MType, forge=forge)
+
+
+def get_e_types(forge):
+    query_str = """
+        SELECT ?id ?name ?_rev
+        WHERE {
+            ?id rdfs:subClassOf* bmo:NeuronElectricalType .
+            ?id label ?name ; 
+                _deprecated ?_deprecated ;
+                _rev ?_rev
+            FILTER (?_deprecated = 'false'^^xsd:boolean)  
+        }
+    """
+    return sparql_to_class(query_str=query_str, class_name=EType, forge=forge)
 
 
 def get_entities(forge):
@@ -355,30 +381,27 @@ def stimulus_type_label_fill(result_resources: List[ResultResource], token: str)
     return [add_stimulus_type_label(resource) for resource in result_resources]
 
 
-def retrieve_as_result_resource(ids, token, limit) -> List[ResultResource]:
+def retrieve_as_result_resource(ids, token) -> List[ResultResource]:
     """
     Provided a list of resource ids, and a limit, fetches the most recently updated Resources
     up until the limit, converts them into ResultResources, and adds missing information,
     such as contribution labels, and stimulus type labels
     @param ids: the list of Resource ids
     @param token the user authentication token
-    @param limit the number of results requested
     @return a list of ResultResources
     """
-    retrieved: List[ResultResource] = retrieve_limit_sort(ids, token, limit, True)
+    retrieved: List[ResultResource] = retrieve_elastic(ids, token, True)
     retrieved = contribution_label_fill(result_resources=retrieved, token=token)
     retrieved = stimulus_type_label_fill(result_resources=retrieved, token=token)
     return retrieved
 
 
-def retrieve_limit_sort(ids, token, limit, to_result_resource) -> \
-        Union[List[ResultResource], List[Resource]]:
+def retrieve_elastic(ids, token, to_result_resource) -> Union[List[ResultResource], List[Resource]]:
     """
     Retrieves Resources whose id are in the id list provided, up to a limit,
     only returned the most recently updated ones
     @param ids: the list of Resource ids
     @param token: the user authentication token
-    @param limit: the number of Resources to retrieve
     @param to_result_resource: whether to keep the Resource as a kgforge.core.Resource
     or to convert it into a ResultResource
     @return a list of kgforge.core.Resource, or a list of ResultResource
@@ -386,26 +409,24 @@ def retrieve_limit_sort(ids, token, limit, to_result_resource) -> \
     forge = get_forge_bbp_atlas(token)
 
     q = {
-        "from": 0, "size": limit,
-        "sort": [
-            {"_updatedAt": "desc"},
-        ],
-        "query": {
-            "bool": {
-                "must": [
-                    {
-                        "terms": {"@id": ids}
-                    },
-                    {
-                        "term": {"_deprecated": False}
-                    }
+        'query': {
+            'bool': {
+                'filter': [
+                    {'terms': {'@id': ids}}
+                ],
+                'must': [
+                    {'match': {'_deprecated': False}}
+                ],
+                'must_not': [
+
                 ]
             }
         },
     }
+
     resources = forge.elastic(json.dumps(q), debug=False)
 
-    if len(resources) != limit and len(resources) != ids:
+    if resources is None:
         raise ForgeError("Elastic Search Retrieval was not successful")
 
     return [ResultResource.to_result_object(element, forge) for element in resources] \
@@ -413,81 +434,81 @@ def retrieve_limit_sort(ids, token, limit, to_result_resource) -> \
 
 
 # TODO finish
-def minds(ids, token) -> List[ResultSparql]:
-    """
-    Retrieve MINDs information of a list of Resources, provided a list of their ids, and formats it
-    into a ResultSparql instance
-    @param ids: the list of Resource ids
-    @param token: the user authentication token
-    @return a list of ResultSparql instances, holding MINDs information
-    """
-    forge = get_forge_bbp_atlas(token)
-
-    id_str = f"{' '.join([f'(<{id_i}>)' for id_i in ids])}"
-
-    query_str = """
-        SELECT ?id ?name ?_self ?_project
-        (GROUP_CONCAT(DISTINCT ?br_label; SEPARATOR=$SEP) AS ?brain_region) 
-        (GROUP_CONCAT(DISTINCT ?subject_label; SEPARATOR=$SEP) AS ?subject) 
-        (GROUP_CONCAT(DISTINCT ?type_i; SEPARATOR=$SEP) AS ?type) 
-        (GROUP_CONCAT(DISTINCT ?contribution_name_i; SEPARATOR=$SEP) AS ?contribution_name)
-        (GROUP_CONCAT(DISTINCT ?contribution_i; SEPARATOR=$SEP) AS ?contribution)
-        (GROUP_CONCAT(DISTINCT ?class_label; SEPARATOR=$SEP) AS ?classification_label)
-        (GROUP_CONCAT(DISTINCT ?class_type; SEPARATOR=$SEP) AS ?classification_type)
-        (GROUP_CONCAT(DISTINCT ?distribution_cu_i; SEPARATOR=$SEP) AS ?distribution_content_url) 
-        (GROUP_CONCAT(DISTINCT ?distribution_ef_i; SEPARATOR=$SEP) AS ?distribution_encoding_format) 
-        (GROUP_CONCAT(DISTINCT ?distribution_al_i; SEPARATOR=$SEP) AS ?distribution_at_location) 
-        (GROUP_CONCAT(DISTINCT ?image_i; SEPARATOR=$SEP) AS ?image) 
-        
-        WHERE {
-            ?id schema:name|rdfs:label ?name .
-            ?id _deprecated ?_deprecated .
-            ?id _self ?_self .
-            ?id _project ?_project .
-            
-            OPTIONAL { ?id type ?type_i }
-            OPTIONAL { 
-                ?id nsg:brainLocation/nsg:brainRegion ?br . 
-                ?br label ?br_label 
-            }
-            OPTIONAL { 
-                ?id nsg:subject/nsg:species ?subject . 
-                ?subject label ?subject_label  
-            }
-            OPTIONAL { ?id distribution/contentUrl ?distribution_cu_i }
-            OPTIONAL { ?id distribution/encodingFormat ?distribution_ef_i }
-            OPTIONAL { ?id distribution/atLocation/location ?distribution_al_i }
-            OPTIONAL { ?id image ?image_i }
-            OPTIONAL { ?id contribution/agent ?contribution_i }
-            OPTIONAL {
-                ?contribution_i givenName ?contribution_f_name .
-                ?contribution_i familyName ?contribution_l_name . 
-                BIND(CONCAT(?contribution_f_name, ?contribution_l_name) AS ?contribution_name_i)
-            }
-            OPTIONAL { ?id annotation/hasBody/label ?class_label }
-            OPTIONAL { ?id annotation/hasBody/type ?class_type  }
-            OPTIONAL { ?contribution_i name ?contribution_name_i }
-            
-            Filter (?_deprecated = 'false'^^xsd:boolean)  
-            VALUES (?id) { $ID_LIST }
-        } 
-        GROUP BY ?id ?name ?_self ?_project
-    """
-
-    query_str = query_str.replace("$ID_LIST", id_str)
-    query_str = query_str.replace("$SEP", '";"')
-
-    res = forge.sparql(query_str, debug=False)
-
-    if res is None:
-        raise ForgeError("Retrieving MINDs information failed")
-
-    if len(res) == 0:
-        return []
-
-    res_json = forge.as_json(res)
-
-    return [ResultSparql.to_result_object(res_i, forge) for res_i in res_json]
+# def minds(ids, token) -> List[ResultSparql]:
+#     """
+#     Retrieve MINDs information of a list of Resources, provided a list of their ids,
+#     and formats it into a ResultSparql instance
+#     @param ids: the list of Resource ids
+#     @param token: the user authentication token
+#     @return a list of ResultSparql instances, holding MINDs information
+#     """
+#     forge = get_forge_bbp_atlas(token)
+#
+#     id_str = f"{' '.join([f'(<{id_i}>)' for id_i in ids])}"
+#
+#     query_str = """
+#         SELECT ?id ?name ?_self ?_project
+#         (GROUP_CONCAT(DISTINCT ?br_label; SEPARATOR=$SEP) AS ?brain_region)
+#         (GROUP_CONCAT(DISTINCT ?subject_label; SEPARATOR=$SEP) AS ?subject)
+#         (GROUP_CONCAT(DISTINCT ?type_i; SEPARATOR=$SEP) AS ?type)
+#         (GROUP_CONCAT(DISTINCT ?contribution_name_i; SEPARATOR=$SEP) AS ?contribution_name)
+#         (GROUP_CONCAT(DISTINCT ?contribution_i; SEPARATOR=$SEP) AS ?contribution)
+#         (GROUP_CONCAT(DISTINCT ?class_label; SEPARATOR=$SEP) AS ?classification_label)
+#         (GROUP_CONCAT(DISTINCT ?class_type; SEPARATOR=$SEP) AS ?classification_type)
+#         (GROUP_CONCAT(DISTINCT ?distribution_cu_i; SEPARATOR=$SEP) AS ?distribution_content_url)
+#         (GROUP_CONCAT(DISTINCT ?distribution_ef_i; SEPARATOR=$SEP) AS ?distribution_encoding_format)
+#         (GROUP_CONCAT(DISTINCT ?distribution_al_i; SEPARATOR=$SEP) AS ?distribution_at_location)
+#         (GROUP_CONCAT(DISTINCT ?image_i; SEPARATOR=$SEP) AS ?image)
+#
+#         WHERE {
+#             ?id schema:name|rdfs:label ?name .
+#             ?id _deprecated ?_deprecated .
+#             ?id _self ?_self .
+#             ?id _project ?_project .
+#
+#             OPTIONAL { ?id type ?type_i }
+#             OPTIONAL {
+#                 ?id nsg:brainLocation/nsg:brainRegion ?br .
+#                 ?br label ?br_label
+#             }
+#             OPTIONAL {
+#                 ?id nsg:subject/nsg:species ?subject .
+#                 ?subject label ?subject_label
+#             }
+#             OPTIONAL { ?id distribution/contentUrl ?distribution_cu_i }
+#             OPTIONAL { ?id distribution/encodingFormat ?distribution_ef_i }
+#             OPTIONAL { ?id distribution/atLocation/location ?distribution_al_i }
+#             OPTIONAL { ?id image ?image_i }
+#             OPTIONAL { ?id contribution/agent ?contribution_i }
+#             OPTIONAL {
+#                 ?contribution_i givenName ?contribution_f_name .
+#                 ?contribution_i familyName ?contribution_l_name .
+#                 BIND(CONCAT(?contribution_f_name, ?contribution_l_name) AS ?contribution_name_i)
+#             }
+#             OPTIONAL { ?id annotation/hasBody/label ?class_label }
+#             OPTIONAL { ?id annotation/hasBody/type ?class_type  }
+#             OPTIONAL { ?contribution_i name ?contribution_name_i }
+#
+#             Filter (?_deprecated = 'false'^^xsd:boolean)
+#             VALUES (?id) { $ID_LIST }
+#         }
+#         GROUP BY ?id ?name ?_self ?_project
+#     """
+#
+#     query_str = query_str.replace("$ID_LIST", id_str)
+#     query_str = query_str.replace("$SEP", '";"')
+#
+#     res = forge.sparql(query_str, debug=False)
+#
+#     if res is None:
+#         raise ForgeError("Retrieving MINDs information failed")
+#
+#     if len(res) == 0:
+#         return []
+#
+#     res_json = forge.as_json(res)
+#
+#     return [ResultSparql.to_result_object(res_i, forge) for res_i in res_json]
 
 
 def download_from_content_url(content_url, path_to_download, org, project, token):

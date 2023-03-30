@@ -1,7 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from api import config
 from api.router import rules, inference
-from fastapi.middleware.cors import CORSMiddleware
 
 tags_metadata = [
     {
@@ -34,4 +34,3 @@ app.add_middleware(
 
 app.include_router(rules.router, prefix="/rules")
 app.include_router(inference.router, prefix="/infer")
-

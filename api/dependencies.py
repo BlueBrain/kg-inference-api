@@ -1,8 +1,8 @@
 from fastapi import HTTPException
 from starlette.requests import Request
+import jwt
 from api.session import UserSession
 from api.user import User
-import jwt
 
 
 def retrieve_user(request: Request) -> User:

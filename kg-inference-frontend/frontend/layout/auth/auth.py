@@ -7,7 +7,8 @@ auth = html.Div(style={"width": "25%", "minWidth": "400px"}, children=[
 
     html.Div(className="collapse", id="collapse_auth", children=[
         html.Div(className="card-body", children=[
-            html.Div(className="d-flex justify-content-end", style={"marginLeft": "auto", "marginRight": 0}, children=[
+            html.Div(className="d-flex justify-content-end",
+                     style={"marginLeft": "auto", "marginRight": 0}, children=[
                 dcc.Loading(
                     id="auth-loading",
                     children=[html.Div([html.Div(id="token_header_alert")])],

@@ -32,7 +32,8 @@ def build_result_chart_with_controls(results):
                 label="Y Axis"
             ),
             html.Div(className="col-2 mt-2", children=[
-                html.Button(id="chart_button", children="Change axis", className="btn btn-dark mt-4")
+                html.Button(id="chart_button", children="Change axis",
+                            className="btn btn-dark mt-4")
             ])
         ]),
         html.Div(id="chart_container", children=build_result_chart(results))
@@ -65,8 +66,10 @@ def build_result_chart(data: list, x_axis=DEFAULT_X_AXIS, y_axis=DEFAULT_Y_AXIS)
 
     layout = go.Layout(
         title="Heatmap", height=550, autosize=True,
-        xaxis=go.layout.XAxis(title=dropdown_key_title_map[x_axis], linecolor="black", linewidth=1, automargin=True),
-        yaxis=go.layout.YAxis(title=dropdown_key_title_map[y_axis], linecolor="black", linewidth=1, automargin=True),
+        xaxis=go.layout.XAxis(title=dropdown_key_title_map[x_axis], linecolor="black",
+                              linewidth=1, automargin=True),
+        yaxis=go.layout.YAxis(title=dropdown_key_title_map[y_axis], linecolor="black",
+                              linewidth=1, automargin=True),
     )
 
     heatmap = go.Figure(data=go.Heatmap(x=x, y=y, z=z), layout=layout)

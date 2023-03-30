@@ -23,6 +23,3 @@ def build_rule_table(stored_rules):
         page_size=5,
         style_table={'overflowX': 'auto'},
     )
-
-
-

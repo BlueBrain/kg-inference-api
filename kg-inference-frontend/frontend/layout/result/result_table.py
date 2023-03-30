@@ -1,6 +1,7 @@
-from dash import dash_table, html
+from dash import dash_table, html, dcc
 from data.result.result import Attribute
 from data.result.result_resource import ResultResource
+# import json
 
 
 def build_result_table(results):
@@ -18,7 +19,15 @@ def build_result_table(results):
     columns = [{"name": key.value, "id": key.value, "hideable": "last"} for key in list(Attribute)
                if key not in ignore_keys]
 
-    table = dash_table.DataTable(
+    # return html.Div([dcc.Textarea(
+    #     id='textarea1',
+    #     value=json.dumps(data),
+    # ), dcc.Textarea(
+    #     id='textarea2',
+    #     value=json.dumps(columns),
+    # )])
+
+    return dash_table.DataTable(
         id="datatable_results",
         columns=columns,
         data=data,
@@ -39,5 +48,3 @@ def build_result_table(results):
         export_format='xlsx',
         export_headers='display'
     )
-
-    return table

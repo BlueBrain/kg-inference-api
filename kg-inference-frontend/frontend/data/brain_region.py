@@ -22,7 +22,7 @@ class BrainRegion:
     def source_to_class(br):
         return BrainRegion(
             id=br["id"],
-            name=str(br["label"]),
+            name=str(br["name"]),
             hasPart=br.get("hasPart", None),
             isPart=br.get("isPart", None)
         )

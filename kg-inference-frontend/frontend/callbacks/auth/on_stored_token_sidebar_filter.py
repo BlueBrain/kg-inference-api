@@ -16,10 +16,12 @@ def on_stored_token_sidebar_filter(app):
         State(component_id='selected_rule', component_property='modified_timestamp'),
         # State(component_id="contributor_dropdown", component_property="value"),
     )
-    def on_stored_token_sidebar_filter_callback(token, search_filters, selected_rule_timestamp):  # contributors
+    def on_stored_token_sidebar_filter_callback(token, search_filters, selected_rule_timestamp):
+        # contributors
 
         if token:
-            clear_if_not_empty = selected_rule_timestamp != -1  # only clear if the store has already been changed
+            clear_if_not_empty = selected_rule_timestamp != -1
+            # only clear if the store has already been changed
 
             if token is None:
                 return None, make_toast(ToastType.ERROR, "Missing Authentication Token"), \

@@ -1,11 +1,10 @@
 from dash import Input, Output, no_update
 from dash.exceptions import PreventUpdate
+
 from layout.utils import make_toast, ToastType
-from query.forge import get_cell_types, get_data_types, get_brain_regions, ForgeError, get_forge_neuroscience_datamodels
-from data.brain_region import BrainRegion
-from data.data_type import DataType
-from data.cell_type import CellType
-from data.dict_key import DictKey
+from query.forge import get_cell_types, get_data_types, get_brain_regions, ForgeError, \
+    get_forge_neuroscience_datamodels, get_m_types, get_e_types, get_entities, get_species
+from data.dict_key import DictKey, dict_key_class_map
 
 
 def on_token_update(app):
@@ -19,18 +18,32 @@ def on_token_update(app):
         if token is not None:
             try:
                 forge = get_forge_neuroscience_datamodels(token)
-                brain_regions = get_brain_regions(forge)
-                data_types = get_data_types(forge)
-                cell_types = get_cell_types(forge)
-                # contributors = get_contributors(forge)
+
+                dict_key_data_map = {
+                    DictKey.BRAIN_REGIONS: get_brain_regions(forge),
+                    DictKey.CELL_TYPES: get_cell_types(forge),
+                    DictKey.DATA_TYPES: get_data_types(forge),
+                    DictKey.M_TYPES: get_m_types(forge),
+                    DictKey.E_TYPES: get_e_types(forge),
+                    DictKey.SPECIES: get_species(forge),
+                    # DictKey.CONTRIBUTORS: get_contributors(forge)
+                    # DictKey.ENTITIES: get_entities(forge)
+                }
+
+                sidebar_content = dict(
+                    (
+                        dict_key.value,
+                        [
+                         dict_key_class_map[dict_key].class_to_store(e)
+                         for e in dict_key_data_map[dict_key]
+                        ]
+                     )
+                    for dict_key in DictKey if dict_key not in
+                    [DictKey.CONTRIBUTORS, DictKey.ENTITIES])
 
                 return (
                     make_toast(ToastType.INFORMATION, "Loaded sidebar information"),
-                    {
-                        DictKey.BRAIN_REGIONS.value: [BrainRegion.class_to_store(br) for br in brain_regions],
-                        DictKey.DATA_TYPES.value: [DataType.class_to_store(dt) for dt in data_types],
-                        DictKey.CELL_TYPES.value: [CellType.class_to_store(c) for c in cell_types]
-                    },
+                    sidebar_content,
                     no_update
                 )
             except ForgeError as e:

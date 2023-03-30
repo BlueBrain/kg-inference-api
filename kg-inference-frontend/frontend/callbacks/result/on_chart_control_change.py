@@ -13,6 +13,7 @@ def on_chart_control_change(app):
     )
     def on_chart_control_change_callback(n_clicks, x_axis_select, y_axis_select, stored_results):
         if n_clicks and n_clicks > 0:
-            return build_result_chart(stored_results.values(), x_axis=x_axis_select, y_axis=y_axis_select)
+            return build_result_chart(stored_results.values(), x_axis=x_axis_select,
+                                      y_axis=y_axis_select)
 
         raise PreventUpdate
