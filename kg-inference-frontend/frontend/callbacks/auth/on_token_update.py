@@ -4,12 +4,7 @@ from dash.exceptions import PreventUpdate
 from layout.utils import make_toast, ToastType
 from query.forge import get_cell_types, get_data_types, get_brain_regions, ForgeError, \
     get_forge_neuroscience_datamodels, get_m_types, get_e_types, get_entities, get_species
-from data.brain_region import BrainRegion
-from data.data_type import DataType
-from data.cell_type import CellType, MType, EType
 from data.dict_key import DictKey, dict_key_class_map
-from data.species import Species
-from data.entity import Entity
 
 
 def on_token_update(app):

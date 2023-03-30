@@ -64,7 +64,6 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
             return dcc.Dropdown(
                 id=id_obj,
                 multi=multiple,
-                disabled=True,
                 options=ddf,
                 value=[el["value"] for el in ddf] if multiple else ddf[0]["value"]
             )

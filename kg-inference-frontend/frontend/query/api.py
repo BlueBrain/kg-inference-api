@@ -121,7 +121,7 @@ def infer(rule_id: str, input_parameters: dict, token: str, retrieve=True,
         "inputFilter": input_parameters
     }
 
-    print(data)
+
     body = request(endpoint_rel=endpoint_rel, data=data, token=token)
 
     if len(body) == 0 or "results" not in body[0]:
