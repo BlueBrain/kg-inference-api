@@ -511,11 +511,12 @@ def retrieve_elastic(ids, token, to_result_resource) -> Union[List[ResultResourc
 #     return [ResultSparql.to_result_object(res_i, forge) for res_i in res_json]
 
 
-def download_from_content_url(content_url, path_to_download, org, project, token):
+def download_from_content_url(content_url, content_type, path_to_download, org, project, token):
     """
     Download a file using only its content url, without having to follow a path within
     the Resource it's attached to
     @param content_url: the file content url
+    @param content_type: the encoding format of the file
     @param path_to_download: the path where to download the file
     @param org: the organisation the file belongs to
     @param project: the project the file belongs to
@@ -524,4 +525,4 @@ def download_from_content_url(content_url, path_to_download, org, project, token
     forge = _allocate_forge_session("bbp", "atlas", token=token)
     forge._store._download_one(url=content_url, path=path_to_download,
                                store_metadata=DictWrapper({"_project": f"{org}/{project}"}),
-                               cross_bucket=True)
+                               cross_bucket=True, content_type=content_type)
