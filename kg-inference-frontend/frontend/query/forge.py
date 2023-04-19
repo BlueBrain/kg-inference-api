@@ -579,7 +579,7 @@ def get_neuron_morphologies(token: str, rule_id: str) -> Dict[str, Result]:
 
     ids = [query_singular_view(view_id) for view_id in similarity_views[rule_id]]
     ids_intersection = list(set.intersection(*ids))
-    limit_nm = 50
+    limit_nm = 20
     if len(ids_intersection) > limit_nm:
         ids_intersection = ids_intersection[:limit_nm-1]
 
