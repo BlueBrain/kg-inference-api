@@ -3,6 +3,7 @@ from callbacks.rule.on_selected_rule_update import on_selected_rule_update
 from callbacks.rule.on_stored_rules_update import on_stored_rules_update
 from callbacks.rule.on_generalized_field_name_change import on_generalized_field_name_change
 from callbacks.rule.on_infer_press import on_infer_press
+from callbacks.rule.custom_rules.on_nm_rule_select import on_nm_rule_select
 
 
 def get_rule_callbacks(app):
@@ -11,3 +12,4 @@ def get_rule_callbacks(app):
     on_stored_rules_update(app)
     on_selected_rule_update(app)
     on_rule_row_select(app)
+    on_nm_rule_select(app)

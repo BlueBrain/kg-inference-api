@@ -10,8 +10,8 @@ from data.dict_key import DictKey, dict_key_class_map
 def on_token_update(app):
     @app.callback(
         Output(component_id="toast_container_sidebar_fetch", component_property='children'),
-        Output(component_id="sidebar_content", component_property="data"),
         Output(component_id="sidebar_fetching_loader", component_property="children"),
+        Output(component_id="sidebar_content", component_property="data"),
         Input(component_id='stored_token', component_property='data'),
     )
     def on_token_update_callback(token):
@@ -43,13 +43,13 @@ def on_token_update(app):
 
                 return (
                     make_toast(ToastType.INFORMATION, "Loaded sidebar information"),
+                    no_update,
                     sidebar_content,
-                    no_update
                 )
             except ForgeError as e:
                 return (
                     make_toast(ToastType.ERROR, str(e)),
                     no_update,
-                    no_update
+                    no_update,
                 )
         raise PreventUpdate

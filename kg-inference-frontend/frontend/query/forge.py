@@ -1,6 +1,7 @@
-from typing import Union, List
+from typing import Union, List, Dict, Tuple, Optional
 import os
 import json
+
 from kgforge.core import KnowledgeGraphForge, Resource
 from kgforge.core.commons.exceptions import QueryingError
 from kgforge.core.wrappings.dict import DictWrapper
@@ -10,11 +11,20 @@ from data.data_type import DataType
 from data.cell_type import CellType, MType, EType
 from data.entity import Entity
 from data.result.attribute import Attribute
+from data.result.result import Result
 from data.result.result_resource import ResultResource
 from data.species import Species
 from data.utils import get_id
+from query.forge_utils import set_elastic_view, set_sparql_view
 from query.sdk_layer import fetch as fetch_file
 from config import NEXUS_ENDPOINT, NEXUS_CONFIG_PATH
+
+shape_rule_id = "https://bbp.epfl.ch/neurosciencegraph/data/ac5885c8-bb70-4336-ae7f-3e1425356fe8"
+all_aspect_rule_id = \
+    "https://bbp.epfl.ch/neurosciencegraph/data/abb1949e-dc16-4719-b43b-ff88dabc4cb8"
+location_rule_id = "https://bbp.epfl.ch/neurosciencegraph/data/70e8e757-1834-420c-bcc1-37ea850ddfe3"
+
+NM_RULE_IDS = [shape_rule_id, location_rule_id, all_aspect_rule_id]
 
 
 class ForgeError(BaseException):
@@ -281,7 +291,7 @@ def get_latest_revisions(result_list: List[dict]) -> List[dict]:
             temp.items()]  # get only the latest revision (max index)
 
 
-def contribution_label_fill(result_resources: List[ResultResource], token: str) -> \
+def contribution_label_fill(result_resources: List[ResultResource], forge: KnowledgeGraphForge) -> \
         List[ResultResource]:
     """
     Fill the contribution label for all contributions in a ResultResource:
@@ -291,7 +301,7 @@ def contribution_label_fill(result_resources: List[ResultResource], token: str) 
     all contribution entities are retrieved, the appropriate label is built, and the label field
     is added into the contribution dictionaries located within the ResultResources
     @param result_resources: the list of ResultResource
-    @param token: the user authentication token
+    @param forge: a forge instance to run the query
     @return the list of ResultResource with the contribution labels added
     """
     ids_to_fetch = []
@@ -306,7 +316,6 @@ def contribution_label_fill(result_resources: List[ResultResource], token: str) 
     if len(ids_to_fetch) == 0:
         return result_resources
 
-    forge = get_forge_bbp_atlas(token)
     res = [forge.retrieve(id_, cross_bucket=True) for id_ in ids_to_fetch]
     contributors = [forge.as_json(el) for el in res if el is not None]
 
@@ -328,7 +337,7 @@ def contribution_label_fill(result_resources: List[ResultResource], token: str) 
     return [add_contribution_label(resource) for resource in result_resources]
 
 
-def stimulus_type_label_fill(result_resources: List[ResultResource], token: str):
+def stimulus_type_label_fill(result_resources: List[ResultResource], forge: KnowledgeGraphForge):
     """
        Fill the stimulus type label for all trace images in a ResultResource: when retrieving
         a Resource, it may have trace images characterized by stimulus types. When it does,
@@ -337,7 +346,7 @@ def stimulus_type_label_fill(result_resources: List[ResultResource], token: str)
        and the label field is added into the stimulus type dictionaries located within the
        ResultResources
        @param result_resources: the list of ResultResource
-       @param token: the user authentication token
+       @param forge: a forge instance to run the query
        @return the list of ResultResource with the stimulus type labels added
        """
     ids_to_fetch = []
@@ -353,7 +362,6 @@ def stimulus_type_label_fill(result_resources: List[ResultResource], token: str)
     if len(ids_to_fetch) == 0:
         return result_resources
 
-    forge = get_forge_bbp_atlas(token)
     res = [forge.retrieve(id_, cross_bucket=True) for id_ in ids_to_fetch]
 
     stimuli = [forge.as_json(el) for el in res if el is not None]
@@ -381,34 +389,26 @@ def stimulus_type_label_fill(result_resources: List[ResultResource], token: str)
     return [add_stimulus_type_label(resource) for resource in result_resources]
 
 
-def retrieve_as_result_resource(ids, token) -> List[ResultResource]:
-    """
-    Provided a list of resource ids, and a limit, fetches the most recently updated Resources
-    up until the limit, converts them into ResultResources, and adds missing information,
-    such as contribution labels, and stimulus type labels
-    @param ids: the list of Resource ids
-    @param token the user authentication token
-    @return a list of ResultResources
-    """
-    retrieved: List[ResultResource] = retrieve_elastic(ids, token, True)
-    retrieved = contribution_label_fill(result_resources=retrieved, token=token)
-    retrieved = stimulus_type_label_fill(result_resources=retrieved, token=token)
-    return retrieved
+def to_result_resource(resources: List[Resource], forge: KnowledgeGraphForge):
+    result_resources = [ResultResource.to_result_object(element, forge) for element in resources]
+    result_resources = contribution_label_fill(result_resources=result_resources, forge=forge)
+    result_resources = stimulus_type_label_fill(result_resources=result_resources, forge=forge)
+    return result_resources
 
 
-def retrieve_elastic(ids, token, to_result_resource) -> Union[List[ResultResource], List[Resource]]:
+def retrieve_elastic(ids, token) -> Tuple[List[Resource], KnowledgeGraphForge]:
     """
-    Retrieves Resources whose id are in the id list provided, up to a limit,
-    only returned the most recently updated ones
+    Retrieves Resources whose id are in the id list provided
     @param ids: the list of Resource ids
     @param token: the user authentication token
-    @param to_result_resource: whether to keep the Resource as a kgforge.core.Resource
-    or to convert it into a ResultResource
-    @return a list of kgforge.core.Resource, or a list of ResultResource
+    @return a list of kgforge.core.Resource and the KnowledgeGraphForge instance used to retrieve
+    them
     """
     forge = get_forge_bbp_atlas(token)
 
     q = {
+        "from": 0,
+        "size": 10000,
         'query': {
             'bool': {
                 'filter': [
@@ -429,8 +429,7 @@ def retrieve_elastic(ids, token, to_result_resource) -> Union[List[ResultResourc
     if resources is None:
         raise ForgeError("Elastic Search Retrieval was not successful")
 
-    return [ResultResource.to_result_object(element, forge) for element in resources] \
-        if to_result_resource else resources
+    return resources, forge
 
 
 # TODO finish
@@ -526,3 +525,112 @@ def download_from_content_url(content_url, content_type, path_to_download, org, 
     forge._store._download_one(url=content_url, path=path_to_download,
                                store_metadata=DictWrapper({"_project": f"{org}/{project}"}),
                                cross_bucket=True, content_type=content_type)
+
+
+def get_neuron_morphologies(token: str, rule_id: str) -> Dict[str, Result]:
+    # Other alternative: in order to limit hard-coding of values (especially, if we consider that
+    # similarity views may be updated in the future), we could also propagate to this function the
+    # model_ids that are within the rule, retrieve the models, and access their similarity view ids
+    # Problem: this would lead to an additional query and similarity view changes in models are not
+    # that common
+    location_views = [
+        "https://bbp.epfl.ch/neurosciencegraph/data/269940bf-a7e1-44bf-a209-c83c650f2a3c",
+        # Coordinates-based embedding - Location 1
+        "https://bbp.epfl.ch/neurosciencegraph/data/2c43c500-6ba2-4d1f-9a96-e80e480816c7",
+        # Brain region ontology-based embedding - Location 2
+        "https://bbp.epfl.ch/neurosciencegraph/data/a2cf748b-2f8f-4f6f-ad3f-0089e54e81a5",
+        # Axon co-projection-based embedding - Location 3
+        "https://bbp.epfl.ch/neurosciencegraph/data/5cc7619e-d3ea-475b-a0f4-63cec28d4f9b",
+        # Dendrite co-projection-based embedding - Location 4
+    ]
+    shape_views = [
+        "https://bbp.epfl.ch/neurosciencegraph/data/21e480a8-f955-4ff1-a98a-7a5fd3200a54",
+        # Neurite feature-based embedding - Shape 1
+        "https://bbp.epfl.ch/neurosciencegraph/data/12e3c699-135c-4c69-8ee7-f2b13f1376f9"
+        # Unscaled TMD-based embedding - Shape 2
+    ]
+
+    similarity_views = dict(
+        (rule_id, view_list)
+        for rule_id, view_list in
+        zip(NM_RULE_IDS, [shape_views, location_views, shape_views + location_views])
+    )
+
+    forge_seu = _allocate_forge_session("bbp-external", "seu", token)
+
+    q = {
+        "from": 0,
+        "size": 10000,
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"_deprecated": False}},
+                ]
+            }
+        }
+    }
+
+    def query_singular_view(similarity_view_id: str):
+        set_elastic_view(forge_seu, similarity_view_id)
+        res = forge_seu.elastic(json.dumps(q))
+        res_json = forge_seu.as_json(res)
+        t = set(get_id(res_json_i["derivation"]["entity"]) for res_json_i in res_json)
+        return t
+
+    ids = [query_singular_view(view_id) for view_id in similarity_views[rule_id]]
+    ids_intersection = list(set.intersection(*ids))
+    limit_nm = 50
+    if len(ids_intersection) > limit_nm:
+        ids_intersection = ids_intersection[:limit_nm-1]
+
+    set_elastic_view(forge_seu, "https://bbp.epfl.ch/neurosciencegraph/data/test_view")
+
+    q = {
+        "from": 0,
+        "size": 10000,
+        'query': {
+            'bool': {
+                'filter': [
+                    {'terms': {'@id': ids_intersection}}
+                ],
+                'must': [
+                    {'match': {'_deprecated': False}}
+                ]
+            }
+        },
+    }
+
+    retrieved: Optional[List[Resource]] = forge_seu.elastic(json.dumps(q), debug=False)
+
+    if retrieved is None:
+        raise ForgeError("Elastic Search Retrieval was not successful")
+
+    resources: List[ResultResource] = to_result_resource(retrieved, forge=forge_seu)
+
+    return dict(
+        (r.get_attribute(Attribute.ID), ResultResource.class_to_store(r))
+        for r in resources
+    )
+
+
+# def get_neuron_morphologies_forge(token: str, rule_models: List[str]) -> Dict[str, Result]:
+#     forge_seu = _allocate_forge_session("bbp-external", "seu", token)
+#     # neuron_morphologies = forge_seu.search({
+#     #     "type": "NeuronMorphology",
+#     #     "id": {
+#     #         "^derivation.entity.id": "id",
+#     #         "id": rule_models
+#     #     }
+#     # })
+#     # set_sparql_view(forge_seu, "https://bluebrain.github.io/nexus/vocabulary/defaultSparqlIndex")
+#     neuron_morphologies = forge_seu.search({
+#         "type": "NeuronMorphology",
+#         "^entity/^derivation/generation/activity/used/id":
+#             "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/d0c21fd5-cb9c-445c"
+#             "-b0a4-94847ba61f5a"}, debug=True)
+#
+#     resources: List[ResultResource] = to_result_resource(neuron_morphologies, forge=forge_seu)
+#     return dict(
+#         (r.get_attribute(Attribute.ID), ResultResource.class_to_store(r))
+#         for r in resources
+#     )

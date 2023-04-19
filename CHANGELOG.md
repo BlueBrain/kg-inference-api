@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.2.5] - 18/04/2023
+
+- Client: Neuron Morphology related rules - Added a selector for neuron morphologies (instead of writing an id)
+- Client: Neuron Morphology related rules - Choose models to run with checkboxes instead of 
+  ignoring models with a multi-select dropdown
+
 ## [0.2.4] - 31/03/2023
 
 - Client: Adapt call to nexus-forge changes for downloading

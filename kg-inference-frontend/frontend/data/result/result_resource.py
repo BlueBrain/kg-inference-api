@@ -1,18 +1,21 @@
+from kgforge.core import Resource
+
 from data.result.contribution import Contribution
 from data.result.result import Result
 from data.result.attribute import Attribute
 from data.utils import enforce_list, get_type, to_string, get_id
 from data.result.distribution import Distribution
 from data.result.image import Image
+from query.forge_utils import get_resource_org_project, get_self
 
 
 class ResultResource(Result):
 
     @staticmethod
-    def to_result_object(element, forge):
+    def to_result_object(element: Resource, forge):
         new_obj = forge.as_json(element)
-        nexus_link = element._store_metadata._self
-        org, project = element._store_metadata._project.split("/")[-2:]
+        nexus_link = get_self(element)
+        org, project = get_resource_org_project(element)
 
         new_obj["org"] = org
         new_obj["project"] = project

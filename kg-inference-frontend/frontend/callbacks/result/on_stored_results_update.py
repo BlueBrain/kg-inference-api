@@ -6,14 +6,13 @@ from layout.result.result_list import build_result_list
 def on_stored_results_update(app):
 
     @app.callback(
-        Output(component_id='result_list', component_property='children'),
-        Output(component_id="result_displaying_loader", component_property="children"),
+        Output(component_id="result_list", component_property="children"),
         Output(component_id="toast_container_results_table", component_property="children"),
         Input(component_id="stored_results", component_property="data"),
     )
     def on_stored_results_update_callback(results):
         if results is not None:
-            return build_result_list(results.values()), no_update, make_toast(
+            return build_result_list(results.values()), make_toast(
                 ToastType.INFORMATION, f"Results displayed")
 
-        return grey_box(), no_update, no_update
+        return grey_box(), no_update

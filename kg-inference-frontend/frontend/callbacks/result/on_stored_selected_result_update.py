@@ -1,4 +1,4 @@
-from dash import no_update, Input, Output, State
+from dash import no_update, Input, Output, State, html
 from layout.result.selected_result import build_selected_result
 from layout.utils import grey_box
 
@@ -16,4 +16,4 @@ def on_stored_selected_result_update(app):
             content, title = build_selected_result(result, token, app)
             return content, title, no_update
 
-        return grey_box(), "Selected Result", no_update
+        return grey_box(), html.H5("Selected Result"), no_update

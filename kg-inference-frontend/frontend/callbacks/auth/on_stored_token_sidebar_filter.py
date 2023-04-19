@@ -13,26 +13,23 @@ def on_stored_token_sidebar_filter(app):
         Output(component_id='selected_rule', component_property='clear_data'),
         Input(component_id='stored_token', component_property='data'),
         Input(component_id='stored_filters', component_property='data'),
-        State(component_id='selected_rule', component_property='modified_timestamp'),
         # State(component_id="contributor_dropdown", component_property="value"),
     )
-    def on_stored_token_sidebar_filter_callback(token, search_filters, selected_rule_timestamp):
+    def on_stored_token_sidebar_filter_callback(token, search_filters):
         # contributors
 
         if token:
-            clear_if_not_empty = selected_rule_timestamp != -1
-            # only clear if the store has already been changed
-
             if token is None:
                 return None, make_toast(ToastType.ERROR, "Missing Authentication Token"), \
-                    no_update, clear_if_not_empty
+                    no_update, True
             try:
                 rules_class = get_rules(token, search_filters)
                 rules = [Rule.class_to_store(rule) for rule in rules_class]
 
                 return rules, make_toast(ToastType.INFORMATION, f"Fetched {len(rules)} rules"), \
-                    no_update, clear_if_not_empty
+                    no_update, True
+
             except (AuthenticationError, APIError) as e:
-                return None, make_toast(ToastType.ERROR, str(e)), no_update, clear_if_not_empty
+                return None, make_toast(ToastType.ERROR, str(e)), no_update, True
 
         raise PreventUpdate

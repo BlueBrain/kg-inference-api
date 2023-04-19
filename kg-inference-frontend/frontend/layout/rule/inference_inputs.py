@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from dash import html, dcc
 from dash.development.base_component import Component
 from data.input_parameter import InputParameter, InputParameterType
@@ -6,7 +6,7 @@ from data.dict_key import DictKey, dict_key_class_map
 from data.rule import Rule
 from query.forge import get_forge_neuroscience_datamodels
 
-DEFAULT_LIMIT = 20
+DEFAULT_LIMIT = 50
 
 
 def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool,

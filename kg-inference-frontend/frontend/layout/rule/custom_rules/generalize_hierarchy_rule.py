@@ -1,9 +1,6 @@
 from dash import html, dcc
 
-from data.cell_type import EType, MType
 from data.dict_key import DictKey
-from data.brain_region import BrainRegion
-from data.species import Species
 from layout.rule.inference_inputs import get_form_control, get_input_group, build_id, \
     get_form_control_special
 from typing import List, Dict
@@ -34,6 +31,7 @@ value_map = {
         "PathToGeneralizedField": "MType"
     },
 }
+
 
 def generalise_context_input_groups(rule, token: str, sidebar_content: Dict[str, Dict],
                                     stored_filters: Dict[str, List]) -> List[html.Div]:

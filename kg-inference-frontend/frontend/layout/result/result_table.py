@@ -4,7 +4,7 @@ from data.result.result_resource import ResultResource
 # import json
 
 
-def build_result_table(results):
+def build_result_table(results, table_id):
     if len(results) == 0:
         return html.H5(children="No Results")
 
@@ -28,7 +28,7 @@ def build_result_table(results):
     # )])
 
     return dash_table.DataTable(
-        id="datatable_results",
+        id=table_id,
         columns=columns,
         data=data,
         cell_selectable=False,

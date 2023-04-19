@@ -4,8 +4,53 @@ from layout.utils import grey_box
 
 
 def to_be_filled(id_str):
-    return html.Div(id=id_str, className="border-top px-2 py-4",
+    return html.Div(id=id_str, className="px-2 py-4",
                     children=grey_box(), style={"height": "100%"})
+
+
+confluence_link = \
+    "https://bbpteam.epfl.ch/project/spaces/display/BBKG/Inference+and+Data+Generalization+Rules"
+
+
+def result_view(results: bool):
+    list_title = "Inference Results" if results else "Neuron Morphology List"
+    fetching_loader_id = "result_fetching_loader" if results else "nm_fetching_loader"
+    list_div = "result_list" if results else "nm_list"
+    result_store_id = "stored_results" if results else "stored_nm"
+
+    selected_title = "Selected Result" if results else "Selected Neuron Morphology"
+    selected_title_id = "selected_result_title" if results else "selected_nm_title"
+    selected_loader_id = "selected_result_loader" if results else "selected_nm_loader"
+    selected_div = "selected_result_view" if results else "selected_nm_view"
+    selected_store_id = "selected_result" if results else "selected_nm"
+    collapse_id = "collapse_result" if results else "collapse_nm"
+
+    return html.Div(className="card mt-4", children=[
+        html.Button(className="dropdown-toggle", style={"border": "none"},
+                    id=f"button_{collapse_id}",
+                       ** {"data-bs-toggle": "collapse", "data-bs-target": f"#{collapse_id}"}),
+        html.Div(className="card-body", id=collapse_id, children=html.Div(children=[
+            html.Div(children=[
+                html.Div(className="col-xl-8 col-12", children=[
+                    html.Div(children=html.H5(list_title),
+                             className="d-flex justify-content-center border-bottom"),
+                    dcc.Loading(id=fetching_loader_id, type="circle",
+                                children=[to_be_filled(list_div)]),
+
+                    dcc.Store(id=result_store_id)
+                ]),
+
+                html.Div(className="col-xl-4 col-12", children=[
+                    html.Div(children=html.H5(selected_title), id=selected_title_id,
+                             className="d-flex justify-content-center border-bottom"),
+                    dcc.Loading(id=selected_loader_id, type="circle",
+                                children=[to_be_filled(selected_div)]),
+
+                    dcc.Store(id=selected_store_id)
+                ]),
+            ], className="row"),
+        ]))
+    ])
 
 
 page = html.Div(children=[
@@ -16,6 +61,7 @@ page = html.Div(children=[
             html.Div(id="toast_container_rules_sidebar"),
             html.Div(id="toast_container_token"),
             html.Div(id="toast_container_sidebar_fetch"),
+            html.Div(id="toast_container_infer_press"),
             html.Div(id="toast_container_results_infer"),
             html.Div(id="toast_container_results_table"),
         ])
@@ -25,9 +71,7 @@ page = html.Div(children=[
         html.Div(className="col-xl-8 col-12", children=[
             html.H4("Knowledge Graph Inference Rules"),
             html.Span("In order to request a new rule, follow the instruction on the "),
-            dcc.Link("confluence page",
-                     href="https://bbpteam.epfl.ch/project/spaces/display/BBKG/Inference+and+Data+Generalization+Rules",
-                     target="_blank"),
+            dcc.Link("confluence page", href=confluence_link, target="_blank"),
         ]),
         html.Div(className="d-flex justify-content-end col-xl-4 col-12", children=auth),
         dcc.Store(id='stored_token', storage_type='session'),
@@ -39,71 +83,39 @@ page = html.Div(children=[
         html.Div(className="card-body", id="collapse_rule", children=html.Div([
             html.Div(className="col-xl-3 col-md-4 col-12", children=[
 
-                html.H5(children="Search Data Generalization Rules:",
-                        style={"textAlign": "center"}),
-                dcc.Loading(id="sidebar_fetching_loader",
-                            children=[html.Div(id="sidebar_fetching_loader_output")],
-                            type="circle"),
-                dcc.Loading(id="sidebar_building_loader",
-                            children=[html.Div(id="sidebar_building_loader_output")],
-                            type="circle"),
-                to_be_filled("sidebar"),
+                html.Div(children=html.H5("Search Data Generalization Rules"),
+                         className="d-flex justify-content-center border-bottom"),
+
+                dcc.Loading(id="sidebar_fetching_loader", type="circle",
+                            children=[to_be_filled("sidebar")]),
+
                 dcc.Store(id='sidebar_content'),
                 dcc.Store(id="stored_filters")
             ]),
 
             html.Div(className="col-xl-5 col-md-8 col-12", children=[
-                html.H5(children="Rule Search Results", style={"textAlign": "center"}),
-                dcc.Loading(id="rule_fetching_loader",
-                            children=[html.Div(id="rule_fetching_loader_output")],
-                            type="circle"),
-                to_be_filled("rule_list"),
+
+                html.Div(children=html.H5("Rule Search Results"),
+                         className="d-flex justify-content-center border-bottom"),
+
+                dcc.Loading(id="rule_fetching_loader", type="circle",
+                            children=[to_be_filled("rule_list")]),
                 dcc.Store(id='stored_rules')
-            ]
-                     ),
+
+            ]),
 
             html.Div(className="col-xl-4 col-12", children=[
-                html.H5(children="Selected Rule", id="selected_rule_title",
-                        style={"textAlign": "center"}),
-                dcc.Loading(id="selected_rule_loader",
-                            children=[html.Div(id="selected_rule_loader_output")], type="circle"),
-                to_be_filled("selected_rule_view"),
-                dcc.Store(id='selected_rule')
+                html.Div(children=html.H5("Selected Rule"), id="selected_rule_title",
+                         className="d-flex justify-content-center border-bottom"),
+                html.Div(to_be_filled("selected_rule_view")),
+                dcc.Store(id='selected_rule'),
+                dcc.Store(id='input_parameters')
 
             ]),
 
         ], className="row"))
     ]),
-
-    html.Div(className="card mt-4", children=[
-        html.Button(className="dropdown-toggle", style={"border": "none"},
-                    **{"data-bs-toggle": "collapse", "data-bs-target": "#collapse_result"}),
-        html.Div(className="card-body", id="collapse_result", children=html.Div([
-            html.Div(children=[
-                html.Div(className="col-xl-8 col-12", children=[
-                    html.H5(children="Inference Results", style={"textAlign": "center"}),
-                    dcc.Loading(id="result_fetching_loader",
-                                children=[html.Div(id="result_fetching_loader_output")],
-                                type="circle"),
-                    dcc.Loading(id="result_displaying_loader",
-                                children=[html.Div(id="result_displaying_loader_output")],
-                                type="circle"),
-                    to_be_filled("result_list"),
-                    dcc.Store(id="stored_results")
-                ]),
-
-                html.Div(className="col-xl-4 col-12", children=[
-                    html.H5(children="Selected Result",
-                            id="selected_result_title", style={"textAlign": "center"}),
-                    dcc.Loading(id="selected_result_loader",
-                                children=[html.Div(id="selected_result_loader_output")],
-                                type="circle"),
-                    to_be_filled("selected_result_view"),
-                    dcc.Store(id="selected_result")
-                ]),
-            ], className="row"),
-        ]))
-
-    ]),
+    html.Div(id="nm_container"),
+    result_view(True),
 
 ], className="container-fluid")

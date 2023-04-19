@@ -41,7 +41,7 @@ server = app.server
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--debug', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--debug', action='store_true')
     parser.set_defaults(debug=False)
     args = parser.parse_args()
     app.run_server(debug=args.debug)

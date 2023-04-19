@@ -4,6 +4,8 @@ from data.rule import Rule
 from layout.rule.inference_inputs import generic_input_groups, get_limit_form_control
 from layout.rule.custom_rules.generalize_hierarchy_rule import generalise_context_input_groups, \
     GENERALIZE_HIERARCHY_ID
+from query.forge import NM_RULE_IDS
+from layout.rule.custom_rules.nm_rules import nm_rules_input_groups
 
 
 def build_inputs(rule, token, sidebar_content=None, stored_filters=None):
@@ -12,7 +14,7 @@ def build_inputs(rule, token, sidebar_content=None, stored_filters=None):
     if len(rule.input_parameters) > 0:
 
         fc = generalise_context_input_groups if rule.id == GENERALIZE_HIERARCHY_ID \
-            else generic_input_groups
+            else (nm_rules_input_groups if rule.id in NM_RULE_IDS else generic_input_groups)
 
         prepend = fc(rule, token, sidebar_content=sidebar_content, stored_filters=stored_filters)
         input_groups = prepend + input_groups
@@ -42,4 +44,4 @@ def build_selected_rule(rule, token, sidebar_content=None, stored_filters=None):
             html.Button(children="Infer", id="infer_button", className="btn btn-dark mt-2"),
             html.Div(id="infer_message")
         ], className="form-row")
-    ], rule.name
+    ], html.H5(rule.name)

@@ -1,7 +1,7 @@
 from typing import List, Union, Dict, Tuple
 import os
 import requests
-from query.forge import retrieve_as_result_resource
+from query.forge import retrieve_elastic, to_result_resource
 from data.rule import Rule
 from data.result.result_sparql import ResultSparql
 from data.dict_key import DictKey
@@ -120,8 +120,6 @@ def infer(rule_id: str, input_parameters: dict, token: str, retrieve=True,
         "rules": [{"id": rule_id}],
         "inputFilter": input_parameters
     }
-
-
     body = request(endpoint_rel=endpoint_rel, data=data, token=token)
 
     if len(body) == 0 or "results" not in body[0]:
@@ -134,7 +132,8 @@ def infer(rule_id: str, input_parameters: dict, token: str, retrieve=True,
     if not retrieve:
         return dict(zip(ids, [None] * len(ids)))
 
-    resources: List[Result] = retrieve_as_result_resource(ids=ids, token=token)
+    retrieved, forge = retrieve_elastic(ids, token)
+    resources: List[ResultResource] = to_result_resource(retrieved, forge=forge)
 
     # TODO NOT FINISHED YET (query + downstream usage), implement if ever we switch to this
     # if use_sparql_minds:

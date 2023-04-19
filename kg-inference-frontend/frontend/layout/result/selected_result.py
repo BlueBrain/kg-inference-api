@@ -51,7 +51,7 @@ def build_selected_result(result, token, app):
 
     distribution_content = html.Div(children=[
         html.H5(className="mt-4", children="Distributions"),
-        html.Div(children=[one_distribution(i+1, d) for i, d in enumerate(distributions)])
+        html.Div(children=[one_distribution(i + 1, d) for i, d in enumerate(distributions)])
     ])
 
     metadata.append(distribution_content)
@@ -59,11 +59,12 @@ def build_selected_result(result, token, app):
     name = result_resource.get_attribute(Attribute.NAME)
     link = result_resource.get_attribute(Attribute.LINK)
 
-    title = html.Div(children=[
-        html.H5(name if name else "Selected Result"),
-        dcc.Link(children=html.Img(src=app.get_asset_url('nexus_logo.png')), href=link,
-                 target="_blank") if link else html.Div()
-    ])
+    title = [
+        html.H5(className="me-2", children=name if name else "Selected Result"),
+        dcc.Link(children=html.Img(src=app.get_asset_url('nexus_logo.png'),
+                                   style={"height": "25px"}), href=link, target="_blank")
+        if link else html.Div()
+    ]
 
     result_type = result_resource.get_attribute(Attribute.TYPE, to_str=False)
     images = result_resource.get_attribute(Attribute.IMAGE)
