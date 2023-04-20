@@ -14,9 +14,7 @@ def on_selected_rule_update(app):
         Input(component_id='selected_rule', component_property='data'),
         State(component_id="sidebar_content", component_property="data"),
         State(component_id="stored_token", component_property="data"),
-        State(component_id="stored_filters", component_property="data"),
-        # State(component_id='stored_results', component_property='modified_timestamp'),
-        # State(component_id='selected_result', component_property='modified_timestamp'),
+        State(component_id="stored_filters", component_property="data")
     )
     def on_selected_rule_update_callback(rule, sidebar_content, token, stored_filters):
 
