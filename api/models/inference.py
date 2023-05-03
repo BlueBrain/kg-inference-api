@@ -1,18 +1,13 @@
-from typing import List
+from typing import List, Dict
 from fastapi_camelcase import CamelModel
 from pydantic import BaseModel
 from api.models.rules import RuleInput
 
 
-class Resource(BaseModel):
-    """A simplified serialization of a resource"""
-    id: str
-
-
 class InferenceResult(BaseModel):
     """An inference result of a rule"""
     rule: str
-    results: List[Resource]
+    results: List[Dict]
 
 
 class InferenceBody(CamelModel):
