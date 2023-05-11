@@ -127,13 +127,14 @@ def infer(rule_id: str, input_parameters: dict, token: str, retrieve=True,
 
     body = body[0]["results"]
 
-    ids = [body_i["id"] for body_i in body]
+    id_index = dict((body_i["id"], body_i) for body_i in body)
 
     if not retrieve:
-        return dict(zip(ids, [None] * len(ids)))
+        return dict(zip(id_index.keys(), [None] * len(id_index)))
 
-    retrieved, forge = retrieve_elastic(ids, token)
-    resources: List[ResultResource] = to_result_resource(retrieved, forge=forge)
+    retrieved, forge = retrieve_elastic(list(id_index.keys()), token)
+    resources: List[ResultResource] = to_result_resource(retrieved, forge=forge,
+                                                         additional_data=id_index)
 
     # TODO NOT FINISHED YET (query + downstream usage), implement if ever we switch to this
     # if use_sparql_minds:

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from jsonpath_rw import parse
 from data.utils import to_string
 from data.result.attribute import Attribute
-
+from typing import Optional, Dict
 
 @dataclass
 class Result(ABC):
@@ -23,7 +23,8 @@ class Result(ABC):
 
     @staticmethod
     @abstractmethod
-    def to_result_object(element, forge):
+    def to_result_object(element, forge, score: Optional[float],
+                         score_breakdown: Optional[Dict] = None):
         ...
 
     @abstractmethod

@@ -28,12 +28,12 @@ external_scripts = [
 app = Dash(
     __name__,
     external_stylesheets=external_stylesheets,
-    external_scripts=external_scripts)
+    external_scripts=external_scripts,
+    suppress_callback_exceptions=True,
+    title="KG Inference Rules",
+)
 
-app.config.suppress_callback_exceptions = True
-app.title = "KG Inference Rules"
 app.layout = page
-
 get_callbacks(app)
 
 server = app.server

@@ -36,7 +36,8 @@ def on_nm_rule_select(app):
     )
     def on_stored_nm_callback(stored_nm):
         if stored_nm is not None:
-            return build_result_table(stored_nm.values(), table_id="datatable_nm")
+            return build_result_table(stored_nm.values(), table_id="datatable_nm",
+                                      include_score=False, rule=None)
         raise PreventUpdate
 
     @app.callback(

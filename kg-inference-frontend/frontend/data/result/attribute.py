@@ -9,6 +9,8 @@ class ExtendedEnum(Enum):
 
 
 class Attribute(ExtendedEnum):
+    SCORE = "Combined Score"
+    SCORE_BREAKDOWN = "Score breakdown"
     IMAGE_STIMULUS_TYPE_LABEL = "Image Stimulus Type Label"
     ORG = "Org"
     PROJECT = "Project"

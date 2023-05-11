@@ -12,7 +12,7 @@ confluence_link = \
     "https://bbpteam.epfl.ch/project/spaces/display/BBKG/Inference+and+Data+Generalization+Rules"
 
 
-def result_view(results: bool):
+def result_view(results: bool, empty=False):
     list_title = "Inference Results" if results else "Neuron Morphology List"
     fetching_loader_id = "result_fetching_loader" if results else "nm_fetching_loader"
     list_div = "result_list" if results else "nm_list"
@@ -25,31 +25,33 @@ def result_view(results: bool):
     selected_store_id = "selected_result" if results else "selected_nm"
     collapse_id = "collapse_result" if results else "collapse_nm"
 
+    body = [
+        html.Div(children=[
+            html.Div(className="col-xl-8 col-12", children=[
+                html.Div(children=html.H5(list_title),
+                         className="d-flex justify-content-center border-bottom"),
+                dcc.Loading(id=fetching_loader_id, type="circle",
+                            children=[to_be_filled(list_div)]),
+
+                dcc.Store(id=result_store_id)
+            ]),
+
+            html.Div(className="col-xl-4 col-12", children=[
+                html.Div(children=html.H5(selected_title), id=selected_title_id,
+                         className="d-flex justify-content-center border-bottom"),
+                dcc.Loading(id=selected_loader_id, type="circle",
+                            children=[to_be_filled(selected_div)]),
+
+                dcc.Store(id=selected_store_id)
+            ]),
+        ], className="row"),
+    ] if not empty else []
+
     return html.Div(className="card mt-4", children=[
         html.Button(className="dropdown-toggle", style={"border": "none"},
                     id=f"button_{collapse_id}",
                        ** {"data-bs-toggle": "collapse", "data-bs-target": f"#{collapse_id}"}),
-        html.Div(className="card-body", id=collapse_id, children=html.Div(children=[
-            html.Div(children=[
-                html.Div(className="col-xl-8 col-12", children=[
-                    html.Div(children=html.H5(list_title),
-                             className="d-flex justify-content-center border-bottom"),
-                    dcc.Loading(id=fetching_loader_id, type="circle",
-                                children=[to_be_filled(list_div)]),
-
-                    dcc.Store(id=result_store_id)
-                ]),
-
-                html.Div(className="col-xl-4 col-12", children=[
-                    html.Div(children=html.H5(selected_title), id=selected_title_id,
-                             className="d-flex justify-content-center border-bottom"),
-                    dcc.Loading(id=selected_loader_id, type="circle",
-                                children=[to_be_filled(selected_div)]),
-
-                    dcc.Store(id=selected_store_id)
-                ]),
-            ], className="row"),
-        ]))
+        html.Div(className="card-body", id=collapse_id, children=html.Div(children=body))
     ])
 
 
@@ -115,7 +117,8 @@ page = html.Div(children=[
 
         ], className="row"))
     ]),
-    html.Div(id="nm_container"),
+    html.Div(id="nm_container", children=result_view(results=False, empty=True)),
+    # callback is failing if the element doesn't exist on_infer_press/on_collapse_nm_click
     result_view(True),
 
 ], className="container-fluid")

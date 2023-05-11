@@ -304,14 +304,10 @@ def contribution_label_fill(result_resources: List[ResultResource], forge: Knowl
     @param forge: a forge instance to run the query
     @return the list of ResultResource with the contribution labels added
     """
-    ids_to_fetch = []
+    ids_to_fetch = set()
     for result_resource in result_resources:
-        contributions = result_resource.get_attribute(Attribute.CONTRIBUTION, to_str=False)
-        for contribution in contributions:
-            if not contribution.label:
-                missing_id = contribution.id
-                if missing_id not in ids_to_fetch:
-                    ids_to_fetch.append(missing_id)
+        ids_to_fetch.update(set([contribution.id for contribution in result_resource.get_attribute(
+            Attribute.CONTRIBUTION, to_str=False) if not contribution.label]))
 
     if len(ids_to_fetch) == 0:
         return result_resources
@@ -319,18 +315,18 @@ def contribution_label_fill(result_resources: List[ResultResource], forge: Knowl
     res = [forge.retrieve(id_, cross_bucket=True) for id_ in ids_to_fetch]
     contributors = [forge.as_json(el) for el in res if el is not None]
 
-    def get_label(contributor_resource):
-        if "name" in contributor_resource:
-            return contributor_resource["name"]
-        if "givenName" in contributor_resource and "familyName" in contributor_resource:
-            return f"{contributor_resource['givenName']} {contributor_resource['familyName']}"
-        return "?"
+    def get_label(contributor_json):
+        if "name" in contributor_json:
+            return contributor_json["name"]
+        if "givenName" in contributor_json and "familyName" in contributor_json:
+            return f"{contributor_json['givenName']} {contributor_json['familyName']}"
+        return contributor_json["id"]
 
     id_label_map = dict((get_id(el), get_label(el)) for el in contributors)
 
     def add_contribution_label(resource):
         return resource.set_contributions([
-            c.set_label(id_label_map.get(c.id, "?"))
+            c.set_label(id_label_map.get(c.id, "?") if c.label is None else c.label)
             for c in result_resource.get_attribute(Attribute.CONTRIBUTION)
         ])
 
@@ -349,15 +345,14 @@ def stimulus_type_label_fill(result_resources: List[ResultResource], forge: Know
        @param forge: a forge instance to run the query
        @return the list of ResultResource with the stimulus type labels added
        """
-    ids_to_fetch = []
+    ids_to_fetch = set()
 
     for result_resource in result_resources:
-        images = result_resource.get_attribute(Attribute.IMAGE, to_str=False)
-        for image in images:
-            if "label" not in image.stimulus_type:
-                missing_id = get_id(image.stimulus_type)
-                if missing_id not in ids_to_fetch:
-                    ids_to_fetch.append(missing_id)
+        ids_to_fetch.update([
+            get_id(image.stimulus_type)
+            for image in result_resource.get_attribute(Attribute.IMAGE, to_str=False)
+            if "label" not in image.stimulus_type
+        ])
 
     if len(ids_to_fetch) == 0:
         return result_resources
@@ -389,8 +384,21 @@ def stimulus_type_label_fill(result_resources: List[ResultResource], forge: Know
     return [add_stimulus_type_label(resource) for resource in result_resources]
 
 
-def to_result_resource(resources: List[Resource], forge: KnowledgeGraphForge):
-    result_resources = [ResultResource.to_result_object(element, forge) for element in resources]
+def to_result_resource(resources: List[Resource], forge: KnowledgeGraphForge,
+                       additional_data: Optional[Dict]):
+    result_resources = [
+        ResultResource.to_result_object(
+            element, forge,
+            score=(
+                additional_data[element.id].get("score", None)
+                if additional_data is not None else None
+            ),
+            score_breakdown=(
+                additional_data[element.id].get("score_breakdown", None))
+            if additional_data is not None else None
+        )
+        for element in resources
+    ]
     result_resources = contribution_label_fill(result_resources=result_resources, forge=forge)
     result_resources = stimulus_type_label_fill(result_resources=result_resources, forge=forge)
     return result_resources
@@ -524,37 +532,11 @@ def download_from_content_url(content_url, content_type, path_to_download, org, 
     forge = _allocate_forge_session("bbp", "atlas", token=token)
     forge._store._download_one(url=content_url, path=path_to_download,
                                store_metadata=DictWrapper({"_project": f"{org}/{project}"}),
-                               cross_bucket=True, content_type=content_type)
+                               cross_bucket=True, content_type=content_type,
+                               bucket=f"{org}/{project}")
 
 
 def get_neuron_morphologies(token: str, rule_id: str) -> Dict[str, Result]:
-    # Other alternative: in order to limit hard-coding of values (especially, if we consider that
-    # similarity views may be updated in the future), we could also propagate to this function the
-    # model_ids that are within the rule, retrieve the models, and access their similarity view ids
-    # Problem: this would lead to an additional query and similarity view changes in models are not
-    # that common
-    location_views = [
-        "https://bbp.epfl.ch/neurosciencegraph/data/269940bf-a7e1-44bf-a209-c83c650f2a3c",
-        # Coordinates-based embedding - Location 1
-        "https://bbp.epfl.ch/neurosciencegraph/data/2c43c500-6ba2-4d1f-9a96-e80e480816c7",
-        # Brain region ontology-based embedding - Location 2
-        "https://bbp.epfl.ch/neurosciencegraph/data/a2cf748b-2f8f-4f6f-ad3f-0089e54e81a5",
-        # Axon co-projection-based embedding - Location 3
-        "https://bbp.epfl.ch/neurosciencegraph/data/5cc7619e-d3ea-475b-a0f4-63cec28d4f9b",
-        # Dendrite co-projection-based embedding - Location 4
-    ]
-    shape_views = [
-        "https://bbp.epfl.ch/neurosciencegraph/data/21e480a8-f955-4ff1-a98a-7a5fd3200a54",
-        # Neurite feature-based embedding - Shape 1
-        "https://bbp.epfl.ch/neurosciencegraph/data/12e3c699-135c-4c69-8ee7-f2b13f1376f9"
-        # Unscaled TMD-based embedding - Shape 2
-    ]
-
-    similarity_views = dict(
-        (rule_id, view_list)
-        for rule_id, view_list in
-        zip(NM_RULE_IDS, [shape_views, location_views, shape_views + location_views])
-    )
 
     forge_seu = _allocate_forge_session("bbp-external", "seu", token)
 
@@ -570,48 +552,24 @@ def get_neuron_morphologies(token: str, rule_id: str) -> Dict[str, Result]:
         }
     }
 
-    def query_singular_view(similarity_view_id: str):
-        set_elastic_view(forge_seu, similarity_view_id)
-        res = forge_seu.elastic(json.dumps(q))
-        res_json = forge_seu.as_json(res)
-        t = set(get_id(res_json_i["derivation"]["entity"]) for res_json_i in res_json)
-        return t
-
-    ids = [query_singular_view(view_id) for view_id in similarity_views[rule_id]]
-    ids_intersection = list(set.intersection(*ids))
-    limit_nm = 20
-    if len(ids_intersection) > limit_nm:
-        ids_intersection = ids_intersection[:limit_nm-1]
-
     set_elastic_view(forge_seu, "https://bbp.epfl.ch/neurosciencegraph/data/test_view")
 
-    q = {
-        "from": 0,
-        "size": 10000,
-        'query': {
-            'bool': {
-                'filter': [
-                    {'terms': {'@id': ids_intersection}}
-                ],
-                'must': [
-                    {'match': {'_deprecated': False}}
-                ]
-            }
-        },
-    }
+    neuron_morphologies = forge_seu.elastic(json.dumps(q))
 
-    retrieved: Optional[List[Resource]] = forge_seu.elastic(json.dumps(q), debug=False)
+    limit_nm = 20
+    if len(neuron_morphologies) > limit_nm:
+        neuron_morphologies = neuron_morphologies[:limit_nm - 1]
 
-    if retrieved is None:
+    if neuron_morphologies is None:
         raise ForgeError("Elastic Search Retrieval was not successful")
 
-    resources: List[ResultResource] = to_result_resource(retrieved, forge=forge_seu)
+    resources: List[ResultResource] = to_result_resource(neuron_morphologies, forge=forge_seu,
+                                                         additional_data=None)
 
     return dict(
         (r.get_attribute(Attribute.ID), ResultResource.class_to_store(r))
         for r in resources
     )
-
 
 # def get_neuron_morphologies_forge(token: str, rule_models: List[str]) -> Dict[str, Result]:
 #     forge_seu = _allocate_forge_session("bbp-external", "seu", token)

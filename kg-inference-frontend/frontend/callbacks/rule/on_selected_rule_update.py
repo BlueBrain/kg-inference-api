@@ -25,9 +25,13 @@ def on_selected_rule_update(app):
                 stored_filters=stored_filters
             )
 
-            nm = result_view(False) if rule["id"] in NM_RULE_IDS else []
+            nm = result_view(False) if rule["id"] in NM_RULE_IDS else \
+                result_view(results=False, empty=True)
 
             return title, view, True, nm
 
-        return html.H5("Selected Rule"), to_be_filled("selected_view_id"), True, []
+        return html.H5("Selected Rule"), to_be_filled("selected_view_id"), True, \
+            result_view(results=False, empty=True)
 
+    # Resetting nm_container = div with id collapse_nm because
+    # callback is failing if the element doesn't exist on_infer_press/on_collapse_nm_click

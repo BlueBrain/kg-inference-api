@@ -1,6 +1,6 @@
 from data.result.attribute import Attribute
 from data.result.result import Result
-
+from typing import Optional, Dict
 
 class ResultSparql(Result):
 
@@ -19,7 +19,8 @@ class ResultSparql(Result):
         pass
 
     @staticmethod
-    def to_result_object(element, forge):
+    def to_result_object(element, forge, score: Optional[float],
+                         score_breakdown: Optional[Dict] = None):
         single_valued = ["name", "id", "_self", "_project"]
 
         def split(el):

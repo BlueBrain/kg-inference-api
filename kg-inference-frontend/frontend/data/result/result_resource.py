@@ -1,5 +1,5 @@
-from kgforge.core import Resource
-
+from kgforge.core import Resource, KnowledgeGraphForge
+from typing import Optional, Dict
 from data.result.contribution import Contribution
 from data.result.result import Result
 from data.result.attribute import Attribute
@@ -12,7 +12,8 @@ from query.forge_utils import get_resource_org_project, get_self
 class ResultResource(Result):
 
     @staticmethod
-    def to_result_object(element: Resource, forge):
+    def to_result_object(element: Resource, forge: KnowledgeGraphForge, score: Optional[float],
+                         score_breakdown: Optional[Dict] = None):
         new_obj = forge.as_json(element)
         nexus_link = get_self(element)
         org, project = get_resource_org_project(element)
@@ -20,6 +21,11 @@ class ResultResource(Result):
         new_obj["org"] = org
         new_obj["project"] = project
         new_obj["nexus_link"] = nexus_link
+
+        if score is not None:
+            new_obj["score"] = score
+        if score_breakdown is not None:
+            new_obj["score_breakdown"] = score_breakdown
 
         resource = ResultResource(json_object=new_obj)
 
@@ -68,7 +74,9 @@ class ResultResource(Result):
             Attribute.IMAGE: "image[*]",
             Attribute.LINK: "nexus_link",
             Attribute.ORG: "org",
-            Attribute.PROJECT: "project"
+            Attribute.PROJECT: "project",
+            Attribute.SCORE: "score",
+            Attribute.SCORE_BREAKDOWN: "score_breakdown"
             # Attribute.CONTRIBUTION_ID: "contribution[*].agent.id",
             # Attribute.E_TYPE: "annotation[*]['hasBody'][?(@.type contains 'EType')].label",
             # Attribute.M_TYPE: "annotation[*]['hasBody'][?(@.type contains 'MType')].label"
@@ -92,8 +100,9 @@ class ResultResource(Result):
         if attr == Attribute.TYPE:
             return get_type(self.__dict__) if not to_str else to_string(get_type(self.__dict__))
         if attr == Attribute.CONTRIBUTION:
-            return self.get_contribution()
-            # Can't json path with @ in field
+            return self.get_contribution() # Can't json path with @ in field
+        if attr == Attribute.SCORE_BREAKDOWN:
+            return Result.get_value(self.__dict__, self.get_path(attr), to_str=False)
 
         return Result.get_value(self.__dict__, self.get_path(attr), to_str=to_str)
 

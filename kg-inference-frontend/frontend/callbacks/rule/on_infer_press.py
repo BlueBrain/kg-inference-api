@@ -15,9 +15,7 @@ from query.forge import ForgeError
 def on_infer_press(app):
     @app.callback(
         Output(component_id="input_parameters", component_property="data"),
-        Output(component_id="collapse_nm", component_property="className"),
         Output(component_id="toast_container_infer_press", component_property="children"),
-        Input(component_id='button_collapse_nm', component_property='n_clicks'),
         Input(component_id='infer_button', component_property='n_clicks'),
         State(component_id="selected_rule", component_property="data"),
         State(component_id={
@@ -25,25 +23,9 @@ def on_infer_press(app):
             "name": ALL,
             "index": ALL,
             "control_type": ALL
-        }, component_property='value'),
-        State(component_id="collapse_nm", component_property="className"),
-
+        }, component_property='value')
     )
-    def on_infer_press_callback(btn_collapse_n_clicks, infer_n_clicks, rule, values,
-                                collapsed_state):
-
-        hide_cls = "card-body collapse"
-        show_cls = f"{hide_cls} show"
-        # This necessary because both clicking this button and the infer button lead to collapsing
-        # (or opening) of the div. However, the collapsing was done through bootstrap's js when
-        # using the ""data-bs-toggle": "collapse", "data-bs-target": f"#{collapse_id}" properties
-        # and it would update the class of the div (to have "show" or not), but the className
-        # property accessible through dash would remain the same. So when updating the className
-        # to not have "show" in it, the value would remain the same, and the html component's class
-        # would remain the same (the show wouldn't be removed)
-        if dash.callback_context.triggered_id == "button_collapse_nm" \
-                and btn_collapse_n_clicks and btn_collapse_n_clicks > 0:
-            return no_update, show_cls if collapsed_state == hide_cls else hide_cls, no_update
+    def on_infer_press_callback(infer_n_clicks, rule, values):
 
         if not infer_n_clicks or infer_n_clicks == 0:
             raise PreventUpdate
@@ -100,16 +82,30 @@ def on_infer_press(app):
             to_add = dict(list(value_map[selected_hierarchy].items())[1:])
             input_parameters.update(to_add)
 
-        return input_parameters, hide_cls, make_toast(
-            ToastType.INFORMATION, f"Started inference")
+        return input_parameters, make_toast(ToastType.INFORMATION, f"Started inference")
+
+    @app.callback(
+        Output(component_id="collapse_nm", component_property="className", allow_duplicate=True),
+        Input(component_id='button_collapse_nm', component_property='n_clicks'),
+        Input(component_id="input_parameters", component_property="data"),
+        State(component_id="collapse_nm", component_property="className"),
+        prevent_initial_call=True
+    )
+    def on_collapse_nm_click(btn_collapse_n_clicks, input_parameter, collapsed_state):
+        hide_cls = "card-body collapse"
+        show_cls = f"{hide_cls} show"
+        if btn_collapse_n_clicks and btn_collapse_n_clicks > 0:
+            return show_cls if collapsed_state == hide_cls else hide_cls
 
     @app.callback(
         Output(component_id="stored_results", component_property="clear_data"),
         Output(component_id="selected_result", component_property="clear_data"),
+        Output(component_id="collapse_nm", component_property="className"),
         Input(component_id="input_parameters", component_property="data"),
     )
     def on_input_parameter_store(input_parameters):
-        return True, True
+        hide_cls = "card-body collapse"
+        return True, True, hide_cls
 
     @app.callback(
         # clearing the stored_results should clear the selected result
@@ -135,4 +131,3 @@ def on_infer_press(app):
 
         if input_parameters is None:
             return None, no_update, no_update
-
