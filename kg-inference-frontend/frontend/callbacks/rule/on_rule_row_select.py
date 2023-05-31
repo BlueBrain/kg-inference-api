@@ -7,9 +7,9 @@ from data.rule import Rule
 def on_rule_row_select(app):
 
     @app.callback(
-        Output(component_id='selected_rule', component_property='data'),
-        Output(component_id='toast_container_rules_sidebar', component_property="children"),
-        Input(component_id='datatable_rules', component_property='selected_row_ids'),
+        Output(component_id="selected_rule", component_property="data"),
+        Output(component_id="toast_container_rules_sidebar", component_property="children"),
+        Input(component_id="datatable_rules", component_property="selected_row_ids"),
         State(component_id="stored_rules", component_property="data"),
         State(component_id="sidebar_content", component_property="data")
     )

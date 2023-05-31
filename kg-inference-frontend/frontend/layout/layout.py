@@ -12,7 +12,18 @@ confluence_link = \
     "https://bbpteam.epfl.ch/project/spaces/display/BBKG/Inference+and+Data+Generalization+Rules"
 
 
-def result_view(results: bool, empty=False):
+def result_view(results: bool, empty: bool = False):
+    """
+    Result view used in order to display neuron morphology list/selected neuron morphology
+    And inference results/selected results
+    @param results: True if results view, False if neuron morphology view
+    @type: bool
+    @param empty: Render it empty or with its body. Necessary because some callbacks require
+    some html element ids to exist, so the div is rendered with no visible content for these
+    callbacks not to complain
+    @type: bool
+    """
+
     list_title = "Inference Results" if results else "Neuron Morphology List"
     fetching_loader_id = "result_fetching_loader" if results else "nm_fetching_loader"
     list_div = "result_list" if results else "nm_list"
@@ -45,7 +56,7 @@ def result_view(results: bool, empty=False):
                 dcc.Store(id=selected_store_id)
             ]),
         ], className="row"),
-    ] if not empty else []
+    ] if not empty else [dcc.Store(id=selected_store_id)]
 
     return html.Div(className="card mt-4", children=[
         html.Button(className="dropdown-toggle", style={"border": "none"},
@@ -63,6 +74,7 @@ page = html.Div(children=[
             html.Div(id="toast_container_rules_sidebar"),
             html.Div(id="toast_container_token"),
             html.Div(id="toast_container_sidebar_fetch"),
+            html.Div(id="toast_container_nm_fetch"),
             html.Div(id="toast_container_infer_press"),
             html.Div(id="toast_container_results_infer"),
             html.Div(id="toast_container_results_table"),
@@ -76,7 +88,7 @@ page = html.Div(children=[
             dcc.Link("confluence page", href=confluence_link, target="_blank"),
         ]),
         html.Div(className="d-flex justify-content-end col-xl-4 col-12", children=auth),
-        dcc.Store(id='stored_token', storage_type='session'),
+        dcc.Store(id="stored_token", storage_type="session"),
     ], className="row mt-4"),
 
     html.Div(className="card mt-4", children=[
@@ -91,7 +103,7 @@ page = html.Div(children=[
                 dcc.Loading(id="sidebar_fetching_loader", type="circle",
                             children=[to_be_filled("sidebar")]),
 
-                dcc.Store(id='sidebar_content'),
+                dcc.Store(id="sidebar_content"),
                 dcc.Store(id="stored_filters")
             ]),
 
@@ -102,7 +114,7 @@ page = html.Div(children=[
 
                 dcc.Loading(id="rule_fetching_loader", type="circle",
                             children=[to_be_filled("rule_list")]),
-                dcc.Store(id='stored_rules')
+                dcc.Store(id="stored_rules")
 
             ]),
 
@@ -110,14 +122,15 @@ page = html.Div(children=[
                 html.Div(children=html.H5("Selected Rule"), id="selected_rule_title",
                          className="d-flex justify-content-center border-bottom"),
                 html.Div(to_be_filled("selected_rule_view")),
-                dcc.Store(id='selected_rule'),
-                dcc.Store(id='input_parameters')
+                dcc.Store(id="selected_rule"),
+                dcc.Store(id="input_parameters")
 
             ]),
 
         ], className="row"))
     ]),
     html.Div(id="nm_container", children=result_view(results=False, empty=True)),
+    dcc.Store(id="prepared_plot_data"),  # TODO Place elsewhere most likely
     # callback is failing if the element doesn't exist on_infer_press/on_collapse_nm_click
     result_view(True),
 

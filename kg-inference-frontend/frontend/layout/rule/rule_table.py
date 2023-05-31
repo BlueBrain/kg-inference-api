@@ -11,15 +11,15 @@ def build_rule_table(stored_rules):
 
     return dash_table.DataTable(
         style_data={
-            'whiteSpace': 'normal',
-            'height': 'auto',
+            "whiteSpace": "normal",
+            "height": "auto",
         },
-        style_cell={'textAlign': 'left', 'fontSize': 15, 'font-family': 'sans-serif'},
+        style_cell={"textAlign": "left", "fontSize": 15, "font-family": "sans-serif"},
         id="datatable_rules",
         data=rules_table_format,
         columns=[{"name": label, "id": key} for (label, key) in zip(table_labels, table_visible_keys)],
         row_selectable="single",
         cell_selectable=False,
         page_size=5,
-        style_table={'overflowX': 'auto'},
+        style_table={"overflowX": "auto"},
     )

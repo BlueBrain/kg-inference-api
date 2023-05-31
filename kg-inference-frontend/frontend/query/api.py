@@ -97,7 +97,8 @@ def get_rules(token, search_filters: dict = None) -> List[Rule]:
     return [Rule.source_to_class(el) for el in body]
 
 
-def infer(rule_id: str, input_parameters: dict, token: str, retrieve=True,
+def infer(rule_id: str, input_parameters: dict, token: str,
+          sidebar_content: Dict[str, Dict], retrieve=True,
           use_sparql_minds=False) \
         -> Dict[str, Union[ResultResource, Tuple[ResultResource, ResultSparql], None]]:
     """
@@ -105,12 +106,13 @@ def infer(rule_id: str, input_parameters: dict, token: str, retrieve=True,
     @param rule_id: the id of the rule to be run
     @param input_parameters: the input parameter values, as a dictionary of the rule
     @param token: the user authentication token
-    @param retrieve whether only the ids are returned or the Resource information is being
+    @param retrieve: whether only the ids are returned or the Resource information is being
     retrieved too
+    @param sidebar_content: entities loaded by the sidebar
     @param use_sparql_minds whether to also run a sparql query to retrieve minds information for
     the inferred resources
     @return returns a dictionary with the keys being the ids of the resources that have been
-    inferred,
+    inferred
     and the values being None if retrieve is False, ResultResources if retrieve is True
     and use_sparql_minds is False,
     pairs of ResultResource and ResultSparql if retrieved is True and use_sparql_minds is True
@@ -133,8 +135,9 @@ def infer(rule_id: str, input_parameters: dict, token: str, retrieve=True,
         return dict(zip(id_index.keys(), [None] * len(id_index)))
 
     retrieved, forge = retrieve_elastic(list(id_index.keys()), token)
-    resources: List[ResultResource] = to_result_resource(retrieved, forge=forge,
-                                                         additional_data=id_index)
+    resources: List[ResultResource] = to_result_resource(
+        retrieved, forge=forge, additional_data=id_index, sidebar_content=sidebar_content
+    )
 
     # TODO NOT FINISHED YET (query + downstream usage), implement if ever we switch to this
     # if use_sparql_minds:

@@ -1,6 +1,11 @@
+from typing import List
+
 from dash import dcc, html
 import plotly.graph_objects as go
 from itertools import product
+
+from dash.development.base_component import Component
+
 from layout.rule.inference_inputs import get_input_group
 from data.utils import enforce_list
 from data.result.result import Attribute
@@ -17,7 +22,7 @@ dropdown_key_title_map = {
 }
 
 
-def build_result_chart_with_controls(results):
+def build_result_chart_with_controls(results: List[ResultResource]):
     return html.Div(children=[
         html.Div(className="row", children=[
 
@@ -40,8 +45,11 @@ def build_result_chart_with_controls(results):
     ])
 
 
-def build_result_chart(data: list, x_axis=DEFAULT_X_AXIS, y_axis=DEFAULT_Y_AXIS):
-    data = [ResultResource.store_to_class(e) for e in data]
+def build_result_chart(data: List[ResultResource], x_axis=DEFAULT_X_AXIS, y_axis=DEFAULT_Y_AXIS) \
+        -> Component:
+    if len(data) == 0:
+        return html.H5(children="No Results")
+
     x_unflattened = [enforce_list(el.get_attribute(Attribute(x_axis), to_str=False)) for el in data]
     y_unflattened = [enforce_list(el.get_attribute(Attribute(y_axis), to_str=False)) for el in data]
 
@@ -73,5 +81,5 @@ def build_result_chart(data: list, x_axis=DEFAULT_X_AXIS, y_axis=DEFAULT_Y_AXIS)
     )
 
     heatmap = go.Figure(data=go.Heatmap(x=x, y=y, z=z), layout=layout)
-    heatmap.update_traces(colorbar={"dtick": 1}, selector={"type": 'heatmap'})
+    heatmap.update_traces(colorbar={"dtick": 1}, selector={"type": "heatmap"})
     return dcc.Graph(figure=heatmap)

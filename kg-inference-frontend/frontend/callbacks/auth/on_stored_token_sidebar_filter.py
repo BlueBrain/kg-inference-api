@@ -7,12 +7,12 @@ from data.rule import Rule
 
 def on_stored_token_sidebar_filter(app):
     @app.callback(
-        Output(component_id='stored_rules', component_property='data'),
-        Output(component_id='toast_container_rules', component_property="children"),
+        Output(component_id="stored_rules", component_property="data"),
+        Output(component_id="toast_container_rules", component_property="children"),
         Output(component_id="rule_fetching_loader", component_property="children"),
-        Output(component_id='selected_rule', component_property='clear_data'),
-        Input(component_id='stored_token', component_property='data'),
-        Input(component_id='stored_filters', component_property='data'),
+        Output(component_id="selected_rule", component_property="clear_data"),
+        Input(component_id="stored_token", component_property="data"),
+        Input(component_id="stored_filters", component_property="data"),
         # State(component_id="contributor_dropdown", component_property="value"),
     )
     def on_stored_token_sidebar_filter_callback(token, search_filters):

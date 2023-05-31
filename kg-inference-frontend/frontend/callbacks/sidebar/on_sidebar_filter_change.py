@@ -3,11 +3,11 @@ from dash import Input, Output, html
 
 def on_sidebar_filter_change(app):
     @app.callback(
-        Output(component_id='search_filter_summary', component_property='children'),
-        Input(component_id='datatype_dropdown', component_property='value'),
-        Input(component_id='brain_region_dropdown', component_property='value'),
-        Input(component_id='cell_type_dropdown', component_property='value'),
-        # Input(component_id='contributor_dropdown', component_property='value'),
+        Output(component_id="search_filter_summary", component_property="children"),
+        Input(component_id="datatype_dropdown", component_property="value"),
+        Input(component_id="brain_region_dropdown", component_property="value"),
+        Input(component_id="cell_type_dropdown", component_property="value"),
+        # Input(component_id="contributor_dropdown", component_property="value"),
     )
     def on_sidebar_filter_change_callback(datatypes, brain_regions, cell_types):  # , contributors):
         def strify(i):

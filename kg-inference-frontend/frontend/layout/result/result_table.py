@@ -1,27 +1,22 @@
 from typing import Dict, List
 
-from dash import dash_table, html, dcc
+from dash import dash_table, html
 from data.result.result import Attribute
 from data.result.result_resource import ResultResource
+from data.utils import get_model_label
 
 
-def build_result_table(results, table_id, include_score: bool, rule=None):
+def build_result_table(results: List[ResultResource], table_id, include_score: bool, rule=None):
     if len(results) == 0:
         return html.H5(children="No Results")
+
+    data = results
 
     ignore_keys = [Attribute.CONTENT_URL, Attribute.AT_LOCATION, Attribute.BRAIN_REGION_ID,
                    Attribute.LINK, Attribute.M_TYPE, Attribute.E_TYPE, Attribute.CONTRIBUTION,
                    Attribute.IMAGE, Attribute.ORG, Attribute.PROJECT, Attribute.DISTRIBUTION,
                    Attribute.IMAGE_STIMULUS_TYPE_LABEL, Attribute.SUBJECT_ID, Attribute.SCORE,
                    Attribute.SCORE_BREAKDOWN]
-
-    data = [ResultResource.store_to_class(elastic_json) for elastic_json in results]
-
-    def get_model_label(model_id):
-        ips = rule["inputParameters"]
-        ip = next(ip for ip in ips if ip["name"] == "IgnoreModelsParameter")["values"]
-        label = next(key for key, value in ip.items() if value == model_id)
-        return label.replace("_", " ")
 
     def format_data_point(r: ResultResource, is_with_score: bool) -> Dict:
         data_base = r.get_attributes(ignore_keys=ignore_keys)
@@ -35,7 +30,7 @@ def build_result_table(results, table_id, include_score: bool, rule=None):
 
         for key, value in breakdown.items():
             score, weight = value
-            model_label = get_model_label(key)
+            model_label = get_model_label(key, rule)
             data_base[f"Score for {model_label}"] = score
             data_base[f"Weight for {model_label}"] = weight
 
@@ -55,7 +50,7 @@ def build_result_table(results, table_id, include_score: bool, rule=None):
         added = ["Combined Score"]
         breakdown = data_as_resource[0].get_attribute(Attribute.SCORE_BREAKDOWN)[0]
         for el in breakdown.keys():
-            model_label = get_model_label(el)
+            model_label = get_model_label(el, rule)
             added.append(f"Score for {model_label}")
             added.append(f"Weight for {model_label}")
 
@@ -81,12 +76,12 @@ def build_result_table(results, table_id, include_score: bool, rule=None):
         row_selectable="single",
         row_deletable=True,
         page_size=15,
-        style_table={'overflowX': 'auto'},
+        style_table={"overflowX": "auto"},
         style_header={"whiteSpace": "normal"},
-        style_cell={'textAlign': 'left', 'fontSize': 15, 'font-family': 'sans-serif'},
+        style_cell={"textAlign": "left", "fontSize": 15, "font-family": "sans-serif"},
         css=[
             {"selector": "p", "rule": "margin: 0"}
         ],
-        export_format='xlsx',
-        export_headers='display'
+        export_format="xlsx",
+        export_headers="display"
     )

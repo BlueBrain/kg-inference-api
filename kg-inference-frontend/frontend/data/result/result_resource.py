@@ -100,7 +100,7 @@ class ResultResource(Result):
         if attr == Attribute.TYPE:
             return get_type(self.__dict__) if not to_str else to_string(get_type(self.__dict__))
         if attr == Attribute.CONTRIBUTION:
-            return self.get_contribution() # Can't json path with @ in field
+            return self.get_contribution()  # Can't json path with @ in field
         if attr == Attribute.SCORE_BREAKDOWN:
             return Result.get_value(self.__dict__, self.get_path(attr), to_str=False)
 
@@ -120,6 +120,10 @@ class ResultResource(Result):
 
     def set_images(self, images: [Image]):
         self.__dict__["image"] = [Image.class_to_store(i) for i in images]
+        return self
+
+    def set_brain_region(self, brain_region_obj: Dict):
+        self.__dict__["brainLocation"]["brainRegion"] = brain_region_obj
         return self
 
     def get_distribution(self):

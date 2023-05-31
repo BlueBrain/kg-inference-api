@@ -8,7 +8,7 @@ def on_stored_selected_result_update(app):
         Output(component_id="selected_result_view", component_property="children"),
         Output(component_id="selected_result_title", component_property="children"),
         Output(component_id="selected_result_loader", component_property="children"),
-        Input(component_id='selected_result', component_property='data'),
+        Input(component_id="selected_result", component_property="data"),
         State(component_id="stored_token", component_property="data")
     )
     def on_stored_selected_result_update_callback(result, token):

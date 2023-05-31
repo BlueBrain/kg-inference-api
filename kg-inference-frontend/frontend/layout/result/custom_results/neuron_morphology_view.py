@@ -17,14 +17,19 @@ def neuron_morphology_3d(result, distributions: [Distribution], token):
 
     for el in distributions:
         if "swc" in el.encoding_format:
-            download_from_content_url(content_url=el.content_url, content_type=el.encoding_format,
-                                      org=result.get_attribute(Attribute.ORG),
-                                      project=result.get_attribute(Attribute.PROJECT),
-                                      path_to_download=path_to_download, token=token)
+
+            download_from_content_url(
+                content_url=el.content_url,
+                content_type=el.encoding_format,
+                org=result.get_attribute(Attribute.ORG),
+                project=result.get_attribute(Attribute.PROJECT),
+                path_to_download=path_to_download,
+                token=token
+            )
 
             m = nm.load_morphology(path_to_download)
-            fig = get_figure(m, plane='3d', title="3D View")
-            graph = dcc.Graph(id=f'neurom', figure=fig)
+            fig = get_figure(m, plane="3d", title="3D View")
+            graph = dcc.Graph(id="neurom", figure=fig)
             shutil.rmtree(path)
             return [graph]
 

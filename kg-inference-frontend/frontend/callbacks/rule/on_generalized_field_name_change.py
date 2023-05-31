@@ -16,7 +16,7 @@ def on_generalized_field_name_change(app):
             "index": GENERALIZE_HIERARCHY_ID,
             "control_type": "basic"
         }, component_property="value"),
-        State(component_id='selected_rule', component_property='data'),
+        State(component_id="selected_rule", component_property="data"),
         State(component_id="sidebar_content", component_property="data"),
         State(component_id="stored_token", component_property="data"),
         State(component_id="stored_filters", component_property="data")

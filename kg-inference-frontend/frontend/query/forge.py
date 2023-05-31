@@ -9,6 +9,7 @@ from requests.exceptions import HTTPError
 from data.brain_region import BrainRegion
 from data.data_type import DataType
 from data.cell_type import CellType, MType, EType
+from data.dict_key import DictKey
 from data.entity import Entity
 from data.result.attribute import Attribute
 from data.result.result import Result
@@ -38,6 +39,44 @@ class ForgeError(BaseException):
 DEBUG = False
 
 LIMIT = 10000
+
+
+def get_embedding_vectors(entity_ids: List[str], model_id: str, token: str) -> List[Dict]:
+    es_view = "https://bbp.epfl.ch/neurosciencegraph/data/views/es/aggregated_similarity_view"
+    forge = _allocate_forge_session("bbp-external", "seu", token)
+    set_elastic_view(forge, es_view)
+
+    vector_query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "nested": {
+                            "path": "derivation.entity",
+                            "query": {
+                                "terms": {"derivation.entity.@id": entity_ids}
+                            }
+                        }
+                    },
+                    {
+                        "nested": {
+                            "path": "generation.activity.used",
+                            "query": {
+                                "term": {"generation.activity.used.@id": model_id}
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+
+    result = forge.elastic(json.dumps(vector_query), limit=10000)
+
+    if result is None or len(result) == 0:
+        raise ForgeError("Elastic Search Retrieval of embeddings was not successful")
+
+    return forge.as_json(result)
 
 
 def _allocate_forge_session(org, project, token, config_path=NEXUS_CONFIG_PATH):
@@ -384,8 +423,41 @@ def stimulus_type_label_fill(result_resources: List[ResultResource], forge: Know
     return [add_stimulus_type_label(resource) for resource in result_resources]
 
 
-def to_result_resource(resources: List[Resource], forge: KnowledgeGraphForge,
-                       additional_data: Optional[Dict]):
+def brain_region_fill(result_resources: List[ResultResource], forge: KnowledgeGraphForge,
+                      sidebar_content: Dict[str, Dict]):
+    if not any(result_resource.get_attribute(Attribute.BRAIN_REGION) is None
+               for result_resource in result_resources):
+        return result_resources
+
+    def get_obj(brain_region_resource: BrainRegion):
+        return {
+            "id": brain_region_resource.id,
+            "label": brain_region_resource.name
+            if brain_region_resource.name else brain_region_resource.id
+        }
+
+    id_br_map = dict(
+        (get_id(el), BrainRegion.store_to_class(el))
+        for el in sidebar_content[DictKey.BRAIN_REGIONS.value]
+    )
+
+    def add_brain_region(resource):
+        if resource.get_attribute(Attribute.BRAIN_REGION) is None:
+            br_id = resource.get_attribute(Attribute.BRAIN_REGION_ID)
+            br_id = forge._model.context().expand(br_id)
+            not_found = BrainRegion(id=br_id, name="", hasPart=None, isPart=None)
+            return resource.set_brain_region(
+                get_obj(id_br_map.get(br_id, not_found))
+            )
+        return resource
+
+    return [add_brain_region(resource) for resource in result_resources]
+
+
+def to_result_resource(
+        resources: List[Resource], forge: KnowledgeGraphForge,
+        additional_data: Optional[Dict], sidebar_content: Optional[Dict[str, Dict]]
+) -> List[ResultResource]:
     result_resources = [
         ResultResource.to_result_object(
             element, forge,
@@ -394,13 +466,19 @@ def to_result_resource(resources: List[Resource], forge: KnowledgeGraphForge,
                 if additional_data is not None else None
             ),
             score_breakdown=(
-                additional_data[element.id].get("score_breakdown", None))
-            if additional_data is not None else None
+                additional_data[element.id].get("score_breakdown", None)
+                if additional_data is not None else None
+            )
         )
         for element in resources
     ]
     result_resources = contribution_label_fill(result_resources=result_resources, forge=forge)
     result_resources = stimulus_type_label_fill(result_resources=result_resources, forge=forge)
+
+    if sidebar_content is not None:
+        result_resources = brain_region_fill(result_resources=result_resources, forge=forge,
+                                             sidebar_content=sidebar_content)
+
     return result_resources
 
 
@@ -417,15 +495,15 @@ def retrieve_elastic(ids, token) -> Tuple[List[Resource], KnowledgeGraphForge]:
     q = {
         "from": 0,
         "size": 10000,
-        'query': {
-            'bool': {
-                'filter': [
-                    {'terms': {'@id': ids}}
+        "query": {
+            "bool": {
+                "filter": [
+                    {"terms": {"@id": ids}}
                 ],
-                'must': [
-                    {'match': {'_deprecated': False}}
+                "must": [
+                    {"match": {"_deprecated": False}}
                 ],
-                'must_not': [
+                "must_not": [
 
                 ]
             }
@@ -536,8 +614,42 @@ def download_from_content_url(content_url, content_type, path_to_download, org, 
                                bucket=f"{org}/{project}")
 
 
-def get_neuron_morphologies(token: str, rule_id: str) -> Dict[str, Result]:
+def get_neuron_morphology(token: str, nm_id: str, sidebar_content: Dict[str, Dict]) \
+        -> ResultResource:
+    forge_seu = _allocate_forge_session("bbp-external", "seu", token)
+    set_elastic_view(forge_seu, "https://bbp.epfl.ch/neurosciencegraph/data/test_view")
 
+    q = {
+        "from": 0,
+        "size": 1,
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"_deprecated": False}},
+                ],
+                "filter": [
+                    {"term": {"@id": nm_id}}
+                ]
+            }
+        }
+    }
+
+    neuron_morphologies = forge_seu.elastic(json.dumps(q))
+
+    if neuron_morphologies is None:
+        raise ForgeError("Elastic Search Retrieval of queried neuron morphology was not successful")
+
+    resources: List[ResultResource] = to_result_resource(
+        neuron_morphologies, forge=forge_seu, additional_data=None, sidebar_content=sidebar_content
+    )
+
+    if len(resources) > 0:
+        return resources[0]
+
+    raise ForgeError(f"Couldn't retrieve neuron morphology {nm_id}")
+
+
+def get_neuron_morphologies(token: str, sidebar_content: Dict[str, Dict]) -> Dict[str, Result]:
     forge_seu = _allocate_forge_session("bbp-external", "seu", token)
 
     q = {
@@ -561,10 +673,11 @@ def get_neuron_morphologies(token: str, rule_id: str) -> Dict[str, Result]:
         neuron_morphologies = neuron_morphologies[:limit_nm - 1]
 
     if neuron_morphologies is None:
-        raise ForgeError("Elastic Search Retrieval was not successful")
+        raise ForgeError("Elastic Search Retrieval of neuron morphologies was not successful")
 
-    resources: List[ResultResource] = to_result_resource(neuron_morphologies, forge=forge_seu,
-                                                         additional_data=None)
+    resources: List[ResultResource] = to_result_resource(
+        neuron_morphologies, forge=forge_seu, additional_data=None, sidebar_content=sidebar_content
+    )
 
     return dict(
         (r.get_attribute(Attribute.ID), ResultResource.class_to_store(r))
@@ -573,22 +686,18 @@ def get_neuron_morphologies(token: str, rule_id: str) -> Dict[str, Result]:
 
 # def get_neuron_morphologies_forge(token: str, rule_models: List[str]) -> Dict[str, Result]:
 #     forge_seu = _allocate_forge_session("bbp-external", "seu", token)
-#     # neuron_morphologies = forge_seu.search({
-#     #     "type": "NeuronMorphology",
-#     #     "id": {
-#     #         "^derivation.entity.id": "id",
-#     #         "id": rule_models
-#     #     }
-#     # })
-#     # set_sparql_view(forge_seu, "https://bluebrain.github.io/nexus/vocabulary/defaultSparqlIndex")
 #     neuron_morphologies = forge_seu.search({
 #         "type": "NeuronMorphology",
-#         "^entity/^derivation/generation/activity/used/id":
-#             "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/d0c21fd5-cb9c-445c"
-#             "-b0a4-94847ba61f5a"}, debug=True)
+#         "id": {
+#             "^derivation.entity.id": "id",
+#             "id": rule_models
+#         }
+#     })
 #
 #     resources: List[ResultResource] = to_result_resource(neuron_morphologies, forge=forge_seu)
 #     return dict(
 #         (r.get_attribute(Attribute.ID), ResultResource.class_to_store(r))
 #         for r in resources
 #     )
+#
+#

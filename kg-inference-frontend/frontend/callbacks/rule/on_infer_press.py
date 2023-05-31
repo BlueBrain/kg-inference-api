@@ -1,6 +1,5 @@
 from typing import Any, Optional
 
-import dash
 from dash import Input, Output, State, no_update, ALL, callback_context
 from dash.exceptions import PreventUpdate
 
@@ -16,14 +15,14 @@ def on_infer_press(app):
     @app.callback(
         Output(component_id="input_parameters", component_property="data"),
         Output(component_id="toast_container_infer_press", component_property="children"),
-        Input(component_id='infer_button', component_property='n_clicks'),
+        Input(component_id="infer_button", component_property="n_clicks"),
         State(component_id="selected_rule", component_property="data"),
         State(component_id={
-            'type': 'infer_form_control',
+            "type": "infer_form_control",
             "name": ALL,
             "index": ALL,
             "control_type": ALL
-        }, component_property='value')
+        }, component_property="value")
     )
     def on_infer_press_callback(infer_n_clicks, rule, values):
 
@@ -36,7 +35,7 @@ def on_infer_press(app):
         form_control_ids = [fc["id"] for fc in infer_form_controls]
         form_control_names = [fc_id["name"] for fc_id in form_control_ids]
 
-        # idx_limit = form_control_names.index('LimitQueryParameter')
+        # idx_limit = form_control_names.index("LimitQueryParameter")
         # limit = values[idx_limit]
         #
         # if limit is None or limit == "":
@@ -86,7 +85,7 @@ def on_infer_press(app):
 
     @app.callback(
         Output(component_id="collapse_nm", component_property="className", allow_duplicate=True),
-        Input(component_id='button_collapse_nm', component_property='n_clicks'),
+        Input(component_id="button_collapse_nm", component_property="n_clicks"),
         Input(component_id="input_parameters", component_property="data"),
         State(component_id="collapse_nm", component_property="className"),
         prevent_initial_call=True
@@ -100,28 +99,33 @@ def on_infer_press(app):
     @app.callback(
         Output(component_id="stored_results", component_property="clear_data"),
         Output(component_id="selected_result", component_property="clear_data"),
+        Output(component_id="prepared_plot_data", component_property="clear_data"),
         Output(component_id="collapse_nm", component_property="className"),
         Input(component_id="input_parameters", component_property="data"),
     )
     def on_input_parameter_store(input_parameters):
         hide_cls = "card-body collapse"
-        return True, True, hide_cls
+        return True, True, True, hide_cls
 
     @app.callback(
         # clearing the stored_results should clear the selected result
         Output(component_id="stored_results", component_property="data"),
         Output(component_id="result_fetching_loader", component_property="children"),
         Output(component_id="toast_container_results_infer", component_property="children"),
-        Input(component_id='stored_results', component_property='clear_data'),
+        Input(component_id="stored_results", component_property="clear_data"),
         State(component_id="input_parameters", component_property="data"),
         State(component_id="stored_token", component_property="data"),
         State(component_id="selected_rule", component_property="data"),
+        State(component_id="sidebar_content", component_property="data"),
+
     )
-    def on_stored_result_clear(stored_results, input_parameters, token, rule):
+    def on_stored_result_clear(stored_results_clear, input_parameters, token, rule,
+                               sidebar_content):
 
         if input_parameters is not None:
             try:
-                results = infer(rule_id=rule["id"], input_parameters=input_parameters, token=token)
+                results = infer(rule_id=rule["id"], input_parameters=input_parameters,
+                                token=token, sidebar_content=sidebar_content)
 
             except (APIError, ForgeError) as e:
                 return None, no_update, make_toast(ToastType.ERROR, str(e))

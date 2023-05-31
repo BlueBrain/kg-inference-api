@@ -18,3 +18,10 @@ def to_string(obj):
     # the path leads to a value which is a list
     return temp[0] if len(temp) == 1 else " - ".join(temp)
     # one path leads to multiple matches (multiple objects)
+
+
+def get_model_label(model_id, rule):
+    ips = rule["inputParameters"]
+    ip = next(ip for ip in ips if ip["name"] == "IgnoreModelsParameter")["values"]
+    label = next(key for key, value in ip.items() if value == model_id)
+    return label.replace("_", " ")

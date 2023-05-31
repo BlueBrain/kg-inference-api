@@ -5,8 +5,8 @@ from data.dict_key import DictKey
 
 def on_filter_press(app):
     @app.callback(
-        Output(component_id='stored_filters', component_property='data'),
-        Input(component_id='filter_rules_button', component_property='n_clicks'),
+        Output(component_id="stored_filters", component_property="data"),
+        Input(component_id="filter_rules_button", component_property="n_clicks"),
         State(component_id="datatype_dropdown", component_property="value"),
         State(component_id="brain_region_dropdown", component_property="value"),
         State(component_id="cell_type_dropdown", component_property="value")
