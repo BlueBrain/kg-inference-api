@@ -11,6 +11,8 @@ metadata:
     nginx.org/proxy-connect-timeout: 3600s
     nginx.org/proxy-read-timeout: 3600s
     nginx.org/proxy-send-timeout: 3600s
+    nginx.ingress.kubernetes.io/client-max-body-size: 50m
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
 spec:
   tls:
   - hosts:
@@ -21,7 +23,7 @@ spec:
       http:
         paths:
           - path: /
-            pathType: Exact
+            pathType: Prefix
             backend:
               service:
                 name: kg-inference-frontend-service
