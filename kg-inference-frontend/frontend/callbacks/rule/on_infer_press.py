@@ -104,8 +104,9 @@ def on_infer_press(app):
         Input(component_id="input_parameters", component_property="data"),
     )
     def on_input_parameter_store(input_parameters):
-        hide_cls = "card-body collapse"
-        return True, True, True, hide_cls
+        if input_parameters is not None:
+            return True, True, True, "card-body collapse"
+        return False, False, False, no_update
 
     @app.callback(
         # clearing the stored_results should clear the selected result

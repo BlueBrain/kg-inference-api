@@ -126,7 +126,8 @@ def update_generalized_field_value(token: str, dict_key: str, class_name,
             token=token,
             dict_key=dict_key,
             stored_filters=stored_filters,
-            sidebar_content=sidebar_content
+            sidebar_content=sidebar_content,
+            disabled=False
         ),
         label=label
     )

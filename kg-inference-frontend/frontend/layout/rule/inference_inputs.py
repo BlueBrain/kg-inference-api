@@ -11,7 +11,8 @@ DEFAULT_LIMIT = 50
 
 def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool,
                              id_obj: Dict[str, str], token: str,
-                             sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List]) \
+                             sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List],
+                             disabled: bool) \
         -> Component:
     """
     Returns the form control for a specific set of input parameter names, those whose user
@@ -22,6 +23,7 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
     pre-filled with the sidebar selection.
 
     @param class_name: the data class of the values that should be listed
+    @param disabled: whether the form control is disabled or not
     @param dict_key: if class_name is one of the dataclasses loaded in the sidebar, a dict key is
     specified, and it is the key into the sidebar loaded data held in sidebar_content, that will
     lead to the data that will populate the form control. If the dict key is None, then the
@@ -54,7 +56,6 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
 
         # A filter for this dropdown has been selected in the sidebar
         if stored_filters and dict_key in stored_filters and len(stored_filters[dict_key]) > 0:
-
             indexed_entities = dict((entity.id, entity) for entity in all_as_class)
             selected_filter = stored_filters[dict_key] if not multiple \
                 else [stored_filters[dict_key][0]]
@@ -65,13 +66,15 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
                 id=id_obj,
                 multi=multiple,
                 options=ddf,
-                value=[el["value"] for el in ddf] if multiple else ddf[0]["value"]
+                value=[el["value"] for el in ddf] if multiple else ddf[0]["value"],
+                disabled=disabled
             )
 
         return dcc.Dropdown(
             id=id_obj,
             multi=multiple,
             options=to_dropdown_format(all_as_class),
+            disabled=disabled
         )
     else:  # TODO so far doesn't reach this with extraction of MType and Entity
 
@@ -82,6 +85,7 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
                 id=id_obj,
                 multi=multiple,
                 options=to_dropdown_format(data),
+                disabled=disabled
             )
 
         raise ValueError
@@ -109,7 +113,8 @@ def build_id(rule_id, name, control_type="basic") -> Dict[str, str]:
 
 
 def get_form_control(input_parameter: InputParameter, rule_id: str, token: str,
-                     sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List]) \
+                     sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List],
+                     disabled=False) \
         -> Component:
     """
     Gets a form control for a rule's input parameter. For some input parameter names, the form
@@ -120,6 +125,7 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str,
     @param input_parameter: the input parameter this form control will set the value for
     @param rule_id: the id of the rule associated with the input parameter
     @param token: the user authentication token
+    @param disabled: whether to disable the form control or not
     @param sidebar_content: the data that has been loaded into the sidebar.
     Some input controls will use some as a list of available values
     @param stored_filters: the filters chosen by the user in the sidebar.
@@ -145,31 +151,42 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str,
 
     if input_parameter.name in special_inputs.keys():
         dict_key = special_inputs[input_parameter.name]
-        class_name = dict_key_class_map[dict_key]
 
-        id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
-        return get_form_control_special(dict_key=dict_key.value, class_name=class_name,
-                                        multiple=multiple, id_obj=id_obj,
-                                        sidebar_content=sidebar_content,
-                                        stored_filters=stored_filters, token=token)
+        return get_form_control_special(
+            dict_key=dict_key.value,
+            class_name=dict_key_class_map[dict_key],
+            multiple=multiple,
+            id_obj=build_id(rule_id=rule_id, name=input_parameter.name),
+            sidebar_content=sidebar_content,
+            stored_filters=stored_filters,
+            token=token,
+            disabled=disabled
+        )
 
     if input_parameter.type == InputParameterType.BOOL:
-        id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
         return dcc.RadioItems(
             options={"true": "Yes", "false": "No"},
             inline=True,
             value="true",
-            id=id_obj,
+            id=build_id(rule_id=rule_id, name=input_parameter.name),
             name=input_parameter.name,
             className="form-control"
-        )
+        ) # TODO disabled?
     if multiple:
-        id_obj = build_id(rule_id=rule_id, name=input_parameter.name,
-                          control_type="newline_separated")
-        return dcc.Textarea(id=id_obj, name=input_parameter.name, className="form-control")
+        return dcc.Textarea(
+            id=build_id(rule_id=rule_id, name=input_parameter.name,
+                        control_type="newline_separated"),
+            name=input_parameter.name,
+            className="form-control",
+            disabled=disabled
+        )
 
-    id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
-    return dcc.Input(id=id_obj, name=input_parameter.name, className="form-control")
+    return dcc.Input(
+        id=build_id(rule_id=rule_id, name=input_parameter.name),
+        name=input_parameter.name,
+        className="form-control",
+        disabled=disabled
+    )
 
 
 def get_input_group(form_control: Component, label: str) -> html.Div:

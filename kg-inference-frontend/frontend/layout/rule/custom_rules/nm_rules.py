@@ -16,9 +16,10 @@ def nm_rules_input_groups(rule, token: str, sidebar_content: Dict[str, Dict],
             sidebar_content=sidebar_content,
             stored_filters=stored_filters,
             token=token,
-            rule_id=rule.id
+            rule_id=rule.id,
+            disabled=True
         ),
-        label=param1.description
+        label=f"{param1.description}, use the 'neuron morphology list' table below to select one"
     )
 
     param2 = input_parameters["IgnoreModelsParameter"]
