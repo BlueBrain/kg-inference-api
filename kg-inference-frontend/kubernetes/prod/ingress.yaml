@@ -8,9 +8,11 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.org/backend-protocol: "HTTPS"
-    nginx.org/proxy-connect-timeout: 3600s
-    nginx.org/proxy-read-timeout: 3600s
-    nginx.org/proxy-send-timeout: 3600s
+    nginx.org/proxy-connect-timeout: 240s
+    nginx.org/proxy-read-timeout: 240s
+    nginx.org/proxy-send-timeout: 240s
+    nginx.ingress.kubernetes.io/client-max-body-size: 8m
+    nginx.ingress.kubernetes.io/proxy-body-size: 8m
 spec:
   tls:
     - hosts:
@@ -21,7 +23,7 @@ spec:
       http:
         paths:
           - path: /
-            pathType: Exact
+            pathType: Prefix
             backend:
               service:
                 name: kg-inference-frontend-service
