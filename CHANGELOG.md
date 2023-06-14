@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] - 14/06/2023
+
+- Client: Updated the retrieval of the neuron morphology selector to get public/thalamus data 
+  for the shape rule. Updated plot files in the assets for the new embeddings
+
 ## [0.2.6] - 02/06/2023
 
 - Client: 2D Plot of neuron morphology embeddings, disabled neuron morphology id input

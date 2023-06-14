@@ -6,7 +6,8 @@ from dash.development.base_component import Component
 from data.result.result_resource import ResultResource
 from data.utils import get_model_label
 from layout.rule.inference_inputs import get_input_group
-from query.forge import get_embedding_vectors, ForgeError
+from query.forge import get_embedding_vectors, ForgeError, shape_rule_id, all_aspect_rule_id, \
+    location_rule_id
 from dash import html, dcc
 from sklearn.manifold import TSNE
 from plotly.express import scatter
@@ -27,19 +28,32 @@ TSNE_SUBDIRECTORY = "tsne"
 
 DataFormat = Dict[str, Tuple[str, Dict]]
 
-FILENAMES = {
-    "https://bbp.epfl.ch/neurosciencegraph/data/7479d675-0fe4-4a04-898c-94f482c2bd30":
+FILENAMES_SEU = {
+    "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/84519407-ad30-4d31-877e-1d6560325393":
         "SEU_morph_axon_coproj_node2vec_cosine",
-    "https://bbp.epfl.ch/neurosciencegraph/data/0da5d33e-798d-4169-bfbe-4f38f9be8993":
+    "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/fe78e1f7-d091-41e6-93f0-40e9e30035a1":
         "SEU_morph_brain_region_poincare_bbp",
-    "https://bbp.epfl.ch/neurosciencegraph/data/04982fcd-472c-4512-8033-873897de5ce5":
+    "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/608fab85-0cc9-4ff9-a4bd-4249589b5889":
         "SEU_morph_coordinates_euclidean",
-    "https://bbp.epfl.ch/neurosciencegraph/data/7c99b41a-7f24-4e67-923c-87cd99d05be1":
+    "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/9fe6873b-ef6a-41b5-854a-382bc1be9fff":
         "SEU_morph_dendrite_coproj_node2vec_cosine",
-    "https://bbp.epfl.ch/neurosciencegraph/data/462c62c8-d4be-48e5-bda4-353d57d616bf":
-        "SEU_morph_neurite_features_euclidean",
-    "https://bbp.epfl.ch/neurosciencegraph/data/5484fc15-1cde-4deb-b8e7-01c6771c13a4":
+    "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/d0c21fd5-cb9c-445c-b0a4-94847ba61f5a":
+        "SEU_morph_neurite_features_euclidean_apical",
+    "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/43965be4-72f9-4901-9a95-d9ca13da8fb4":
         "SEU_morph_TMD_euclidean"
+}
+
+FILENAMES_THALAMUS = {
+    "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/d0c21fd5-cb9c-445c-b0a4-94847ba61f5a":
+        "morph_neurite_features_euclidean_apical",
+    "https://bbp.epfl.ch/nexus/v1/resources/dke/embedding-pipelines/_/43965be4-72f9-4901-9a95-d9ca13da8fb4":
+        "morph_TMD_euclidean"
+}
+
+FILENAMES = {
+    location_rule_id: FILENAMES_SEU,
+    shape_rule_id: FILENAMES_THALAMUS,
+    all_aspect_rule_id: FILENAMES_SEU
 }
 
 
@@ -163,6 +177,7 @@ def build_result_plot(prepared_data: DataFormat,
 
 
 def _prepare_data_load(
+        rule_id: str,
         model_id: str,
         entity_ids: List[str],
         token: str,
@@ -192,7 +207,7 @@ def _prepare_data_load(
     """
     tsne_sub_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../../assets/",
-                                 TSNE_SUBDIRECTORY, FILENAMES[model_id])
+                                 TSNE_SUBDIRECTORY, FILENAMES[rule_id][model_id])
 
     archive = zipfile.ZipFile(f"{tsne_sub_path}.zip", "r")
     pickle_data = archive.read(f"{perplexity}_{nb_iterations}.pickle")
@@ -222,6 +237,7 @@ def _prepare_data_load(
 
 
 def _prepare_data_build(
+        rule_id: str,
         model_id: str,
         entity_ids: List[str],
         token: str,
@@ -336,6 +352,7 @@ def prepare_data(results: Dict[str, ResultResource], rule: Dict, token: str,
                 f"TSNE perplexity: {perplexity}, "
                 f"nb iterations: {nb_iterations}",
                 prepare_data_fc(
+                    rule_id=rule["id"],
                     model_id=model_id,
                     entity_ids=entity_ids,
                     token=token,

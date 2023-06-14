@@ -15,10 +15,11 @@ def on_nm_rule_select(app):
         Output(component_id="nm_fetching_loader", component_property="children"),
         Input(component_id="stored_nm", component_property="clear_data"),
         State(component_id="stored_token", component_property="data"),
-        State(component_id="sidebar_content", component_property="data")
+        State(component_id="sidebar_content", component_property="data"),
+        State(component_id="selected_rule", component_property="data")
     )
-    def on_stored_nm_clear_data(cleared, token, sidebar_content):
-        return get_neuron_morphologies(token, sidebar_content), no_update
+    def on_stored_nm_clear_data(cleared, token, sidebar_content, rule):
+        return get_neuron_morphologies(token, sidebar_content, rule_id=rule["id"]), no_update
 
     @app.callback(
         Output(component_id="nm_list", component_property="children"),

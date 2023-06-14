@@ -15,7 +15,7 @@ class UserSession:
                 token=token,
                 debug=config.DEBUG_MODE),
             config.DATAMODELS_BUCKET: KnowledgeGraphForge(
-                "./api/config/forge-config.yaml",
+                "./api/config/forge-config_datamodels.yaml",
                 endpoint=self.endpoint,
                 bucket=config.DATAMODELS_BUCKET,
                 token=token,

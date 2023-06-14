@@ -2,12 +2,13 @@ import os
 
 
 def get_env_vars():
-
     environment_variables = {
         "ENVIRONMENT": "LOCAL",
         "NEXUS_ENDPOINT": "https://bbp.epfl.ch/nexus/v1",
         "NEXUS_CONFIG_PATH": os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           "./config/forge-config.yaml"),
+        "NEXUS_CONFIG_PATH_DATAMODELS": os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                     "./config/forge-config-datamodels.yaml"),
         "API_BASE": None
     }
 
@@ -36,4 +37,5 @@ def get_env_vars():
     return environment_variables.values()
 
 
-ENVIRONMENT, NEXUS_ENDPOINT, NEXUS_CONFIG_PATH, API_BASE = get_env_vars()
+ENVIRONMENT, NEXUS_ENDPOINT, NEXUS_CONFIG_PATH, NEXUS_CONFIG_PATH_DATAMODELS, API_BASE = \
+    get_env_vars()

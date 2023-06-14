@@ -18,7 +18,7 @@ from data.species import Species
 from data.utils import get_id
 from query.forge_utils import set_elastic_view, set_sparql_view
 from query.sdk_layer import fetch as fetch_file
-from config import NEXUS_ENDPOINT, NEXUS_CONFIG_PATH
+from config import NEXUS_ENDPOINT, NEXUS_CONFIG_PATH, NEXUS_CONFIG_PATH_DATAMODELS
 
 shape_rule_id = "https://bbp.epfl.ch/neurosciencegraph/data/ac5885c8-bb70-4336-ae7f-3e1425356fe8"
 all_aspect_rule_id = \
@@ -80,6 +80,10 @@ def get_embedding_vectors(entity_ids: List[str], model_id: str, token: str) -> L
 
 
 def _allocate_forge_session(org, project, token, config_path=NEXUS_CONFIG_PATH):
+
+    if org == "neurosciencegraph" and project == "datamodels":
+        config_path = NEXUS_CONFIG_PATH_DATAMODELS
+
     try:
         forge = KnowledgeGraphForge(
             configuration=config_path,
@@ -614,9 +618,10 @@ def download_from_content_url(content_url, content_type, path_to_download, org, 
                                bucket=f"{org}/{project}")
 
 
-def get_neuron_morphology(token: str, nm_id: str, sidebar_content: Dict[str, Dict]) \
-        -> ResultResource:
-    forge_seu = _allocate_forge_session("bbp-external", "seu", token)
+def get_neuron_morphology(token: str, nm_id: str, sidebar_content: Dict[str, Dict],
+                          org: str, project: str) -> ResultResource:
+
+    forge_seu = _allocate_forge_session(org, project, token)
     set_elastic_view(forge_seu, "https://bbp.epfl.ch/neurosciencegraph/data/test_view")
 
     q = {
@@ -649,24 +654,33 @@ def get_neuron_morphology(token: str, nm_id: str, sidebar_content: Dict[str, Dic
     raise ForgeError(f"Couldn't retrieve neuron morphology {nm_id}")
 
 
-def get_neuron_morphologies(token: str, sidebar_content: Dict[str, Dict]) -> Dict[str, Result]:
-    forge_seu = _allocate_forge_session("bbp-external", "seu", token)
+def get_neuron_morphologies(token: str, sidebar_content: Dict[str, Dict],
+                            rule_id: str) -> Dict[str, Result]:
+
+    org, project = ("public", "thalamus") if rule_id == shape_rule_id else ("bbp-external", "seu")
+
+    forge = _allocate_forge_session(org, project, token)
 
     q = {
-        "from": 0,
-        "size": 10000,
         "query": {
             "bool": {
+                "filter": [
+                    {"term": {"@type": "NeuronMorphology"}}
+                ],
                 "must": [
-                    {"term": {"_deprecated": False}},
+                    {"match": {"_deprecated": False}}
                 ]
             }
         }
     }
 
-    set_elastic_view(forge_seu, "https://bbp.epfl.ch/neurosciencegraph/data/test_view")
+    if org == "bbp-external" and project == "seu":
+        es_view = "https://bbp.epfl.ch/neurosciencegraph/data/test_view"
+    else:
+        es_view = "https://bbp.epfl.ch/neurosciencegraph/data/views/es/dataset"
 
-    neuron_morphologies = forge_seu.elastic(json.dumps(q))
+    set_elastic_view(forge, es_view)
+    neuron_morphologies = forge.elastic(json.dumps(q))
 
     limit_nm = 20
     if len(neuron_morphologies) > limit_nm:
@@ -676,7 +690,7 @@ def get_neuron_morphologies(token: str, sidebar_content: Dict[str, Dict]) -> Dic
         raise ForgeError("Elastic Search Retrieval of neuron morphologies was not successful")
 
     resources: List[ResultResource] = to_result_resource(
-        neuron_morphologies, forge=forge_seu, additional_data=None, sidebar_content=sidebar_content
+        neuron_morphologies, forge=forge, additional_data=None, sidebar_content=sidebar_content
     )
 
     return dict(
