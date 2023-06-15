@@ -1,5 +1,7 @@
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
+
+from data.result.result_resource import ResultResource
 from layout.result.result_chart import build_result_chart
 
 
@@ -14,7 +16,7 @@ def on_chart_control_change(app):
     def on_chart_control_change_callback(n_clicks, x_axis_select, y_axis_select, stored_results):
         if n_clicks and n_clicks > 0:
             return build_result_chart(
-                data=stored_results.values(),
+                data=[ResultResource.store_to_class(e) for e in stored_results.values()],
                 x_axis=x_axis_select,
                 y_axis=y_axis_select
             )

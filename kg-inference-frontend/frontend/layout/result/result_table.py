@@ -13,7 +13,7 @@ def build_result_table(results: List[ResultResource], table_id, include_score: b
     data = results
 
     ignore_keys = [Attribute.CONTENT_URL, Attribute.AT_LOCATION, Attribute.BRAIN_REGION_ID,
-                   Attribute.LINK, Attribute.M_TYPE, Attribute.E_TYPE, Attribute.CONTRIBUTION,
+                   Attribute.LINK, Attribute.E_TYPE, Attribute.CONTRIBUTION,
                    Attribute.IMAGE, Attribute.ORG, Attribute.PROJECT, Attribute.DISTRIBUTION,
                    Attribute.IMAGE_STIMULUS_TYPE_LABEL, Attribute.SUBJECT_ID, Attribute.SCORE,
                    Attribute.SCORE_BREAKDOWN]
