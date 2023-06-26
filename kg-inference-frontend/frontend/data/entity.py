@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 
+from data.identifiable import Identifiable
+
 
 @dataclass(init=True)
-class Entity:
-    id: str
+class Entity(Identifiable):
     name: str
 
     @staticmethod

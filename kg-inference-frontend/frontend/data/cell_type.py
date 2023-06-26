@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 
+from data.identifiable import Identifiable
+
 
 @dataclass(init=True)
-class CellType:
+class CellType(Identifiable):
     name: str
-    id: str
 
     @staticmethod
     def class_to_store(ct):

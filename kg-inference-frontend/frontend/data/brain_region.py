@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 
+from data.identifiable import Identifiable
+
 
 @dataclass(init=True)
-class BrainRegion:
+class BrainRegion(Identifiable):
 
     name: str
-    id: str
     hasPart: any
     isPart: any
 

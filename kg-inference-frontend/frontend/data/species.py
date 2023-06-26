@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 
+from data.identifiable import Identifiable
+
 
 @dataclass(init=True)
-class Species:
+class Species(Identifiable):
 
     name: str
-    id: str
 
     @staticmethod
     def class_to_store(ct):

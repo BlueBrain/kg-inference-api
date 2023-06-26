@@ -1,6 +1,8 @@
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Type
 from dash import html, dcc
 from dash.development.base_component import Component
+
+from data.identifiable import Identifiable
 from data.input_parameter import InputParameter, InputParameterType
 from data.dict_key import DictKey, dict_key_class_map
 from data.rule import Rule
@@ -9,11 +11,17 @@ from query.forge import get_forge_neuroscience_datamodels
 DEFAULT_LIMIT = 50
 
 
-def get_form_control_special(dict_key: Optional[DictKey], class_name, multiple: bool,
-                             id_obj: Dict[str, str], token: str,
-                             sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List],
-                             disabled: bool) \
-        -> Component:
+def get_form_control_special(
+        dict_key: Optional[DictKey],
+        class_name: Type[Identifiable],
+        multiple: bool,
+        id_obj: Dict[str, str],
+        token: str,
+        sidebar_content: Dict[str, Dict],
+        stored_filters: Dict[str, List],
+        disabled: bool,
+        filter_set: Optional[List[str]] = None
+) -> Component:
     """
     Returns the form control for a specific set of input parameter names, those whose user
     selected value has a type that is known, and therefore whose valid values are known too and
@@ -35,12 +43,14 @@ def get_form_control_special(dict_key: Optional[DictKey], class_name, multiple: 
     @param sidebar_content: the data that has been loaded into the sidebar.
     Some input controls will use some as a list of available values
     @param stored_filters: the filters chosen by the user in the sidebar.
+    @param filter_set: a list of ids to keep from the sidebar content valid values, if not all of
+    them are valid values
     Some input controls will use them to preselect a value
     @return
     """
-    class_to_func = {
-
-    }
+    # class_to_func = {
+    #
+    # }
 
     def to_dropdown_format(el_list):
         return [
@@ -53,6 +63,9 @@ def get_form_control_special(dict_key: Optional[DictKey], class_name, multiple: 
         dict_key_value = dict_key.value
         all_entities = sidebar_content[dict_key_value]
         all_as_class = [class_name.store_to_class(e) for e in all_entities]
+
+        if filter_set is not None:
+            all_as_class = [e for e in all_as_class if e.id in filter_set]
 
         # A filter for this dropdown has been selected in the sidebar
         if stored_filters and dict_key in stored_filters and \
@@ -78,19 +91,19 @@ def get_form_control_special(dict_key: Optional[DictKey], class_name, multiple: 
             options=to_dropdown_format(all_as_class),
             disabled=disabled
         )
-    else:  # TODO so far doesn't reach this with extraction of MType and Entity
-
-        if class_name in class_to_func:
-            forge = get_forge_neuroscience_datamodels(token)
-            data = class_to_func[class_name](forge)
-            return dcc.Dropdown(
-                id=id_obj,
-                multi=multiple,
-                options=to_dropdown_format(data),
-                disabled=disabled
-            )
-
-        raise ValueError
+    # else:  # TODO so far doesn't reach this with extraction of MType and Entity
+    #
+    #     if class_name in class_to_func:
+    #         forge = get_forge_neuroscience_datamodels(token)
+    #         data = class_to_func[class_name](forge)
+    #         return dcc.Dropdown(
+    #             id=id_obj,
+    #             multi=multiple,
+    #             options=to_dropdown_format(data),
+    #             disabled=disabled
+    #         )
+    #
+    #     raise ValueError
 
 
 def build_id(rule_id, name, control_type="basic") -> Dict[str, str]:

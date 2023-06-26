@@ -1,3 +1,6 @@
+import os
+import json
+
 from dash import html, dcc
 
 from data.dict_key import DictKey, dict_key_class_map, dict_key_attribute_map
@@ -61,7 +64,6 @@ def generalise_similarity_input_groups(rule: Rule, token: str, sidebar_content: 
 
 def build_from_sub_rule(hierarchy_dict_key: DictKey, rule: Rule, token: str,
                         sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List]):
-
     sub_rule = rule.sub_rules[hierarchy_dict_key]
 
     input_parameters = dict((i.name, i) for i in sub_rule.input_parameters)
@@ -78,6 +80,13 @@ def build_from_sub_rule(hierarchy_dict_key: DictKey, rule: Rule, token: str,
         label="Result Type"
     )
 
+    if hierarchy_dict_key == DictKey.BRAIN_REGIONS:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                               "../../../assets/", "brain_region_ids.json"), "r") as f:
+            filter_set = json.load(f)
+    else:
+        filter_set = None
+
     starting_value_control = get_input_group(
         form_control=get_form_control_special(
             dict_key=hierarchy_dict_key,
@@ -87,7 +96,8 @@ def build_from_sub_rule(hierarchy_dict_key: DictKey, rule: Rule, token: str,
             stored_filters=stored_filters,
             class_name=dict_key_class_map[hierarchy_dict_key],
             id_obj=build_id(rule_id=sub_rule.id, name=field_name_map[hierarchy_dict_key]),
-            disabled=False
+            disabled=False,
+            filter_set=filter_set
         ),
         label="Hierarchy starting value"
     )
