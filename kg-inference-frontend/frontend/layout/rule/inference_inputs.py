@@ -9,7 +9,7 @@ from query.forge import get_forge_neuroscience_datamodels
 DEFAULT_LIMIT = 50
 
 
-def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool,
+def get_form_control_special(dict_key: Optional[DictKey], class_name, multiple: bool,
                              id_obj: Dict[str, str], token: str,
                              sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List],
                              disabled: bool) \
@@ -50,15 +50,17 @@ def get_form_control_special(dict_key: Optional[str], class_name, multiple: bool
 
     # rendering an input that is of one of the datatypes loaded in the sidebar
     if dict_key:
-
-        all_entities = sidebar_content[dict_key]
+        dict_key_value = dict_key.value
+        all_entities = sidebar_content[dict_key_value]
         all_as_class = [class_name.store_to_class(e) for e in all_entities]
 
         # A filter for this dropdown has been selected in the sidebar
-        if stored_filters and dict_key in stored_filters and len(stored_filters[dict_key]) > 0:
+        if stored_filters and dict_key in stored_filters and \
+                len(stored_filters[dict_key_value]) > 0:
+
             indexed_entities = dict((entity.id, entity) for entity in all_as_class)
-            selected_filter = stored_filters[dict_key] if not multiple \
-                else [stored_filters[dict_key][0]]
+            selected_filter = stored_filters[dict_key_value] if not multiple \
+                else [stored_filters[dict_key_value][0]]
             filters_as_class = [indexed_entities[e] for e in selected_filter]
             ddf = to_dropdown_format(filters_as_class)
 
@@ -151,12 +153,14 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str,
 
     if input_parameter.name in special_inputs.keys():
         dict_key = special_inputs[input_parameter.name]
+        class_name = dict_key_class_map[dict_key]
+        id_obj = build_id(rule_id=rule_id, name=input_parameter.name)
 
         return get_form_control_special(
-            dict_key=dict_key.value,
-            class_name=dict_key_class_map[dict_key],
+            dict_key=dict_key,
+            class_name=class_name,
             multiple=multiple,
-            id_obj=build_id(rule_id=rule_id, name=input_parameter.name),
+            id_obj=id_obj,
             sidebar_content=sidebar_content,
             stored_filters=stored_filters,
             token=token,
@@ -171,7 +175,7 @@ def get_form_control(input_parameter: InputParameter, rule_id: str, token: str,
             id=build_id(rule_id=rule_id, name=input_parameter.name),
             name=input_parameter.name,
             className="form-control"
-        ) # TODO disabled?
+        )  # TODO disabled?
     if multiple:
         return dcc.Textarea(
             id=build_id(rule_id=rule_id, name=input_parameter.name,

@@ -13,7 +13,7 @@ def build_selected_result(result, token, app):
                    Attribute.ENCODING_FORMAT, Attribute.CONTENT_URL, Attribute.AT_LOCATION,
                    Attribute.LINK, Attribute.IMAGE, Attribute.ORG, Attribute.PROJECT,
                    Attribute.DISTRIBUTION, Attribute.IMAGE_STIMULUS_TYPE_LABEL,
-                   Attribute.SCORE_BREAKDOWN]
+                   Attribute.SCORE_BREAKDOWN, Attribute.SPECIES]
 
     attributes = result_resource.get_attributes(ignore_keys=ignore_keys)
 

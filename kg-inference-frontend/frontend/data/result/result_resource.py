@@ -38,7 +38,8 @@ class ResultResource(Result):
                 )
 
             resource.set_images([
-                image.set_stimulus_type(get_stimulus_in_resource_by_id(image.stimulus_type.id, new_obj))
+                image.set_stimulus_type(get_stimulus_in_resource_by_id(image.stimulus_type.id,
+                                                                       new_obj))
                 for image in resource.get_image()
                 if image.stimulus_type and "label" not in image.stimulus_type
             ])

@@ -16,7 +16,7 @@ def build_result_table(results: List[ResultResource], table_id, include_score: b
                    Attribute.LINK, Attribute.E_TYPE, Attribute.CONTRIBUTION,
                    Attribute.IMAGE, Attribute.ORG, Attribute.PROJECT, Attribute.DISTRIBUTION,
                    Attribute.IMAGE_STIMULUS_TYPE_LABEL, Attribute.SUBJECT_ID, Attribute.SCORE,
-                   Attribute.SCORE_BREAKDOWN]
+                   Attribute.SCORE_BREAKDOWN, Attribute.SPECIES]
 
     def format_data_point(r: ResultResource, is_with_score: bool) -> Dict:
         data_base = r.get_attributes(ignore_keys=ignore_keys)

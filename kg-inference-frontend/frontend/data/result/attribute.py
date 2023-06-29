@@ -18,7 +18,7 @@ class Attribute(ExtendedEnum):
     NAME = "Name"
     SUBJECT = "Subject"
     SUBJECT_ID = "Subject Id"
-    TYPE = "Type"
+    TYPE = "Data Type"
     BRAIN_REGION = "Brain Region"
     BRAIN_REGION_ID = "Brain Region Id"
     CONTRIBUTION = "Contribution"
@@ -32,3 +32,4 @@ class Attribute(ExtendedEnum):
     M_TYPE = "M Type"
     IMAGE = "Image"
     DISTRIBUTION = "Distribution"
+    SPECIES = "Species"

@@ -1,8 +1,11 @@
 from typing import Any, Optional
 
+import dash
 from dash import Input, Output, State, no_update, ALL, callback_context
 from dash.exceptions import PreventUpdate
 
+from callbacks.auth.on_stored_token_sidebar_filter import GENERALIZE_SIMILARITY_ID
+from data.dict_key import DictKey
 from layout.rule.custom_rules.generalize_hierarchy_rule import GENERALIZE_HIERARCHY_ID, value_map
 from layout.utils import make_toast, ToastType
 from layout.rule.inference_inputs import DEFAULT_LIMIT
@@ -44,31 +47,23 @@ def on_infer_press(app):
 
         form_control_types = [fc_id["control_type"] for fc_id in form_control_ids]
 
+        # TODO different in gen sim
+
+        if rule.id == GENERALIZE_SIMILARITY_ID:
+            idx = next(
+                i for i, val in enumerate(form_control_names)
+                if val == "GeneralizedFieldName"
+            )
+            rule = rule.sub_rules[DictKey(values[idx])]
+            del form_control_names[idx]
+            del values[idx]
+
         i_ps = dict((i_p.name, i_p) for i_p in rule.input_parameters)
         # TODO would be better to somehow have a data_ attribute in the form control
         form_control_data = [i_ps[fc_data].values for fc_data in form_control_names]
 
-        def format_value(value: Any, control_type: str, additional_data: Optional[Any]):
-            """
-            Reformatting of the values input in the form controls:
-            - newline_separated: if a parameter allows for multiple values, but there is no
-            predefined list of valid values for it, they are given by the user in a text area,
-            and individual values are separated by a newline. The reformatting separates them
-            into an array of values
-            - opposite: given a form control that has a list of valid values, the user
-            chooses amongst them. The values that will be submitted are all valid values
-            that have NOT been selected by the user
-            """
-            if control_type == "basic":
-                return value
-            if control_type == "newline_separated":
-                return value.split("\n") if value else []
-            if control_type == "opposite":
-                return list(set(additional_data.keys()).difference(set(value)))
-            raise Exception(f"Unknown form control type {control_type}")
-
         values = [
-            format_value(value, control_type, data)
+            _format_value(value, control_type, data)
             for (value, control_type, data) in
             zip(values, form_control_types, form_control_data)
         ]
@@ -80,6 +75,11 @@ def on_infer_press(app):
             selected_hierarchy = input_parameters["GeneralizedFieldName"]
             to_add = dict(list(value_map[selected_hierarchy].items())[1:])
             input_parameters.update(to_add)
+
+        input_parameters = {
+            "rule_id": rule.id,
+            "parameters": input_parameters
+        }
 
         return input_parameters, make_toast(ToastType.INFORMATION, f"Started inference")
 
@@ -116,16 +116,18 @@ def on_infer_press(app):
         Input(component_id="stored_results", component_property="clear_data"),
         State(component_id="input_parameters", component_property="data"),
         State(component_id="stored_token", component_property="data"),
-        State(component_id="selected_rule", component_property="data"),
         State(component_id="sidebar_content", component_property="data"),
 
     )
-    def on_stored_result_clear(stored_results_clear, input_parameters, token, rule,
+    def on_stored_result_clear(stored_results_cleared, input_parameters, token,
                                sidebar_content):
 
         if input_parameters is not None:
+
+            parameters = input_parameters["parameters"]
+            rule_id = input_parameters["rule_id"]
             try:
-                results = infer(rule_id=rule["id"], input_parameters=input_parameters,
+                results = infer(rule_id=rule_id, input_parameters=parameters,
                                 token=token, sidebar_content=sidebar_content)
 
             except (APIError, ForgeError) as e:
@@ -136,3 +138,23 @@ def on_infer_press(app):
 
         if input_parameters is None:
             return None, no_update, no_update
+
+
+def _format_value(value: Any, control_type: str, additional_data: Optional[Any]):
+    """
+    Reformatting of the values input in the form controls:
+    - newline_separated: if a parameter allows for multiple values, but there is no
+    predefined list of valid values for it, they are given by the user in a text area,
+    and individual values are separated by a newline. The reformatting separates them
+    into an array of values
+    - opposite: given a form control that has a list of valid values, the user
+    chooses amongst them. The values that will be submitted are all valid values
+    that have NOT been selected by the user
+    """
+    if control_type == "basic":
+        return value
+    if control_type == "newline_separated":
+        return value.split("\n") if value else []
+    if control_type == "opposite":
+        return list(set(additional_data.keys()).difference(set(value)))
+    raise Exception(f"Unknown form control type {control_type}")

@@ -2,6 +2,7 @@ from enum import Enum
 from data.brain_region import BrainRegion
 from data.cell_type import CellType, MType, EType
 from data.data_type import DataType
+from data.result.attribute import Attribute
 from data.species import Species
 
 
@@ -25,4 +26,15 @@ dict_key_class_map = {
     DictKey.M_TYPES: MType,
     DictKey.E_TYPES: EType,
     DictKey.SPECIES: Species
+}
+
+dict_key_attribute_map = {
+    DictKey.BRAIN_REGIONS: Attribute.BRAIN_REGION,
+    DictKey.DATA_TYPES: Attribute.TYPE,
+    DictKey.M_TYPES: Attribute.M_TYPE,
+    DictKey.E_TYPES: Attribute.E_TYPE,
+    DictKey.SPECIES: Attribute.SPECIES
+    # DictKey.CONTRIBUTORS: ,
+    # DictKey.ENTITIES: ,
+    # DictKey.CELL_TYPES: ,
 }

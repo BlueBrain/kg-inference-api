@@ -13,13 +13,16 @@ from data.result.result_resource import ResultResource
 
 DEFAULT_X_AXIS, DEFAULT_Y_AXIS = Attribute.BRAIN_REGION.value, Attribute.TYPE.value
 
-dropdown_key_title_map = {
-    Attribute.BRAIN_REGION.value: "Brain Regions",
-    Attribute.TYPE.value: "Data Types",
-    Attribute.E_TYPE.value: "E Types",
-    Attribute.M_TYPE.value: "M Types",
-    Attribute.CONTRIBUTION_LABEL.value: "Contributors"
-}
+dropdown_key_title_map = dict(
+    (att.value, f"{att.value}s")
+    for att in [
+        Attribute.BRAIN_REGION,
+        Attribute.TYPE,
+        Attribute.E_TYPE,
+        Attribute.M_TYPE,
+        Attribute.CONTRIBUTION_LABEL
+    ]
+)
 
 
 def build_result_chart_with_controls(results: List[ResultResource]):

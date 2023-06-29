@@ -33,8 +33,8 @@ value_map = {
 }
 
 
-def generalise_context_input_groups(rule, token: str, sidebar_content: Dict[str, Dict],
-                                    stored_filters: Dict[str, List]) -> List[html.Div]:
+def generalise_hierarchy_input_groups(rule, token: str, sidebar_content: Dict[str, Dict],
+                                      stored_filters: Dict[str, List]) -> List[html.Div]:
     """
 
     @param rule:
@@ -69,7 +69,7 @@ def generalise_context_input_groups(rule, token: str, sidebar_content: Dict[str,
 
     # GeneralizedFieldValue
     control3 = html.Div(
-        id="generalized_field_value_container",
+        id="hierarchy_generalized_field_value_container",
         children=get_input_group(
             form_control=dcc.Dropdown(),
             label="Hierarchy starting value"
@@ -103,14 +103,14 @@ def generalise_context_input_groups(rule, token: str, sidebar_content: Dict[str,
     return [control1, control2, control3, control4, control5]
 
 
-def update_generalized_field_value(token: str, dict_key: str, class_name,
+def update_generalized_field_value(token: str, dict_key: DictKey, class_name,
                                    sidebar_content: Dict[str, Dict],
                                    stored_filters: Dict[str, List],
                                    id_obj: Dict, label: str, multiple: bool) -> html.Div:
     """
     @param token:
     @param dict_key:
-    @param class_name:
+    @param class_name: The class corresponding to the DictKey
     @param sidebar_content:
     @param stored_filters:
     @param id_obj:
