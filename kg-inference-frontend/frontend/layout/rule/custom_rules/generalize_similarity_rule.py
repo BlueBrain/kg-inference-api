@@ -84,6 +84,7 @@ def build_from_sub_rule(hierarchy_dict_key: DictKey, rule: Rule, token: str,
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                "../../../assets/", "brain_region_ids.json"), "r") as f:
             filter_set = json.load(f)
+            filter_set = [f"http://api.brain-map.org/api/v2/data/Structure/{e}" for e in filter_set]
     else:
         filter_set = None
 
