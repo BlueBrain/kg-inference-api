@@ -1,15 +1,18 @@
 from typing import List
-
-from dash import dcc, html
-import plotly.graph_objects as go
+from collections import defaultdict
 from itertools import product
 
 from dash.development.base_component import Component
+from dash import dcc, html
+import plotly.graph_objects as go
 
-from layout.rule.inference_inputs import get_input_group
-from data.utils import enforce_list
+from data.rule import Rule
+from data.utils import enforce_list, get_model_label
 from data.result.result import Attribute
 from data.result.result_resource import ResultResource
+
+from layout.rule.inference_inputs import get_input_group
+
 
 DEFAULT_X_AXIS, DEFAULT_Y_AXIS = Attribute.BRAIN_REGION.value, Attribute.TYPE.value
 
@@ -25,7 +28,7 @@ dropdown_key_title_map = dict(
 )
 
 
-def build_result_chart_with_controls(results: List[ResultResource]):
+def build_result_chart_with_controls(results: List[ResultResource], rule: Rule):
     return html.Div(children=[
         html.Div(className="row", children=[
 
@@ -44,7 +47,8 @@ def build_result_chart_with_controls(results: List[ResultResource]):
                             className="btn btn-dark mt-4")
             ])
         ]),
-        html.Div(id="chart_container", children=build_result_chart(results))
+        html.Div(id="chart_container", children=build_result_chart(results)),
+        html.Div(id="chart_score_container", children=build_score_chart(results, rule))
     ])
 
 
@@ -86,3 +90,29 @@ def build_result_chart(data: List[ResultResource], x_axis=DEFAULT_X_AXIS, y_axis
     heatmap = go.Figure(data=go.Heatmap(x=x, y=y, z=z), layout=layout)
     heatmap.update_traces(colorbar={"dtick": 1}, selector={"type": "heatmap"})
     return dcc.Graph(figure=heatmap)
+
+
+def build_score_chart(data: List[ResultResource], rule: Rule) -> Component:
+    combined_score = [e.get_attribute(Attribute.SCORE) for e in data]
+
+    if all(e is None for e in combined_score):
+        return html.Div()
+
+    score_breakdown_attribute = [e.get_attribute(Attribute.SCORE_BREAKDOWN)[0] for e in data]
+
+    to_graph = lambda x, title: dcc.Graph(figure=go.Figure(
+        data=go.Histogram(x=x),
+        layout=go.Layout(title=title))
+    )
+    score_breakdown = defaultdict(list)
+
+    for entry in score_breakdown_attribute:
+        for key, value in entry.items():
+            score, weight = value
+            title = f"{get_model_label(key, rule=rule)}, weight={weight}"
+            score_breakdown[title].append(score)
+
+    data = [to_graph(x=values, title=title) for title, values in score_breakdown.items()] + \
+           [to_graph(x=combined_score, title="Combined Score")]
+
+    return html.Div(children=data)

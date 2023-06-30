@@ -31,7 +31,7 @@ def build_result_list(results: Dict[str, Dict], rule: Dict, token: str,
         dcc.Tab(
             label="Chart View",
             children=build_result_chart_with_controls(
-                results=results_list
+                results=results_list, rule=rule
             )
         )
     ]
