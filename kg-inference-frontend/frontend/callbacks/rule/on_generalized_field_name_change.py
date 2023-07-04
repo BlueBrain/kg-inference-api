@@ -5,7 +5,8 @@ from callbacks.auth.on_stored_token_sidebar_filter import GENERALIZE_SIMILARITY_
 from data.rule import Rule
 from layout.rule.custom_rules.generalize_hierarchy_rule import GENERALIZE_HIERARCHY_ID, \
     update_generalized_field_value, value_map
-from layout.rule.custom_rules.generalize_similarity_rule import build_from_sub_rule
+from layout.rule.custom_rules.generalize_similarity_rule import build_from_sub_rule, \
+    DEFAULT_SIMILARITY_MODEL
 from layout.rule.inference_inputs import build_id
 from data.dict_key import dict_key_class_map, DictKey
 
@@ -62,6 +63,8 @@ def on_generalized_field_name_change(app):
 
     @app.callback(
         Output(component_id="type_query_parameter_container", component_property="children"),
+        Output(component_id="similarity_generalized_model_container",
+               component_property="children"),
         Output(component_id="similarity_generalized_field_value_container",
                component_property="children"),
         Input(component_id={
@@ -84,6 +87,7 @@ def on_generalized_field_name_change(app):
 
         return build_from_sub_rule(
             hierarchy_dict_key=DictKey(new_field_name),
+            similarity_model_dict_key=DEFAULT_SIMILARITY_MODEL[DictKey(new_field_name)],
             rule=Rule.store_to_class(selected_rule),
             token=token,
             sidebar_content=sidebar_content,

@@ -1,6 +1,5 @@
 from typing import Any, Optional
 
-import dash
 from dash import Input, Output, State, no_update, ALL, callback_context
 from dash.exceptions import PreventUpdate
 
@@ -37,6 +36,7 @@ def on_infer_press(app):
         infer_form_controls = callback_context.states_list[1]
         form_control_ids = [fc["id"] for fc in infer_form_controls]
         form_control_names = [fc_id["name"] for fc_id in form_control_ids]
+        form_control_types = [fc_id["control_type"] for fc_id in form_control_ids]
 
         # idx_limit = form_control_names.index("LimitQueryParameter")
         # limit = values[idx_limit]
@@ -45,21 +45,42 @@ def on_infer_press(app):
         #     limit = DEFAULT_LIMIT
         #     values[idx_limit] = limit
 
-        form_control_types = [fc_id["control_type"] for fc_id in form_control_ids]
-
-        # TODO different in gen sim
-
         if rule.id == GENERALIZE_SIMILARITY_ID:
-            idx = next(
-                i for i, val in enumerate(form_control_names)
-                if val == "GeneralizedFieldName"
+
+            # form_control_types, form_control_names, form_control_ids, values are ordered
+            # By getting the index of the form control with the specified name, we can retrieve the
+            # associated values and types
+
+            fcn_idx = lambda name: next(
+                i for i, val in enumerate(form_control_names) if val == name
             )
-            rule = rule.sub_rules[DictKey(values[idx])]
-            del form_control_names[idx]
-            del values[idx]
+
+            generalized_field_name_id = fcn_idx("GeneralizedFieldName")
+            similarity_model_name_id = fcn_idx("SimilarityModelName")
+
+            ids_rule_select = [generalized_field_name_id, similarity_model_name_id]
+
+            # These values are just used to retrieve the appropriate rule id within the
+            # aggregating rule
+            chosen_hierarchy = values[generalized_field_name_id]
+            chosen_model = values[similarity_model_name_id]
+
+            rule = rule.sub_rules[DictKey(chosen_hierarchy)][chosen_model]
+
+            # They are not submitted to the library and can be removed
+            rm_idx = lambda arr: [
+                v for i, v in enumerate(arr)
+                if i not in ids_rule_select
+            ]
+
+            form_control_names = rm_idx(form_control_names)
+            form_control_types = rm_idx(form_control_types)
+            values = rm_idx(values)
 
         i_ps = dict((i_p.name, i_p) for i_p in rule.input_parameters)
-        # TODO would be better to somehow have a data_ attribute in the form control
+
+        # Formatting of values: necessary to get all valid values from the .values field in case
+        # the formatting type is "opposite"
         form_control_data = [i_ps[fc_data].values for fc_data in form_control_names]
 
         values = [

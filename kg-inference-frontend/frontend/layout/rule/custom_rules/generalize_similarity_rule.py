@@ -9,14 +9,17 @@ from layout.rule.inference_inputs import get_form_control, get_input_group, buil
     get_form_control_special
 from typing import List, Dict
 
-DEFAULT_SIMILARITY = DictKey.BRAIN_REGIONS
+DEFAULT_SIMILARITY_HIERARCHY = DictKey.BRAIN_REGIONS
+DEFAULT_SIMILARITY_MODEL = {
+     DictKey.BRAIN_REGIONS: "Poincare"
+}
 
 field_name_map = {
     DictKey.BRAIN_REGIONS: "BrainRegionQueryParameter"
 }
 
 
-def generalise_similarity_input_groups(rule: Rule, token: str, sidebar_content: Dict[str, Dict],
+def generalize_similarity_input_groups(rule: Rule, token: str, sidebar_content: Dict[str, Dict],
                                        stored_filters: Dict[str, List]) -> List[html.Div]:
     """
 
@@ -27,8 +30,9 @@ def generalise_similarity_input_groups(rule: Rule, token: str, sidebar_content: 
     @return
     """
 
-    control1, control3 = build_from_sub_rule(
-        hierarchy_dict_key=DEFAULT_SIMILARITY,
+    control1_content, control3_content, control4_content = build_from_sub_rule(
+        hierarchy_dict_key=DEFAULT_SIMILARITY_HIERARCHY,
+        similarity_model_dict_key=DEFAULT_SIMILARITY_MODEL[DEFAULT_SIMILARITY_HIERARCHY],
         rule=rule,
         token=token,
         sidebar_content=sidebar_content,
@@ -37,12 +41,7 @@ def generalise_similarity_input_groups(rule: Rule, token: str, sidebar_content: 
 
     control1 = html.Div(
         id="type_query_parameter_container",  # TODO maybe not
-        children=control1
-    )
-
-    control3 = html.Div(
-        id="similarity_generalized_field_value_container",
-        children=control3
+        children=control1_content
     )
 
     control2 = get_input_group(
@@ -51,20 +50,37 @@ def generalise_similarity_input_groups(rule: Rule, token: str, sidebar_content: 
                 (dict_key.value, dict_key_attribute_map[dict_key].value)
                 for dict_key in rule.sub_rules.keys()
             ),
-            value=DEFAULT_SIMILARITY.value,
+            value=DEFAULT_SIMILARITY_HIERARCHY.value,
             inline=True,
             id=build_id(rule_id=rule.id, name="GeneralizedFieldName"),
             labelStyle={"paddingRight": "10px"}
         ),
-        label="Hierarchy to use for generalisation"
+        label="Hierarchy to use for generalization"
     )
 
-    return [control1, control2, control3]
+    control3 = html.Div(
+        id="similarity_generalized_model_container",
+        children=control3_content
+    )
+
+    control4 = html.Div(
+        id="similarity_generalized_field_value_container",
+        children=control4_content
+    )
+
+    return [control1, control2, control3, control4]
 
 
-def build_from_sub_rule(hierarchy_dict_key: DictKey, rule: Rule, token: str,
-                        sidebar_content: Dict[str, Dict], stored_filters: Dict[str, List]):
-    sub_rule = rule.sub_rules[hierarchy_dict_key]
+def build_from_sub_rule(
+        hierarchy_dict_key: DictKey,
+        similarity_model_dict_key: str,
+        rule: Rule,
+        token: str,
+        sidebar_content: Dict[str, Dict],
+        stored_filters: Dict[str, List]
+):
+
+    sub_rule = rule.sub_rules[hierarchy_dict_key][similarity_model_dict_key]
 
     input_parameters = dict((i.name, i) for i in sub_rule.input_parameters)
 
@@ -100,8 +116,22 @@ def build_from_sub_rule(hierarchy_dict_key: DictKey, rule: Rule, token: str,
             disabled=False,
             filter_set=filter_set
         ),
-        label="Hierarchy starting value"
+        label="Hierarchy value"
     )
+
+    similarity_model_control = get_input_group(
+        form_control=dcc.RadioItems(
+            options=dict(
+                (v, v)
+                for v in rule.sub_rules[DEFAULT_SIMILARITY_HIERARCHY].keys()
+            ),
+            value=DEFAULT_SIMILARITY_MODEL[DEFAULT_SIMILARITY_HIERARCHY],
+            inline=True,
+            id=build_id(rule_id=rule.id, name="SimilarityModelName"),
+            labelStyle={"paddingRight": "10px"}
+        ),
+        label="Similarity model"
+    )  # TODO
 
     # TODO enable support in the library
     # ExcludeQueryParameter
@@ -113,4 +143,4 @@ def build_from_sub_rule(hierarchy_dict_key: DictKey, rule: Rule, token: str,
     #     ),
     # )
 
-    return type_control, starting_value_control
+    return type_control, similarity_model_control, starting_value_control

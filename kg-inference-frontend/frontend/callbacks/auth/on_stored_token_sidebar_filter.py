@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from dash import Input, Output, State, no_update
 from dash.exceptions import PreventUpdate
 
@@ -10,7 +12,7 @@ GENERALIZE_SIMILARITY_ID = "sim_rule"
 
 SUB_SIMILARITY_RULE_IDS = {
     "https://bbp.epfl.ch/neurosciencegraph/data/9d64dc0d-07d1-4624-b409-cdc47ccda212":
-        DictKey.BRAIN_REGIONS
+        (DictKey.BRAIN_REGIONS, "Poincare")
 }
 
 
@@ -35,21 +37,23 @@ def on_stored_token_sidebar_filter(app):
                 rules_class = get_rules(token, search_filters)
 
                 rules = [rule for rule in rules_class if rule.id not in SUB_SIMILARITY_RULE_IDS]
-                sim_rules = dict(
-                    (SUB_SIMILARITY_RULE_IDS[rule.id], rule)
-                    for rule in rules_class if rule.id in SUB_SIMILARITY_RULE_IDS
-                )
+
+                sim_rules = defaultdict(dict)
+
+                for rule in rules_class:
+                    if rule.id in SUB_SIMILARITY_RULE_IDS:
+                        e = SUB_SIMILARITY_RULE_IDS[rule.id]
+                        sim_rules[e[0]][e[1]] = rule
 
                 if len(sim_rules) != 0:
                     rules.append(Rule(
                         sub_rules=sim_rules,
-                        name="Generalise by similarity in a BBP ontology (e.g. cell type, "
+                        name="Generalize by similarity in a BBP ontology (e.g. cell type, "
                              "brain region)",
                         description="""
-                        Given an entity type (e.g NeuronMorphology, Trace, cell type, ...) 
-                        linked with a value in an ontology (e.g. Brain Region, M Type, E Type, 
-                        Species), generalise to entities associated with similar values in the 
-                        ontology
+                        Generalize to data of a type (Result Type) that is linked to a value of a
+                         hierarchy (Hierarchy to use for generalization) that is similar to the 
+                         input value in the hierarchy (Hierarchy value)
                         """,
                         id=GENERALIZE_SIMILARITY_ID,
                         resource_type="Entity",

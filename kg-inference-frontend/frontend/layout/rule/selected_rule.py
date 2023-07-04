@@ -6,12 +6,12 @@ from callbacks.auth.on_stored_token_sidebar_filter import GENERALIZE_SIMILARITY_
 from data.rule import Rule
 from layout.rule.inference_inputs import generic_input_groups, get_limit_form_control
 from layout.rule.custom_rules.generalize_hierarchy_rule import (
-    generalise_hierarchy_input_groups,
+    generalize_hierarchy_input_groups,
     GENERALIZE_HIERARCHY_ID
 )
 from layout.rule.custom_rules.generalize_similarity_rule import (
-    generalise_similarity_input_groups,
-    DEFAULT_SIMILARITY
+    generalize_similarity_input_groups,
+    DEFAULT_SIMILARITY_HIERARCHY, DEFAULT_SIMILARITY_MODEL
 )
 from query.forge import NM_RULE_IDS
 from layout.rule.custom_rules.nm_rules import nm_rules_input_groups
@@ -23,10 +23,10 @@ def build_inputs(rule, token, sidebar_content=None, stored_filters=None):
 
     if len(rule.input_parameters) > 0 or rule.id == GENERALIZE_SIMILARITY_ID:
         if rule.id == GENERALIZE_SIMILARITY_ID:
-            fc = generalise_similarity_input_groups
+            fc = generalize_similarity_input_groups
         else:
             if rule.id == GENERALIZE_HIERARCHY_ID:
-                fc = generalise_hierarchy_input_groups
+                fc = generalize_hierarchy_input_groups
             elif rule.id in NM_RULE_IDS:
                 fc = nm_rules_input_groups
             else:
@@ -54,7 +54,8 @@ def build_selected_rule(
         if rule.nexus_link is not None:
             return rule.nexus_link
         if rule.sub_rules is not None and len(rule.sub_rules) != 0:
-            return rule.sub_rules[DEFAULT_SIMILARITY].nexus_link
+            def_model = DEFAULT_SIMILARITY_MODEL[DEFAULT_SIMILARITY_HIERARCHY]
+            return rule.sub_rules[DEFAULT_SIMILARITY_HIERARCHY][def_model].nexus_link
         return None
 
     link = dcc.Link(

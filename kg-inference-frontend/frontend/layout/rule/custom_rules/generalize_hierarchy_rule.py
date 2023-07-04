@@ -33,7 +33,7 @@ value_map = {
 }
 
 
-def generalise_hierarchy_input_groups(rule, token: str, sidebar_content: Dict[str, Dict],
+def generalize_hierarchy_input_groups(rule, token: str, sidebar_content: Dict[str, Dict],
                                       stored_filters: Dict[str, List]) -> List[html.Div]:
     """
 
@@ -64,7 +64,7 @@ def generalise_hierarchy_input_groups(rule, token: str, sidebar_content: Dict[st
             id=build_id(rule_id=rule.id, name="GeneralizedFieldName"),
             labelStyle={"paddingRight": "10px"}
         ),
-        label="Hierarchy to use for generalisation"
+        label="Hierarchy to use for generalization"
     )
 
     # GeneralizedFieldValue
@@ -72,7 +72,7 @@ def generalise_hierarchy_input_groups(rule, token: str, sidebar_content: Dict[st
         id="hierarchy_generalized_field_value_container",
         children=get_input_group(
             form_control=dcc.Dropdown(),
-            label="Hierarchy starting value"
+            label="Hierarchy value"
         )
     )
 
@@ -84,7 +84,7 @@ def generalise_hierarchy_input_groups(rule, token: str, sidebar_content: Dict[st
             id=build_id(rule_id=rule.id, name="SearchDirectionBlock"),
             labelStyle={"paddingRight": "10px"}
         ),
-        label="Generalisation direction"
+        label="Generalization direction"
     )
 
     # ExcludeQueryParameter

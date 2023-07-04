@@ -29,26 +29,31 @@ dropdown_key_title_map = dict(
 
 
 def build_result_chart_with_controls(results: List[ResultResource], rule: Rule):
-    return html.Div(children=[
-        html.Div(className="row", children=[
+    return dcc.Tabs(children=[
+        dcc.Tab(label="Heatmap", children=html.Div(children=[
+            html.Div(className="row", children=[
 
-            get_input_group(
-                form_control=dcc.Dropdown(id="x_axis_chart", options=dropdown_key_title_map,
-                                          value=DEFAULT_X_AXIS),
-                label="X Axis"
-            ),
-            get_input_group(
-                form_control=dcc.Dropdown(id="y_axis_chart", options=dropdown_key_title_map,
-                                          value=DEFAULT_Y_AXIS),
-                label="Y Axis"
-            ),
-            html.Div(className="col-2 mt-2", children=[
-                html.Button(id="chart_button", children="Change axis",
-                            className="btn btn-dark mt-4")
-            ])
-        ]),
-        html.Div(id="chart_container", children=build_result_chart(results)),
-        html.Div(id="chart_score_container", children=build_score_chart(results, rule))
+                get_input_group(
+                    form_control=dcc.Dropdown(id="x_axis_chart", options=dropdown_key_title_map,
+                                              value=DEFAULT_X_AXIS),
+                    label="X Axis"
+                ),
+                get_input_group(
+                    form_control=dcc.Dropdown(id="y_axis_chart", options=dropdown_key_title_map,
+                                              value=DEFAULT_Y_AXIS),
+                    label="Y Axis"
+                ),
+                html.Div(className="col-2 mt-2", children=[
+                    html.Button(id="chart_button", children="Change axis",
+                                className="btn btn-dark mt-4")
+                ])
+            ]),
+            html.Div(id="chart_container", children=build_result_chart(results))
+        ])),
+        dcc.Tab(label="Score distribution", children=[
+            html.Div(id="chart_score_container", children=build_score_chart(results, rule))
+        ])
+
     ])
 
 
@@ -96,7 +101,7 @@ def build_score_chart(data: List[ResultResource], rule: Rule) -> Component:
     combined_score = [e.get_attribute(Attribute.SCORE) for e in data]
 
     if all(e is None for e in combined_score):
-        return html.Div()
+        return html.Div("No score distribution")
 
     score_breakdown_attribute = [e.get_attribute(Attribute.SCORE_BREAKDOWN)[0] for e in data]
 
@@ -109,10 +114,10 @@ def build_score_chart(data: List[ResultResource], rule: Rule) -> Component:
     for entry in score_breakdown_attribute:
         for key, value in entry.items():
             score, weight = value
-            title = f"{get_model_label(key, rule=rule)}, weight={weight}"
+            title = f"Score distribution for {get_model_label(key, rule=rule)}, weight={weight}"
             score_breakdown[title].append(score)
 
     data = [to_graph(x=values, title=title) for title, values in score_breakdown.items()] + \
-           [to_graph(x=combined_score, title="Combined Score")]
+           [to_graph(x=combined_score, title="Combined Score distribution")]
 
     return html.Div(children=data)

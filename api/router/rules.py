@@ -24,7 +24,7 @@ async def get_all_rules(user_session: UserSession = Depends(require_user_session
     :return:
     """
     resource_types = None if rules_body is None else rules_body.resource_types
-    rules_view = "https://bbp.epfl.ch/neurosciencegraph/data/rule-view"
+    rules_view = "https://bbp.epfl.ch/neurosciencegraph/data/rule_view"
     # fetches rules using kg-inference lib
     rules = fetch_rules(forge_rules=user_session.get_rules_forge(),
                         forge_datamodels=user_session.get_datamodels_forge(),
