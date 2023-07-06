@@ -4,6 +4,7 @@ include:
 
 # stages defines the dependencies between the different stages of the pipeline
 stages:
+  - generate
   - test
   - deploy
 
@@ -67,3 +68,48 @@ build-and-deploy-client-image-in-registry:
     BUILD_PATH: $CI_PROJECT_DIR/kg-inference-frontend
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
+
+
+
+# Generate sphinx documentation and stores the artifact under docs/generated/html
+generate-sphinx-documentation:
+  stage: generate
+  image: python:3.8
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      when: on_success
+    - if: $CI_COMMIT_TAG
+      when: on_success
+  script:
+    - pip install .[docs]
+    - sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source ./docs/generated/html
+  artifacts:
+    paths:
+      - docs/generated/html
+  variables:
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
+
+
+# Executes deployment of project documentation
+deploy-sphinx-documentation:
+  stage: deploy
+  extends: .build-image-using-kaniko
+  dependencies:
+    - generate-sphinx-documentation
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      when: on_success
+      variables:
+        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-dev
+    - if: $CI_COMMIT_TAG
+      when: on_success
+      variables:
+        CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/sphinx-documentation-prod
+  variables:
+    KUBERNETES_MEMORY_LIMIT: 4Gi
+    KUBERNETES_MEMORY_REQUEST: 4Gi
+    CI_COMMIT_SHORT_SHA: $CI_COMMIT_SHORT_SHA
+    REGISTRY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA-$(date +%s)
+    BUILD_PATH: $CI_PROJECT_DIR/docs
+    KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html"

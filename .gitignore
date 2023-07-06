@@ -1,6 +1,7 @@
 .idea/*
 __pycache__/*
-/kg-inference/
-local/
-/.DS_Store
-local.sh
+**/.DS_Store
+kg_inference_api.egg-info/
+build/
+.eggs/
+docs/generated/

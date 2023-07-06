@@ -22,3 +22,10 @@ spec:
                 name: kg-inference-api-service
                 port:
                   number: 8086
+          - path: /docs
+            pathType: Prefix
+            backend:
+              service:
+                name: kg-inference-api-docs-service
+                port:
+                  number: 8087

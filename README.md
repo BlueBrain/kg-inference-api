@@ -1,4 +1,5 @@
-# KG Inference API
+KG Inference API
+***********************
 
 ## Environment Variables
 

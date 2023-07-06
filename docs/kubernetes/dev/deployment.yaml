@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kg-inference-api-docs
+  name: kg-inference-api-docs
+  namespace: bbp-ou-dke
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kg-inference-api-docs
+  template:
+    metadata:
+      labels:
+        app: kg-inference-api-docs
+    spec:
+      containers:
+      - image: bbpgitlab.epfl.ch:5050/dke/apps/kg-inference-api/sphinx-documentation-dev
+        name: kg-inference-api-docs
+        resources:
+          requests:
+            memory: "1500Mi"
+            cpu: "1500m"
+          limits:
+            memory: "3000Mi"
+            cpu: "3000m"
+        ports:
+          - containerPort: 8080  # port where we expose the service
+      imagePullSecrets:
+      - name: kg-inference-api-read-registry-token
