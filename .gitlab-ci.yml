@@ -82,10 +82,10 @@ generate-sphinx-documentation:
       when: on_success
   script:
     - pip install .[docs]
-    - sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source ./docs/generated/html
+    - sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source generated/html
   artifacts:
     paths:
-      - docs/generated/html
+      - generated/html
   variables:
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
