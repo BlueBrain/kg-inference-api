@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.10] - 11/07/2023
+
+- Added basic structure for documentation
+- Removed kubernetes yaml files
 
 ## [0.2.9] - 03/07/2023
 
@@ -12,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: Similarity model score selection when running generalization by similarity rule
 - Client: Update generalization by similarity input labels and description
 - API: Updated rule view
+
 ## [0.2.8] - 27/06/2023
 
 - Client: Display a histogram of the scores distribution attributed by similarity models for all 
