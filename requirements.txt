@@ -1,6 +1,0 @@
-fastapi==0.95.0
-uvicorn==0.21.1
-fastapi-camelcase==1.0.5
-pytest==7.2.1
-pyJWT==2.6.0
-pydantic==1.10.6

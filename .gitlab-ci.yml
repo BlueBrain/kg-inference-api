@@ -48,6 +48,7 @@ build-and-deploy-api-image-in-registry:
         CI_COMMIT_SHORT_SHA: $CI_COMMIT_SHORT_SHA
         REGISTRY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA-$(date +%s)
   variables:
+    BUILD_PATH: $CI_PROJECT_DIR/api
     KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
@@ -69,7 +70,7 @@ build-and-deploy-client-image-in-registry:
         REGISTRY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA-$(date +%s)
       when: on_success
   variables:
-    BUILD_PATH: $CI_PROJECT_DIR/kg-inference-frontend
+    BUILD_PATH: $CI_PROJECT_DIR/frontend
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
@@ -85,7 +86,7 @@ generate-sphinx-documentation:
     - if: $CI_COMMIT_TAG
       when: on_success
   script:
-    - pip install .[docs]
+    - pip install docs/
     - sphinx-build -T --keep-going -b html -d _build/doctrees -c ./docs/source -D language=en ./docs/source docs/generated/html
   artifacts:
     paths:
@@ -116,4 +117,4 @@ deploy-sphinx-documentation:
     CI_COMMIT_SHORT_SHA: $CI_COMMIT_SHORT_SHA
     REGISTRY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA-$(date +%s)
     BUILD_PATH: $CI_PROJECT_DIR/docs
-    KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html"
+    KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html -f"

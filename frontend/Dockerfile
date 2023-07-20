@@ -7,13 +7,10 @@ RUN apt update && apt install -y \
     python3.9 \
     git && rm -rf /var/lib/apt/lists/*
 
-COPY ./requirements.txt /code/requirements.txt
-COPY ./frontend /code/frontend
-
 WORKDIR /code
+COPY . /code
 
-RUN pip install git+https://github.com/BlueBrain/nexus-forge
-RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
+RUN pip install -e .
 
 ENV PYTHONPATH "${PYTHONPATH}:${WORKDIR}/code/frontend"
 

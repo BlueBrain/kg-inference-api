@@ -5,7 +5,7 @@ version: '3.8'
 services:
   api:
     build:
-      context: .
+      context: ./api
       args:
         GITLAB_USERNAME: <MY_GITLAB_USERNAME>
         GITLAB_TOKEN: <MY_GITLAB_TOKEN>
@@ -18,18 +18,13 @@ services:
       DATAMODELS_BUCKET: neurosciencegraph/datamodels
       WHITELISTED_CORS_URLS: http://api:8000
       NEXUS_TOKEN: "TODO"
-    networks:
-      - bluebrainatlas_default
   front:
     build:
-      context: ./kg-inference-frontend
+      context: ./frontend
     ports:
       - "8050:8050"
     environment:
       ENVIRONMENT: LOCAL
     depends_on:
       - api
-networks:
-  bluebrainatlas_default:
-    external: true
 
