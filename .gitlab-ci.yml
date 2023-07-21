@@ -48,8 +48,7 @@ build-and-deploy-api-image-in-registry:
         CI_COMMIT_SHORT_SHA: $CI_COMMIT_SHORT_SHA
         REGISTRY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA-$(date +%s)
   variables:
-    BUILD_PATH: $CI_PROJECT_DIR/api
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$GITLAB_TOKEN --build-arg GITLAB_USERNAME=$GITLAB_USERNAME -f ./api/Dockerfile
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
@@ -70,7 +69,7 @@ build-and-deploy-client-image-in-registry:
         REGISTRY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA-$(date +%s)
       when: on_success
   variables:
-    BUILD_PATH: $CI_PROJECT_DIR/frontend
+    KANIKO_EXTRA_ARGS: -f ./frontend/Dockerfile
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
@@ -116,5 +115,4 @@ deploy-sphinx-documentation:
     KUBERNETES_MEMORY_REQUEST: 4Gi
     CI_COMMIT_SHORT_SHA: $CI_COMMIT_SHORT_SHA
     REGISTRY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA-$(date +%s)
-    BUILD_PATH: $CI_PROJECT_DIR/docs
-    KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=generated/html -f"
+    KANIKO_EXTRA_ARGS: "--build-arg GENERATED_DOCS_PATH=./docs/generated/html -f ./docs/Dockerfile"

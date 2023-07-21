@@ -1,21 +1,25 @@
 from kgforge.core import KnowledgeGraphForge
 from api import config
-
+import os
 
 class UserSession:
+
+    @staticmethod
+    def to_path(str_base):
+        return os.path.join(os.path.abspath(os.path.dirname(__file__)), str_base)
 
     def __init__(self, token: str) -> None:
         self.endpoint = config.BBP_NEXUS_ENDPOINT
         # adds the rules bucket
         self.forges = {
             config.RULES_BUCKET: KnowledgeGraphForge(
-                "./api/config/forge-config.yaml",
+                UserSession.to_path("./config/forge-config.yaml"),
                 endpoint=self.endpoint,
                 bucket=config.RULES_BUCKET,
                 token=token,
                 debug=config.DEBUG_MODE),
             config.DATAMODELS_BUCKET: KnowledgeGraphForge(
-                "./api/config/forge-config_datamodels.yaml",
+                UserSession.to_path("./config/forge-config_datamodels.yaml"),
                 endpoint=self.endpoint,
                 bucket=config.DATAMODELS_BUCKET,
                 token=token,
@@ -53,7 +57,7 @@ class UserSession:
         # if the bucket does not exist in the session
         if bucket not in self.forges:
             session = KnowledgeGraphForge(
-                "./api/config/forge-config.yaml",
+                UserSession.to_path("./config/forge-config.yaml"),
                 endpoint=self.endpoint,
                 token=self.token,
                 bucket=bucket)
@@ -61,7 +65,7 @@ class UserSession:
         # if the token stored in the forge is different than the one of the session
         elif self.forges[bucket]._store.token != self.token:
             self.forges[bucket] = KnowledgeGraphForge(
-                "./api/config/forge-config.yaml",
+                UserSession.to_path("./config/forge-config.yaml"),
                 endpoint=self.endpoint,
                 token=self.token,
                 bucket=bucket)
@@ -76,13 +80,13 @@ class UserSession:
         """
         self.token = new_token
         self.forges[config.RULES_BUCKET] = KnowledgeGraphForge(
-            "./api/config/forge-config.yaml",
+            UserSession.to_path("./config/forge-config.yaml"),
             endpoint=self.endpoint,
             bucket=config.RULES_BUCKET,
             token=new_token,
             debug=config.DEBUG_MODE)
         self.forges[config.DATAMODELS_BUCKET] = KnowledgeGraphForge(
-            "./api/config/forge-config.yaml",
+            UserSession.to_path("./config/forge-config.yaml"),
             endpoint=self.endpoint,
             bucket=config.DATAMODELS_BUCKET,
             token=new_token,

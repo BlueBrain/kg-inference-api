@@ -1,7 +1,15 @@
 import os
 from setuptools import setup, find_packages
+import re
 
 HERE = os.path.abspath(os.path.dirname(__file__))
+
+
+with open(os.path.join(HERE, "../version.py"), encoding="utf-8") as f2:
+    version_content = f2.read()
+    version_template = "__version__ = '(.*)'\n"
+    m = re.match(version_template, version_content)
+    fallback_version = m.group(1)
 
 
 setup(
@@ -11,6 +19,7 @@ setup(
         "relative_to": __file__,
         "write_to": "version.py",
         "write_to_template": "__version__ = '{version}'\n",
+        "fallback_version": fallback_version
     },
     description="KG Inference Docs",
     keywords="ontology knowledge graph data science inference api",

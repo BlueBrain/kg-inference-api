@@ -13,13 +13,20 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-from pkg_resources import get_distribution
+import os
+import re
+
+with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "../version.py"),
+          encoding="utf-8") as f2:
+    version_content = f2.read()
+    version_template = "__version__ = '(.*)'\n"
+    m = re.match(version_template, version_content)
+    version = m.group(1)
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'KG Inference API'
-version = get_distribution("kg-inference-api").version
 release = version
 
 # -- General configuration ---------------------------------------------------

@@ -8,13 +8,15 @@ RUN apt update && apt install -y \
     git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
-COPY . /code
+COPY ./frontend /code/frontend
+COPY version.py /code
 
-RUN pip install -e .
+RUN pip install -e ./frontend
 
-ENV PYTHONPATH "${PYTHONPATH}:${WORKDIR}/code/frontend"
+EXPOSE 8050:8050
+
+ENV PYTHONPATH "${PYTHONPATH}:${WORKDIR}/code/frontend/frontend"
 
 CMD ["gunicorn", "-b", "0.0.0.0:8050", "app:server", "--timeout", "90"]
 
-EXPOSE 8050:8050
 

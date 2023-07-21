@@ -5,7 +5,7 @@ version: '3.8'
 services:
   api:
     build:
-      context: ./api
+      dockerfile: ./api/Dockerfile
       args:
         GITLAB_USERNAME: <MY_GITLAB_USERNAME>
         GITLAB_TOKEN: <MY_GITLAB_TOKEN>
@@ -20,7 +20,7 @@ services:
       NEXUS_TOKEN: "TODO"
   front:
     build:
-      context: ./frontend
+      dockerfile: ./frontend/Dockerfile
     ports:
       - "8050:8050"
     environment:

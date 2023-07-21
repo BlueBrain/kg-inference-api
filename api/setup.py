@@ -9,7 +9,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-with open(os.path.join(HERE, "version.py"), encoding="utf-8") as f2:
+with open(os.path.join(HERE, "../version.py"), encoding="utf-8") as f2:
     version_content = f2.read()
     version_template = "__version__ = '(.*)'\n"
     m = re.match(version_template, version_content)
@@ -20,7 +20,7 @@ setup(
     author="Blue Brain Project, EPFL",
     use_scm_version={
         "relative_to": __file__,
-        "write_to": "version.py",
+        "write_to": "../version.py",
         "write_to_template": "__version__ = '{version}'\n",
         "fallback_version": fallback_version,
     },
