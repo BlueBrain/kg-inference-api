@@ -1,7 +1,9 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api import config
 from api.router import rules, inference
+from fastapi.logger import logger as fastapi_logger
 
 tags_metadata = [
     {
@@ -34,3 +36,13 @@ app.add_middleware(
 
 app.include_router(rules.router, prefix="/rules")
 app.include_router(inference.router, prefix="/infer")
+
+
+# logging
+gunicorn_error_logger = logging.getLogger("gunicorn.error")
+gunicorn_logger = logging.getLogger("gunicorn")
+uvicorn_access_logger = logging.getLogger("uvicorn.access")
+uvicorn_access_logger.handlers = gunicorn_error_logger.handlers
+
+fastapi_logger.handlers = gunicorn_error_logger.handlers
+fastapi_logger.setLevel(logging.DEBUG)

@@ -1,5 +1,5 @@
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 import re
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -37,6 +37,7 @@ setup(
     install_requires=[
         "fastapi==0.95.0",
         "uvicorn==0.21.1",
+        "gunicorn==21.2.0",
         "fastapi-camelcase==1.0.5",
         "pytest==7.2.1",
         "pyJWT==2.6.0",

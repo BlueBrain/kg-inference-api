@@ -13,8 +13,7 @@ require_bearer = HTTPBearer()
 
 @router.post("", dependencies=[Depends(require_bearer)],
              response_model=List[InferenceResult], tags=["Inference"])
-async def infer_resources(inference_body: InferenceBody,
-                          user_session: UserSession = Depends(require_user_session)):
+def infer_resources(inference_body: InferenceBody, user_session: UserSession = Depends(require_user_session)):
     """
     Receives a set of rules and an input filter and returns a set of inferred resources for
     each rule

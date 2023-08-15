@@ -15,4 +15,4 @@ EXPOSE 8080:8080
 
 ENV PYTHONPATH "${PYTHONPATH}:${WORKDIR}/code/api/api"
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["gunicorn", "main:app", "--workers", "3", "--threads", "2", "--bind", "0.0.0.0:8080", "-k", "uvicorn.workers.UvicornWorker"]

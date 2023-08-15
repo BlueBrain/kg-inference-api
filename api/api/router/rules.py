@@ -14,8 +14,7 @@ require_bearer = HTTPBearer()
 
 @router.post("", dependencies=[Depends(require_bearer)], response_model=List[RuleOutput],
              tags=["Rules"])
-async def get_all_rules(user_session: UserSession = Depends(require_user_session),
-                        rules_body: RulesBody = None):
+def get_all_rules(user_session: UserSession = Depends(require_user_session), rules_body: RulesBody = None):
     """
     Endpoint to get all the data generalization rules
 
