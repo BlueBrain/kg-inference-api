@@ -15,4 +15,4 @@ EXPOSE 8080:8080
 
 ENV PYTHONPATH "${PYTHONPATH}:${WORKDIR}/code/api/api"
 
-CMD ["gunicorn", "main:app", "--workers", "3", "--threads", "2", "--bind", "0.0.0.0:8080", "-k", "uvicorn.workers.UvicornWorker"]
+CMD gunicorn main:app --workers 5 --threads 1 --bind 0.0.0.0:8080 -k uvicorn.workers.UvicornWorker --timeout 250
