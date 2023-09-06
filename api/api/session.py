@@ -2,32 +2,34 @@ from kgforge.core import KnowledgeGraphForge
 from api import config
 import os
 
+
 class UserSession:
 
-    @staticmethod
-    def to_path(str_base):
-        return os.path.join(os.path.abspath(os.path.dirname(__file__)), str_base)
+    default_config_path = "./config/forge-config.yaml"
+    datamodels_config_path = "./config/forge-config_datamodels.yaml"
+
+    def _build_forge(self, bucket: str) -> KnowledgeGraphForge:
+        """
+        Creates a KnowledgeGraphForge instance from a bucket name
+        :param bucket: the bucket the instance will be tied to
+        :return: a KnowledgeGraphForge instance
+        """
+        config_path = UserSession.default_config_path \
+            if bucket != config.DATAMODELS_BUCKET \
+            else UserSession.datamodels_config_path
+
+        return KnowledgeGraphForge(
+            os.path.join(os.path.abspath(os.path.dirname(__file__)), config_path),
+            endpoint=config.BBP_NEXUS_ENDPOINT,
+            bucket=bucket,
+            token=self.token,
+            debug=config.DEBUG_MODE
+        )
 
     def __init__(self, token: str) -> None:
-        self.endpoint = config.BBP_NEXUS_ENDPOINT
-        # adds the rules bucket
-        self.forges = {
-            config.RULES_BUCKET: KnowledgeGraphForge(
-                UserSession.to_path("./config/forge-config.yaml"),
-                endpoint=self.endpoint,
-                bucket=config.RULES_BUCKET,
-                token=token,
-                debug=config.DEBUG_MODE),
-            config.DATAMODELS_BUCKET: KnowledgeGraphForge(
-                UserSession.to_path("./config/forge-config_datamodels.yaml"),
-                endpoint=self.endpoint,
-                bucket=config.DATAMODELS_BUCKET,
-                token=token,
-                debug=config.DEBUG_MODE),
-        }
-        self.token = token
+        self.re_initialize_token(token)
 
-    def get_rules_forge(self):
+    def get_rules_forge(self) -> KnowledgeGraphForge:
         """
         Returns the forge object that includes the rules
 
@@ -35,7 +37,7 @@ class UserSession:
         """
         return self.forges[config.RULES_BUCKET]
 
-    def get_datamodels_forge(self):
+    def get_datamodels_forge(self) -> KnowledgeGraphForge:
         """
         Returns the forge object that includes the datamodels
 
@@ -55,20 +57,10 @@ class UserSession:
         bucket = f"{org}/{project}"
 
         # if the bucket does not exist in the session
-        if bucket not in self.forges:
-            session = KnowledgeGraphForge(
-                UserSession.to_path("./config/forge-config.yaml"),
-                endpoint=self.endpoint,
-                token=self.token,
-                bucket=bucket)
-            self.forges[bucket] = session
-        # if the token stored in the forge is different than the one of the session
-        elif self.forges[bucket]._store.token != self.token:
-            self.forges[bucket] = KnowledgeGraphForge(
-                UserSession.to_path("./config/forge-config.yaml"),
-                endpoint=self.endpoint,
-                token=self.token,
-                bucket=bucket)
+        # if the token stored in the forge is different from the one of the session
+        if bucket not in self.forges or self.forges[bucket]._store.token != self.token:
+            self.forges[bucket] = self._build_forge(bucket=bucket)
+
         return self.forges[bucket]
 
     def re_initialize_token(self, new_token: str) -> None:
@@ -79,18 +71,11 @@ class UserSession:
         :return:
         """
         self.token = new_token
-        self.forges[config.RULES_BUCKET] = KnowledgeGraphForge(
-            UserSession.to_path("./config/forge-config.yaml"),
-            endpoint=self.endpoint,
-            bucket=config.RULES_BUCKET,
-            token=new_token,
-            debug=config.DEBUG_MODE)
-        self.forges[config.DATAMODELS_BUCKET] = KnowledgeGraphForge(
-            UserSession.to_path("./config/forge-config.yaml"),
-            endpoint=self.endpoint,
-            bucket=config.DATAMODELS_BUCKET,
-            token=new_token,
-            debug=config.DEBUG_MODE)
+
+        self.forges = {
+            config.RULES_BUCKET: self._build_forge(bucket=config.RULES_BUCKET),
+            config.DATAMODELS_BUCKET: self._build_forge(bucket=config.DATAMODELS_BUCKET)
+        }
 
     def forge_is_valid(self, access_token: str) -> bool:
         """

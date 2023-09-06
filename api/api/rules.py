@@ -1,9 +1,10 @@
 import logging
-from typing import List
+from typing import List, Dict
 
 from inference_tools.datatypes.rule import Rule
+from inference_tools.datatypes.parameter_specification import ParameterSpecification
 from inference_tools.execution import check_premises
-from inference_tools.utils import get_search_query_parameters
+from inference_tools.utils import get_search_query_parameters, get_embedding_models
 from inference_tools.exceptions.exceptions import InferenceToolsException
 from api.models.rules import InputParameter, RuleOutput
 from api.session import UserSession
@@ -27,9 +28,11 @@ class RulesHandler:
         """
 
         def rule_is_satisfied(rule):
-            return check_premises(forge_factory=user_session.get_or_create_forge_session,
-                                  rule=rule,
-                                  parameter_values=input_filters)
+            return check_premises(
+                forge_factory=user_session.get_or_create_forge_session,
+                rule=rule,
+                parameter_values=input_filters
+            )
 
         self.rules = [rule for rule in self.rules if rule_is_satisfied(rule)]
 
@@ -40,21 +43,32 @@ class RulesHandler:
         """
 
         def rule_formatting(rule: Rule):
+
+            search_query_parameters: Dict[str, ParameterSpecification] = \
+                get_search_query_parameters(rule)
+
+            embedding_models: List = get_embedding_models(rule)
             try:
                 input_parameters = [
-                    InputParameter(name=name, payload=payload)
-                    for name, payload in get_search_query_parameters(rule).items()
+                    InputParameter(
+                        name=name, description=payload.description,
+                        payload=payload.to_dict(),
+                        values=list(payload.values.keys()) if payload.values is not None else None
+                    )
+                    for name, payload in search_query_parameters.items()
                 ]
             except InferenceToolsException:
                 logging.exception(f'Rule \"{rule.name}\" could not be parsed')
                 return None
 
-            return RuleOutput(id=rule.id,
-                              name=rule.name,
-                              description=rule.description,
-                              resource_type=rule.target_resource_type,
-                              input_parameters=input_parameters,
-                              nexus_link=rule.nexus_link)
+            return RuleOutput(
+                id=rule.id,
+                name=rule.name,
+                description=rule.description,
+                resource_type=rule.target_resource_type,
+                input_parameters=input_parameters,
+                nexus_link=rule.nexus_link,
+                embedding_models=embedding_models
+            )
 
-        rules = [rule_formatting(rule) for rule in self.rules]
-        return [rule for rule in rules if rule is not None]
+        return [rule for rule in map(rule_formatting, self.rules) if rule is not None]
