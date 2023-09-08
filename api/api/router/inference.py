@@ -20,17 +20,13 @@ def infer_resources(
     """
     Receives a set of rules and an input filter and returns a set of inferred resources for
     each rule
-
-    :param user_session: the user_session object
-    :param inference_body: the body of the inference request
-    :return:
     """
     rules_forge = user_session.get_rules_forge()
     inference_results = []
 
     try:
         for rule in inference_body.rules:
-            rule_json = rules_forge.as_json(rules_forge.retrieve(rule.id))  # TODO change?
+            rule_json = rules_forge.as_json(rules_forge.retrieve(rule.id))
             # apply the rule to the filter
             results = apply_rule(
                 forge_factory=user_session.get_or_create_forge_session,

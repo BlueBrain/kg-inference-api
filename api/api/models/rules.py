@@ -1,5 +1,6 @@
 from typing import List, Optional
 from fastapi_camelcase import CamelModel
+from inference_tools.type import RuleType
 from pydantic import BaseModel
 
 
@@ -40,3 +41,5 @@ class RulesBody(CamelModel):
     resource_types: Optional[List[str]] = None
     resource_id: Optional[str] = None
     input_filters: Optional[dict] = None
+    rule_types: Optional[List[RuleType]] = None
+
