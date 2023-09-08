@@ -6,8 +6,8 @@ def get_env_vars():
         "BBP_NEXUS_ENDPOINT": None,
         "ENVIRONMENT": None,
         "RULES_BUCKET": None,
-        "RULE_VIEW": None,
-        "DATAMODELS_BUCKET": None,
+        "ES_RULE_VIEW": None,
+        "SPARQL_RULE_VIEW": None,
         "WHITELISTED_CORS_URLS": "",  # can be optional
         "NEXUS_TOKEN": "",  # can be optional
     }
@@ -28,5 +28,5 @@ def get_env_vars():
     return environment_variables.values()
 
 
-BBP_NEXUS_ENDPOINT, ENVIRONMENT, RULES_BUCKET, RULE_VIEW, DATAMODELS_BUCKET, \
+BBP_NEXUS_ENDPOINT, ENVIRONMENT, RULES_BUCKET, ES_RULE_VIEW, SPARQL_RULE_VIEW, \
     WHITELISTED_CORS_URLS, NEXUS_TOKEN, DEBUG_MODE = get_env_vars()

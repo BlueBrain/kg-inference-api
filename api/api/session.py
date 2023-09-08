@@ -4,27 +4,40 @@ import os
 
 
 class UserSession:
-
     default_config_path = "./config/forge-config.yaml"
-    datamodels_config_path = "./config/forge-config_datamodels.yaml"
 
-    def _build_forge(self, bucket: str) -> KnowledgeGraphForge:
+    def _build_forge(self, bucket: str, es_view: str = None, sparql_view: str = None) -> \
+            KnowledgeGraphForge:
         """
         Creates a KnowledgeGraphForge instance from a bucket name
         :param bucket: the bucket the instance will be tied to
         :return: a KnowledgeGraphForge instance
         """
-        config_path = UserSession.default_config_path \
-            if bucket != config.DATAMODELS_BUCKET \
-            else UserSession.datamodels_config_path
+        config_path = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)),
+            UserSession.default_config_path
+        )
 
-        return KnowledgeGraphForge(
-            os.path.join(os.path.abspath(os.path.dirname(__file__)), config_path),
+        args = dict(
+            configuration=config_path,
             endpoint=config.BBP_NEXUS_ENDPOINT,
             bucket=bucket,
             token=self.token,
             debug=config.DEBUG_MODE
         )
+
+        search_endpoints = {}
+
+        if es_view is not None:
+             search_endpoints["elastic"] = {"endpoint": es_view}
+
+        if sparql_view is not None:
+            search_endpoints["sparql"] = {"endpoint": sparql_view}
+
+        if len(search_endpoints) > 0:
+            args["searchendpoints"] = search_endpoints
+
+        return KnowledgeGraphForge(**args)
 
     def __init__(self, token: str) -> None:
         self.re_initialize_token(token)
@@ -36,14 +49,6 @@ class UserSession:
         :return:
         """
         return self.forges[config.RULES_BUCKET]
-
-    def get_datamodels_forge(self) -> KnowledgeGraphForge:
-        """
-        Returns the forge object that includes the datamodels
-
-        :return:
-        """
-        return self.forges[config.DATAMODELS_BUCKET]
 
     def get_or_create_forge_session(self, org: str, project: str) -> KnowledgeGraphForge:
         """
@@ -73,8 +78,10 @@ class UserSession:
         self.token = new_token
 
         self.forges = {
-            config.RULES_BUCKET: self._build_forge(bucket=config.RULES_BUCKET),
-            config.DATAMODELS_BUCKET: self._build_forge(bucket=config.DATAMODELS_BUCKET)
+            config.RULES_BUCKET: self._build_forge(
+                bucket=config.RULES_BUCKET, es_view=config.ES_RULE_VIEW,
+                sparql_view=config.SPARQL_RULE_VIEW
+            )
         }
 
     def forge_is_valid(self, access_token: str) -> bool:
