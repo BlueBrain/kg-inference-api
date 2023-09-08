@@ -1,6 +1,7 @@
 from kgforge.core import KnowledgeGraphForge
 from api import config
 import os
+import yaml
 
 
 class UserSession:
@@ -18,8 +19,13 @@ class UserSession:
             UserSession.default_config_path
         )
 
+        with open(config_path) as e:
+            conf = yaml.safe_load(e)
+            if bucket == "neurosciencegraph/datamodels":
+                conf["Model"]["context"]["iri"] = 'https://neuroshapes.org'
+
         args = dict(
-            configuration=config_path,
+            configuration=conf,
             endpoint=config.BBP_NEXUS_ENDPOINT,
             bucket=bucket,
             token=self.token,
