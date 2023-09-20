@@ -2,6 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from inference_tools.execution import apply_rule
+from inference_tools.source.elastic_search import ElasticSearch
+from kgforge.core import Resource
+
 from api.dependencies import require_user_session
 from api.models.inference import InferenceResult, InferenceBody
 from api.session import UserSession
@@ -26,7 +29,9 @@ def infer_resources(
 
     try:
         for rule in inference_body.rules:
-            rule_json = rules_forge.as_json(rules_forge.retrieve(rule.id))
+
+            rule_resource: Resource = ElasticSearch.get_by_id(forge=rules_forge, ids=rule.id)
+            rule_json = rules_forge.as_json(rule_resource)
             # apply the rule to the filter
             results = apply_rule(
                 forge_factory=user_session.get_or_create_forge_session,

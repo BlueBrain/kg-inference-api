@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 from fastapi_camelcase import CamelModel
 from inference_tools.type import RuleType
 from pydantic import BaseModel
@@ -9,7 +9,6 @@ class InputParameter(BaseModel):
     name: str
     values: Optional[List[str]] = None  # valid values
     description: str
-    payload: dict  # Eventually remove it
 
 
 class EmbeddingModel(BaseModel):
@@ -28,7 +27,7 @@ class RuleOutput(CamelModel):
     resource_type: str
     input_parameters: List[InputParameter]
     nexus_link: str
-    embedding_models: List[EmbeddingModel]
+    embedding_models: Dict[str, EmbeddingModel]
 
 
 class RuleInput(BaseModel):

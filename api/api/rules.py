@@ -47,12 +47,12 @@ class RulesHandler:
             search_query_parameters: Dict[str, ParameterSpecification] = \
                 get_search_query_parameters(rule)
 
-            embedding_models: List = get_embedding_models(rule)
+            embedding_models: Dict = get_embedding_models(rule)
             try:
                 input_parameters = [
                     InputParameter(
-                        name=name, description=payload.description,
-                        payload=payload.to_dict(),
+                        name=name,
+                        description=payload.description,
                         values=list(payload.values.keys()) if payload.values is not None else None
                     )
                     for name, payload in search_query_parameters.items()
