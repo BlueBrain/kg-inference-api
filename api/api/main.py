@@ -19,7 +19,7 @@ tags_metadata = [
 app = FastAPI(
     title="KG Inference API",
     debug=config.DEBUG_MODE,
-    version="0.2.2",
+    version="0.2.15",
     openapi_tags=tags_metadata
 )
 
