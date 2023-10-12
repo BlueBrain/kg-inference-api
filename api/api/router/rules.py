@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union, Dict
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBearer
 from inference_tools.rules import fetch_rules
@@ -13,8 +13,12 @@ router = APIRouter()
 require_bearer = HTTPBearer()
 
 
-@router.post("", dependencies=[Depends(require_bearer)], response_model=List[RuleOutput],
-             tags=["Rules"])
+@router.post(
+    "",
+    dependencies=[Depends(require_bearer)],
+    response_model=Union[List[RuleOutput], List[Dict]],
+    tags=["Rules"]
+)
 def get_all_rules(
         user_session: UserSession = Depends(require_user_session), rules_body: RulesBody = None
 ) -> List[RuleOutput]:
@@ -22,21 +26,18 @@ def get_all_rules(
     Endpoint to get all the data generalization rules
     """
     resource_types = None if rules_body is None else rules_body.resource_types
-    resource_id = None if rules_body is None else rules_body.resource_id
+    resource_ids = None if rules_body is None else rules_body.resource_ids
     rule_types = None if rules_body is None else rules_body.rule_types
-
+    input_filters = None if rules_body is None else rules_body.input_filters
     # fetches rules using kg-inference lib
+
     rules = fetch_rules(
         forge_rules=user_session.get_rules_forge(),
         resource_types=resource_types,
-        resource_id=resource_id,
-        rule_types=rule_types
+        resource_ids=resource_ids,
+        rule_types=rule_types,
+        input_filters=input_filters,
+        forge_factory=user_session.get_or_create_forge_session
     )
-    rules_handler = RulesHandler(rules=rules)
-    # if input filters are added in the request
-    if rules_body and rules_body.input_filters:
-        rules_handler.filter_rules(
-            input_filters=rules_body.input_filters, user_session=user_session
-        )
-    serialized_rules = rules_handler.serialize_rules()
-    return serialized_rules
+
+    return RulesHandler(rules=rules).serialize_rules()

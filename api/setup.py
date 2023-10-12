@@ -4,6 +4,9 @@ import re
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
+GITLAB_USERNAME = os.environ.get("GITLAB_USERNAME")
+GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN")
+
 
 # Get the long description from the README file.
 with open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
@@ -42,7 +45,8 @@ setup(
         "pytest==7.2.1",
         "pyJWT==2.6.0",
         "pydantic==1.10.6",
-        "nexusforge@git+https://github.com/BlueBrain/nexus-forge"
+        "nexusforge@git+https://github.com/BlueBrain/nexus-forge",
+        f"inference_tools@git+https://{GITLAB_USERNAME}:{GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference"
     ],
     classifiers=[
         "Intended Audience :: Information Technology",

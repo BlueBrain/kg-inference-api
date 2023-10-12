@@ -9,8 +9,6 @@ COPY version.py /code
 
 RUN pip install -e ./api
 
-RUN pip install git+https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference
-
 EXPOSE 8080:8080
 
 ENV PYTHONPATH "${PYTHONPATH}:${WORKDIR}/code/api/api"

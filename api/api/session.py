@@ -1,3 +1,5 @@
+from typing import Optional
+
 from kgforge.core import KnowledgeGraphForge
 from api import config
 import os
@@ -35,7 +37,7 @@ class UserSession:
         search_endpoints = {}
 
         if es_view is not None:
-             search_endpoints["elastic"] = {"endpoint": es_view}
+            search_endpoints["elastic"] = {"endpoint": es_view}
 
         if sparql_view is not None:
             search_endpoints["sparql"] = {"endpoint": sparql_view}
@@ -54,25 +56,31 @@ class UserSession:
 
         :return:
         """
-        return self.forges[config.RULES_BUCKET]
+        return self.forges[(config.RULES_BUCKET, config.ES_RULE_VIEW, config.SPARQL_RULE_VIEW)]
 
-    def get_or_create_forge_session(self, org: str, project: str) -> KnowledgeGraphForge:
+    def get_or_create_forge_session(
+            self, org: str, project: str, es_view: Optional[str], sparql_view: Optional[str]
+    ) -> KnowledgeGraphForge:
         """
         Retrieves or creates a forge session for the given organization and project.
         Then returns the forge object
 
         :param org:
         :param project:
+        :param es_view:
+        :param sparql_view:
         :return:
         """
         bucket = f"{org}/{project}"
-
+        key = (bucket, es_view, sparql_view)
         # if the bucket does not exist in the session
         # if the token stored in the forge is different from the one of the session
-        if bucket not in self.forges or self.forges[bucket]._store.token != self.token:
-            self.forges[bucket] = self._build_forge(bucket=bucket)
+        if key not in self.forges \
+                or not self.forge_is_valid(self.forges[key]._store.token):
 
-        return self.forges[bucket]
+            self.forges[key] = self._build_forge(bucket=bucket)
+
+        return self._build_forge(bucket=bucket, es_view=es_view, sparql_view=sparql_view)
 
     def re_initialize_token(self, new_token: str) -> None:
         """
@@ -84,8 +92,9 @@ class UserSession:
         self.token = new_token
 
         self.forges = {
-            config.RULES_BUCKET: self._build_forge(
-                bucket=config.RULES_BUCKET, es_view=config.ES_RULE_VIEW,
+            (config.RULES_BUCKET, config.ES_RULE_VIEW, config.SPARQL_RULE_VIEW): self._build_forge(
+                bucket=config.RULES_BUCKET,
+                es_view=config.ES_RULE_VIEW,
                 sparql_view=config.SPARQL_RULE_VIEW
             )
         }

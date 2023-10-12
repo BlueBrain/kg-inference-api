@@ -1,74 +1,49 @@
-import logging
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from inference_tools.datatypes.rule import Rule
-from inference_tools.datatypes.parameter_specification import ParameterSpecification
-from inference_tools.execution import check_premises
-from inference_tools.utils import get_search_query_parameters, get_embedding_models
-from inference_tools.exceptions.exceptions import InferenceToolsException
 from api.models.rules import InputParameter, RuleOutput
-from api.session import UserSession
 
 
 class RulesHandler:
     """A class to manage the rules and their actions"""
 
-    rules: List[Rule]
+    rules: Union[List[Rule], Dict[str, List[Rule]]]
 
-    def __init__(self, rules: List[Rule]) -> None:
+    def __init__(self, rules: Union[List[Rule], Dict[str, List[Rule]]]) -> None:
         self.rules = rules
 
-    def filter_rules(self, input_filters: dict, user_session: UserSession):
-        """
-        Filter the rules that satisfy all the input filters
-
-        :param user_session:
-        :param input_filters:
-        :return:
-        """
-
-        def rule_is_satisfied(rule):
-            return check_premises(
-                forge_factory=user_session.get_or_create_forge_session,
-                rule=rule,
-                parameter_values=input_filters
-            )
-
-        self.rules = [rule for rule in self.rules if rule_is_satisfied(rule)]
-
-    def serialize_rules(self) -> List[RuleOutput]:
+    def serialize_rules(self) -> Union[List[RuleOutput], List[Dict]]:
         """
         Serializes a list of data generalization rules by returning their models
         :return:
         """
 
-        def rule_formatting(rule: Rule):
+        def format_list(rule_list: List[Rule]) -> List[RuleOutput]:
+            return [
+                rule
+                for rule in map(lambda rule: RuleOutput(
+                    id=rule.id,
+                    name=rule.name,
+                    description=rule.description,
+                    resource_type=rule.target_resource_type,
+                    input_parameters=[
+                        InputParameter(
+                            name=ip.name, description=ip.description, values=ip.values
+                        )
+                        for ip in rule.flattened_input_parameters
+                    ],
+                    nexus_link=rule.nexus_link
+                ), rule_list)
+                if rule is not None
+            ]
 
-            search_query_parameters: Dict[str, ParameterSpecification] = \
-                get_search_query_parameters(rule)
+        if isinstance(self.rules, list):
+            return format_list(self.rules)
 
-            embedding_models: Dict = get_embedding_models(rule)
-            try:
-                input_parameters = [
-                    InputParameter(
-                        name=name,
-                        description=payload.description,
-                        values=list(payload.values.keys()) if payload.values is not None else None
-                    )
-                    for name, payload in search_query_parameters.items()
-                ]
-            except InferenceToolsException:
-                logging.exception(f'Rule \"{rule.name}\" could not be parsed')
-                return None
-
-            return RuleOutput(
-                id=rule.id,
-                name=rule.name,
-                description=rule.description,
-                resource_type=rule.target_resource_type,
-                input_parameters=input_parameters,
-                nexus_link=rule.nexus_link,
-                embedding_models=embedding_models
-            )
-
-        return [rule for rule in map(rule_formatting, self.rules) if rule is not None]
+        return [
+            {
+                "resource_id": res_id,
+                "rules": format_list(rule_list)
+            }
+            for (res_id, rule_list) in self.rules.items()
+        ]
