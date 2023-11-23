@@ -6,8 +6,14 @@ import os
 import yaml
 
 
+def full_path(path):
+    return os.path.join(os.path.abspath(os.path.dirname(__file__)), path)
+
+
+
 class UserSession:
     default_config_path = "./config/forge-config.yaml"
+
 
     def _build_forge(self, bucket: str, es_view: str = None, sparql_view: str = None) -> \
             KnowledgeGraphForge:
@@ -16,15 +22,18 @@ class UserSession:
         :param bucket: the bucket the instance will be tied to
         :return: a KnowledgeGraphForge instance
         """
-        config_path = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)),
-            UserSession.default_config_path
-        )
+        config_path = full_path(UserSession.default_config_path)
 
         with open(config_path) as e:
             conf = yaml.safe_load(e)
             if bucket == "neurosciencegraph/datamodels":
                 conf["Model"]["context"]["iri"] = 'https://neuroshapes.org'
+
+        conf["Store"]["file_resource_mapping"] = full_path(conf["Store"]["file_resource_mapping"])
+        conf["Resolvers"]["ontology"][0]["result_resource_mapping"] = \
+            full_path(conf["Resolvers"]["ontology"][0]["result_resource_mapping"])
+        conf["Resolvers"]["agent"][0]["result_resource_mapping"] = \
+            full_path(conf["Resolvers"]["agent"][0]["result_resource_mapping"])
 
         args = dict(
             configuration=conf,

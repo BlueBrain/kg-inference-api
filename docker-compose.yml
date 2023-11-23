@@ -18,6 +18,8 @@ services:
       DATAMODELS_BUCKET: neurosciencegraph/datamodels
       WHITELISTED_CORS_URLS: http://api:8000
       NEXUS_TOKEN: "TODO"
+      SPARQL_RULE_VIEW: "https://bbp.epfl.ch/neurosciencegraph/data/views/aggreg-sp/rule_view"
+      ES_RULE_VIEW: "https://bbp.epfl.ch/neurosciencegraph/data/views/aggreg-es/rule_view"
   front:
     build:
       dockerfile: ./frontend/Dockerfile
