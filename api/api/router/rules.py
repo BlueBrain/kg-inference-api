@@ -21,7 +21,7 @@ require_bearer = HTTPBearer()
 )
 def get_all_rules(
         user_session: UserSession = Depends(require_user_session), rules_body: RulesBody = None
-) -> List[RuleOutput]:
+) -> Union[List[RuleOutput], List[Dict]]:
     """
     Endpoint to get all the data generalization rules
     """

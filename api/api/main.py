@@ -2,7 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api import config
-from api.router import rules, inference
+from api.router import rules, inference, morpho_img
 from fastapi.logger import logger as fastapi_logger
 
 tags_metadata = [
@@ -14,13 +14,17 @@ tags_metadata = [
         "name": "Inference",
         "description": "Operations related to inferring resources from the knowledge graph",
     },
+    {
+        "name": "Generate",
+        "description": "Generate a PNG image of a morphology",
+    },
 ]
 
 app = FastAPI(
     title="KG Inference API",
     debug=config.DEBUG_MODE,
     version="0.2.15",
-    openapi_tags=tags_metadata
+    openapi_tags=tags_metadata,
 )
 
 
@@ -36,6 +40,7 @@ app.add_middleware(
 
 app.include_router(rules.router, prefix="/rules")
 app.include_router(inference.router, prefix="/infer")
+app.include_router(morpho_img.router, prefix="/generate")
 
 
 # logging

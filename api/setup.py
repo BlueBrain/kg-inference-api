@@ -46,7 +46,8 @@ setup(
         "pyJWT==2.6.0",
         "pydantic==1.10.6",
         "nexusforge@git+https://github.com/BlueBrain/nexus-forge",
-        f"inference_tools@git+https://{GITLAB_USERNAME}:{GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference"
+        f"inference_tools@git+https://{GITLAB_USERNAME}:{GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference",
+        "neurom",
     ],
     classifiers=[
         "Intended Audience :: Information Technology",
@@ -54,5 +55,5 @@ setup(
         "Topic :: Scientific/Engineering",
         "Programming Language :: Python :: 3 :: Only",
         "Natural Language :: English",
-    ]
+    ],
 )

@@ -10,13 +10,12 @@ def full_path(path):
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), path)
 
 
-
 class UserSession:
     default_config_path = "./config/forge-config.yaml"
 
-
-    def _build_forge(self, bucket: str, es_view: str = None, sparql_view: str = None) -> \
-            KnowledgeGraphForge:
+    def _build_forge(
+        self, bucket: str, es_view: str = None, sparql_view: str = None
+    ) -> KnowledgeGraphForge:
         """
         Creates a KnowledgeGraphForge instance from a bucket name
         :param bucket: the bucket the instance will be tied to
@@ -27,20 +26,24 @@ class UserSession:
         with open(config_path) as e:
             conf = yaml.safe_load(e)
             if bucket == "neurosciencegraph/datamodels":
-                conf["Model"]["context"]["iri"] = 'https://neuroshapes.org'
+                conf["Model"]["context"]["iri"] = "https://neuroshapes.org"
 
-        conf["Store"]["file_resource_mapping"] = full_path(conf["Store"]["file_resource_mapping"])
-        conf["Resolvers"]["ontology"][0]["result_resource_mapping"] = \
-            full_path(conf["Resolvers"]["ontology"][0]["result_resource_mapping"])
-        conf["Resolvers"]["agent"][0]["result_resource_mapping"] = \
-            full_path(conf["Resolvers"]["agent"][0]["result_resource_mapping"])
+        conf["Store"]["file_resource_mapping"] = full_path(
+            conf["Store"]["file_resource_mapping"]
+        )
+        conf["Resolvers"]["ontology"][0]["result_resource_mapping"] = full_path(
+            conf["Resolvers"]["ontology"][0]["result_resource_mapping"]
+        )
+        conf["Resolvers"]["agent"][0]["result_resource_mapping"] = full_path(
+            conf["Resolvers"]["agent"][0]["result_resource_mapping"]
+        )
 
         args = dict(
             configuration=conf,
             endpoint=config.BBP_NEXUS_ENDPOINT,
             bucket=bucket,
             token=self.token,
-            debug=config.DEBUG_MODE
+            debug=config.DEBUG_MODE,
         )
 
         search_endpoints = {}
@@ -65,10 +68,12 @@ class UserSession:
 
         :return:
         """
-        return self.forges[(config.RULES_BUCKET, config.ES_RULE_VIEW, config.SPARQL_RULE_VIEW)]
+        return self.forges[
+            (config.RULES_BUCKET, config.ES_RULE_VIEW, config.SPARQL_RULE_VIEW)
+        ]
 
     def get_or_create_forge_session(
-            self, org: str, project: str, es_view: Optional[str], sparql_view: Optional[str]
+        self, org: str, project: str, es_view: Optional[str], sparql_view: Optional[str]
     ) -> KnowledgeGraphForge:
         """
         Retrieves or creates a forge session for the given organization and project.
@@ -84,12 +89,14 @@ class UserSession:
         key = (bucket, es_view, sparql_view)
         # if the bucket does not exist in the session
         # if the token stored in the forge is different from the one of the session
-        if key not in self.forges \
-                or not self.forge_is_valid(self.forges[key]._store.token):
-
+        if key not in self.forges or not self.forge_is_valid(
+            self.forges[key]._store.token
+        ):
             self.forges[key] = self._build_forge(bucket=bucket)
 
-        return self._build_forge(bucket=bucket, es_view=es_view, sparql_view=sparql_view)
+        return self._build_forge(
+            bucket=bucket, es_view=es_view, sparql_view=sparql_view
+        )
 
     def re_initialize_token(self, new_token: str) -> None:
         """
@@ -101,10 +108,14 @@ class UserSession:
         self.token = new_token
 
         self.forges = {
-            (config.RULES_BUCKET, config.ES_RULE_VIEW, config.SPARQL_RULE_VIEW): self._build_forge(
+            (
+                config.RULES_BUCKET,
+                config.ES_RULE_VIEW,
+                config.SPARQL_RULE_VIEW,
+            ): self._build_forge(
                 bucket=config.RULES_BUCKET,
                 es_view=config.ES_RULE_VIEW,
-                sparql_view=config.SPARQL_RULE_VIEW
+                sparql_view=config.SPARQL_RULE_VIEW,
             )
         }
 
