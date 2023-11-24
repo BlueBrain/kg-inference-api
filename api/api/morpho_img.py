@@ -2,10 +2,8 @@ import requests
 import neurom as nm
 import matplotlib.pyplot as plt
 import io
-import hashlib
 
-from fastapi import Header
-from fastapi.responses import FileResponse
+from fastapi import Header, Response
 from neurom.view import matplotlib_impl, matplotlib_utils
 
 
@@ -24,18 +22,6 @@ def get_morphology_file_content(authorization: str = "", content_url: str = ""):
     file_content = response.content.decode("utf-8")
 
     return file_content
-
-
-def get_file_path(content_url: str = ""):
-    """
-    Creates a file path from a content_url, to be used for writing the generated PNG.
-    """
-
-    encoded_content_url = hashlib.sha1(bytes(content_url, "utf8")).hexdigest()
-    file_name = f"{encoded_content_url}.png"
-    file_path = f"dist/{file_name}"
-
-    return file_path
 
 
 def read_image(authorization: str = Header(None), content_url: str = ""):
@@ -61,10 +47,12 @@ def read_image(authorization: str = Header(None), content_url: str = ""):
 
     fig.set_tight_layout(True)
 
-    file_path = get_file_path(content_url=content_url)
+    buffer = io.BytesIO()
 
-    fig.savefig(file_path, dpi=72)
+    fig.savefig(buffer, dpi=72, format="png")
+
+    buffer.seek(0)
 
     plt.close()
 
-    return FileResponse(file_path, media_type="image/png")
+    return Response(buffer.getvalue(), media_type="image/png")

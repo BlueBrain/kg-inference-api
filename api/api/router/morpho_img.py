@@ -1,13 +1,10 @@
 import requests
-import os.path
 
-from typing import Union
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.security import HTTPBearer
-from fastapi.responses import FileResponse
 from api.dependencies import require_user_session
 from api.models.morpho_image import MorphoImageBody
-from api.morpho_img import get_file_path, read_image
+from api.morpho_img import read_image
 from api.session import UserSession
 
 router = APIRouter()
@@ -24,7 +21,7 @@ require_bearer = HTTPBearer()
 def get_morphology_image(
     morpho_img_body: MorphoImageBody,
     user_session: UserSession = Depends(require_user_session),
-) -> Union[FileResponse, None]:
+) -> Response:
     """
     Endpoint to get a preview image of a morphology
     """
@@ -58,9 +55,4 @@ def get_morphology_image(
 
     content_url = distribution["contentUrl"]
 
-    file_path = get_file_path(content_url)
-
-    if os.path.isfile(file_path):
-        return FileResponse(file_path, media_type="image/png")
-    else:
-        return read_image(authorization, content_url)
+    return read_image(authorization, content_url)
