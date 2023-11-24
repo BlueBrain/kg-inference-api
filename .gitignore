@@ -6,4 +6,3 @@ kg_inference_api.egg-info/
 build/
 .eggs/
 docs/generated/
-api/dist
