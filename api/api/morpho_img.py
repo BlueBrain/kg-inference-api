@@ -2,6 +2,7 @@ import requests
 import neurom as nm
 import matplotlib.pyplot as plt
 import io
+from api.exceptions import ResourceNotFoundException
 
 from fastapi import Header, Response
 from neurom.view import matplotlib_impl, matplotlib_utils
@@ -14,14 +15,16 @@ def get_morphology_file_content(authorization: str = "", content_url: str = ""):
 
     response = requests.get(content_url, headers={"authorization": authorization})
 
-    try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        return "Error: " + str(e)
+    if response.status_code == 200:
+        file_content = response.content.decode("utf-8")
 
-    file_content = response.content.decode("utf-8")
+        return file_content
 
-    return file_content
+    elif response.status_code == 404:
+        raise ResourceNotFoundException
+
+    else:
+        raise requests.exceptions.RequestException
 
 
 def read_image(authorization: str = Header(None), content_url: str = ""):
@@ -30,6 +33,7 @@ def read_image(authorization: str = Header(None), content_url: str = ""):
     """
 
     morph = get_morphology_file_content(authorization, content_url)
+
     nrn = nm.load_morphology(io.StringIO(morph), reader="swc")
     fig, ax = matplotlib_utils.get_figure()
 
