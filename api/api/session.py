@@ -1,16 +1,34 @@
-from typing import Optional
+"""
+Module: session.py
 
+This module defines the UserSession class that manages KnowledgeGraphForge instances for user sessions.
+"""
+
+import os
+from typing import Optional
+import yaml
 from kgforge.core import KnowledgeGraphForge
 from api import config
-import os
-import yaml
 
 
 def full_path(path):
+    """
+    Returns the absolute path by joining the current file's directory with the provided path.
+
+    Parameters:
+        - path (str): The relative path to be joined with the current file's directory.
+
+    Returns:
+        str: The absolute path.
+    """
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), path)
 
 
 class UserSession:
+    """
+    Manages KnowledgeGraphForge instances for user sessions.
+    """
+
     default_config_path = "./config/forge-config.yaml"
 
     def _build_forge(
@@ -23,7 +41,7 @@ class UserSession:
         """
         config_path = full_path(UserSession.default_config_path)
 
-        with open(config_path) as e:
+        with open(config_path, encoding="utf-8") as e:
             conf = yaml.safe_load(e)
             if bucket == "neurosciencegraph/datamodels":
                 conf["Model"]["context"]["iri"] = "https://neuroshapes.org"
@@ -38,13 +56,13 @@ class UserSession:
             conf["Resolvers"]["agent"][0]["result_resource_mapping"]
         )
 
-        args = dict(
-            configuration=conf,
-            endpoint=config.BBP_NEXUS_ENDPOINT,
-            bucket=bucket,
-            token=self.token,
-            debug=config.DEBUG_MODE,
-        )
+        args = {
+            "configuration": conf,
+            "endpoint": config.BBP_NEXUS_ENDPOINT,
+            "bucket": bucket,
+            "token": self.token,
+            "debug": config.DEBUG_MODE,
+        }
 
         search_endpoints = {}
 
@@ -90,6 +108,7 @@ class UserSession:
         # if the bucket does not exist in the session
         # if the token stored in the forge is different from the one of the session
         if key not in self.forges or not self.forge_is_valid(
+            # pylint: disable=W0212
             self.forges[key]._store.token
         ):
             self.forges[key] = self._build_forge(bucket=bucket)

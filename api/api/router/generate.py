@@ -1,3 +1,10 @@
+"""
+Module: generate.py
+
+This module defines a FastAPI router for handling requests related to morphology images.
+It includes an endpoint to get a preview image of a morphology.
+"""
+
 from urllib.parse import unquote
 from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.security import HTTPBearer
@@ -33,13 +40,13 @@ def get_morphology_image(
         image = read_image(authorization, content_url)
 
         return image
-    except ResourceNotFoundException:
+    except ResourceNotFoundException as exc:
         raise HTTPException(
             status_code=404,
-            detail=f"There was no distribution for that content url.",
-        )
-    except Exception:
+            detail="There was no distribution for that content url.",
+        ) from exc
+    except Exception as exc:
         raise HTTPException(
             status_code=400,
-            detail=f"Something went wrong.",
-        )
+            detail="Something went wrong.",
+        ) from exc
