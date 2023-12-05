@@ -1,4 +1,3 @@
-from urllib.parse import unquote
 from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.security import HTTPBearer
 from starlette.requests import Request
@@ -12,13 +11,13 @@ require_bearer = HTTPBearer()
 
 
 @router.get(
-    "/morphology-image/{encoded_content_url}",
+    "/morphology-image/{content_url}",
     dependencies=[Depends(require_bearer)],
     response_model=None,
     tags=["Morphology Image"],
 )
 def get_morphology_image(
-    encoded_content_url: str,
+    content_url: str,
     request: Request,
 ) -> Response:
     """
@@ -26,8 +25,6 @@ def get_morphology_image(
     """
     user = retrieve_user(request)
     authorization = f"Bearer {user.access_token}"
-
-    content_url = unquote(encoded_content_url)
 
     try:
         image = read_image(authorization, content_url)
