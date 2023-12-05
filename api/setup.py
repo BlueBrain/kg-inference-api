@@ -1,6 +1,8 @@
+"""Setup.py file"""
+
 import os
-from setuptools import setup
 import re
+from setuptools import setup
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -48,6 +50,8 @@ setup(
         "nexusforge@git+https://github.com/BlueBrain/nexus-forge",
         f"inference_tools@git+https://{GITLAB_USERNAME}:{GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference",
         "neurom",
+        "black==23.11.0",
+        "pylint==3.0.2",
     ],
     classifiers=[
         "Intended Audience :: Information Technology",
