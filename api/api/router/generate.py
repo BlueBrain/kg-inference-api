@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.security import HTTPBearer
 from starlette.requests import Request
 from api.dependencies import retrieve_user
-from api.exceptions import ResourceNotFoundException
+from api.exceptions import InvalidUrlParameterException, ResourceNotFoundException
 from api.morpho_img import read_image
 
 router = APIRouter()
@@ -18,7 +18,7 @@ require_bearer = HTTPBearer()
 
 
 @router.get(
-    "/morphology-image/{content_url}",
+    "/morphology-image",
     dependencies=[Depends(require_bearer)],
     response_model=None,
     tags=["Morphology Image"],
@@ -37,6 +37,11 @@ def get_morphology_image(
         image = read_image(authorization, content_url)
 
         return image
+    except InvalidUrlParameterException as exc:
+        raise HTTPException(
+            status_code=422,
+            detail="Invalid content_url parameter in request.",
+        ) from exc
     except ResourceNotFoundException as exc:
         raise HTTPException(
             status_code=404,

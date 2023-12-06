@@ -5,12 +5,13 @@ This module provides functions to generate morphology PNG images.
 """
 
 import io
+from urllib.parse import urlparse
 import requests
 import neurom as nm
 import matplotlib.pyplot as plt
 from fastapi import Header, Response
 from neurom.view import matplotlib_impl, matplotlib_utils
-from api.exceptions import ResourceNotFoundException
+from api.exceptions import InvalidUrlParameterException, ResourceNotFoundException
 
 
 def get_morphology_file_content(authorization: str = "", content_url: str = "") -> str:
@@ -27,6 +28,12 @@ def get_morphology_file_content(authorization: str = "", content_url: str = "") 
     Raises:
         str: Error message if the request to the content_url fails.
     """
+    parsed_content_url = urlparse(content_url)
+
+    if not all(
+        [parsed_content_url.scheme, parsed_content_url.netloc, parsed_content_url.path]
+    ):
+        raise InvalidUrlParameterException
 
     response = requests.get(
         content_url, headers={"authorization": authorization}, timeout=15
