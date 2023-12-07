@@ -37,7 +37,7 @@ setup(
         "dash==2.9",
         "dash-bootstrap-components==1.4.0",
         "jsonpath-rw==1.4.0",
-        "requests==2.28.2",
+        "requests>=2.28.2",
         "neurom==3.2.2",
         "gunicorn==20.1.0",
         "scikit-learn==1.2.2",
