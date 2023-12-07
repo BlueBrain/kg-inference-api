@@ -70,7 +70,4 @@ class RulesHandler:
         if isinstance(self.rules, list):
             return format_list(self.rules)
 
-        return [
-            {"resource_id": res_id, "rules": format_list(rule_list)}
-            for (res_id, rule_list) in self.rules.items()
-        ]
+        return [{"resource_id": res_id, "rules": format_list(rule_list)} for (res_id, rule_list) in self.rules.items()]

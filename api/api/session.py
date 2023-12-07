@@ -31,9 +31,7 @@ class UserSession:
 
     default_config_path = "./config/forge-config.yaml"
 
-    def _build_forge(
-        self, bucket: str, es_view: str = None, sparql_view: str = None
-    ) -> KnowledgeGraphForge:
+    def _build_forge(self, bucket: str, es_view: str = None, sparql_view: str = None) -> KnowledgeGraphForge:
         """
         Creates a KnowledgeGraphForge instance from a bucket name
         :param bucket: the bucket the instance will be tied to
@@ -46,9 +44,7 @@ class UserSession:
             if bucket == "neurosciencegraph/datamodels":
                 conf["Model"]["context"]["iri"] = "https://neuroshapes.org"
 
-        conf["Store"]["file_resource_mapping"] = full_path(
-            conf["Store"]["file_resource_mapping"]
-        )
+        conf["Store"]["file_resource_mapping"] = full_path(conf["Store"]["file_resource_mapping"])
         conf["Resolvers"]["ontology"][0]["result_resource_mapping"] = full_path(
             conf["Resolvers"]["ontology"][0]["result_resource_mapping"]
         )
@@ -86,9 +82,7 @@ class UserSession:
 
         :return:
         """
-        return self.forges[
-            (config.RULES_BUCKET, config.ES_RULE_VIEW, config.SPARQL_RULE_VIEW)
-        ]
+        return self.forges[(config.RULES_BUCKET, config.ES_RULE_VIEW, config.SPARQL_RULE_VIEW)]
 
     def get_or_create_forge_session(
         self, org: str, project: str, es_view: Optional[str], sparql_view: Optional[str]
@@ -113,9 +107,7 @@ class UserSession:
         ):
             self.forges[key] = self._build_forge(bucket=bucket)
 
-        return self._build_forge(
-            bucket=bucket, es_view=es_view, sparql_view=sparql_view
-        )
+        return self._build_forge(bucket=bucket, es_view=es_view, sparql_view=sparql_view)
 
     def re_initialize_token(self, new_token: str) -> None:
         """

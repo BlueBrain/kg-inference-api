@@ -49,9 +49,7 @@ def infer_resources(
 
     try:
         for rule in inference_body.rules:
-            rule_resource: Resource = ElasticSearch.get_by_id(
-                forge=rules_forge, ids=rule.id
-            )
+            rule_resource: Resource = ElasticSearch.get_by_id(forge=rules_forge, ids=rule.id)
             rule_json = rules_forge.as_json(rule_resource)
             # apply the rule to the filter
             results = apply_rule(

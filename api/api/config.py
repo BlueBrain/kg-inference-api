@@ -38,13 +38,11 @@ def get_env_vars():
     }
 
     environment_variables = dict(
-        (key, os.environ.get(key, default=default))
-        for key, default in environment_variables.items()
+        (key, os.environ.get(key, default=default)) for key, default in environment_variables.items()
     )
 
     environment_variables["DEBUG_MODE"] = (
-        environment_variables["ENVIRONMENT"] == "LOCAL"
-        or environment_variables["ENVIRONMENT"] == "DEV"
+        environment_variables["ENVIRONMENT"] == "LOCAL" or environment_variables["ENVIRONMENT"] == "DEV"
     )
 
     for key, value in environment_variables.items():
