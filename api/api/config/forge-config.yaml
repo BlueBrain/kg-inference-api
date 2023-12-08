@@ -7,6 +7,8 @@ Model:
     bucket: "neurosciencegraph/datamodels"
 
 Store:
+  model:
+    name: RdfModel
   name: BlueBrainNexus
   endpoint: https://bbp.epfl.ch/nexus/v1
   searchendpoints:
