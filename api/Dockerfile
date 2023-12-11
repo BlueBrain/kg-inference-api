@@ -9,7 +9,7 @@ COPY version.py /code
 
 RUN pip install -e ./api
 
-EXPOSE 8080:8080
+EXPOSE 8080
 
 ENV PYTHONPATH "${PYTHONPATH}:${WORKDIR}/code/api/api"
 
