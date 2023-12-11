@@ -3,10 +3,8 @@ Module: user.py
 
 This module defines the User class representing a user in the application.
 """
-import dataclasses
 
 
-@dataclasses.dataclass
 class User:
     """
     Defines the User class representing a user in the application.

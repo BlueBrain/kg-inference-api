@@ -3,13 +3,11 @@ Module: rules_handler.py
 
 This module defines the RulesHandler class for managing rules and their actions.
 """
-import dataclasses
 from typing import List, Dict, Union
 from inference_tools.datatypes.rule import Rule
 from api.models.rules import InputParameter, RuleOutput
 
 
-@dataclasses.dataclass
 class RulesHandler:
     """
     A class to manage the rules and their actions.

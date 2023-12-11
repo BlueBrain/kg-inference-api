@@ -3,14 +3,12 @@ Module: inference_models.py
 
 This module defines Pydantic models for handling inference-related requests and responses.
 """
-import dataclasses
 from typing import List, Dict
 from fastapi_camelcase import CamelModel
 from pydantic import BaseModel
 from api.models.rules import RuleInput
 
 
-@dataclasses.dataclass
 class InferenceResult(BaseModel):
     """
     An inference result of a rule.
@@ -25,7 +23,6 @@ class InferenceResult(BaseModel):
     results: List[Dict]
 
 
-@dataclasses.dataclass
 class InferenceBody(CamelModel):
     """
     The body of the infer requests.

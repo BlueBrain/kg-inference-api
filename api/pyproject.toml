@@ -2,6 +2,7 @@
 [tool.pylint.FORMAT]
 max-line-length=120
 good-names=["version_template"]
+disable =["R0903"]
 
 [tool.pylint.MASTER]
 extension-pkg-whitelist=["pydantic"]
