@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4] - 10/01/2024
+
+- API: Add DPI parameter for Generate endpoint
 
 ## [0.3.3] - 10/12/2023
 
 - SERVER: Add NGINX server to include caching
-- API: Remove  dataclasses, add rule to ignore in pylint config 
+- API: Remove dataclasses, add rule to ignore in pylint config
 
 ## [0.3.2] - 08/12/2023
 
@@ -39,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.11] - 19/07/2023
 
-- API: Updated setup.py and removed requirements.txt 
+- API: Updated setup.py and removed requirements.txt
 
 ## [0.2.10] - 11/07/2023
 
@@ -55,12 +58,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.8] - 27/06/2023
 
-- Client: Display a histogram of the scores distribution attributed by similarity models for all 
+- Client: Display a histogram of the scores distribution attributed by similarity models for all
   inferred results
 
 ## [0.2.7] - 14/06/2023
 
-- Client: Updated the retrieval of the neuron morphology selector to get public/thalamus data 
+- Client: Updated the retrieval of the neuron morphology selector to get public/thalamus data
   for the shape rule. Updated plot files in the assets for the new embeddings
 
 ## [0.2.6] - 02/06/2023
@@ -70,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.5] - 18/04/2023
 
 - Client: Neuron Morphology related rules - Added a selector for neuron morphologies (instead of writing an id)
-- Client: Neuron Morphology related rules - Choose models to run with checkboxes instead of 
+- Client: Neuron Morphology related rules - Choose models to run with checkboxes instead of
   ignoring models with a multi-select dropdown
 
 ## [0.2.4] - 31/03/2023
@@ -93,11 +96,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disabled verification of ssl certificate when requesting from the client to the API
 
 ## [0.2.0] - 20/03/2023
+
 - Updated the forge config yaml file in order to use the aggregated elastic and sparql endpoints
-- Created a forge datamodels instance 
+- Created a forge datamodels instance
 - When inferring, all input filters must be given in a single dictionary to the library, the premise checking will use
-this single dictionary of multiple input parameters 
-(as opposed to the old implementation that called check premises for each input parameter)
+  this single dictionary of multiple input parameters
+  (as opposed to the old implementation that called check premises for each input parameter)
 - Updated Rule model to add a nexus link attribute
 - Refactor getting environment variables: throws exception if a mandatory environment variable is missing
 - Introduce frontend client (Dash)

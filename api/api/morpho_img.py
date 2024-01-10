@@ -5,6 +5,7 @@ This module provides functions to generate morphology PNG images.
 """
 
 import io
+from typing import Union
 from urllib.parse import urlparse
 import requests
 import neurom as nm
@@ -43,7 +44,7 @@ def get_morphology_file_content(authorization: str = "", content_url: str = "") 
     raise requests.exceptions.RequestException
 
 
-def read_image(authorization: str = Header(None), content_url: str = "") -> Response:
+def read_image(authorization: str = Header(None), content_url: str = "", dpi: Union[int, None] = 72) -> Response:
     """
     Returns a PNG image of a morphology (by generating a matplotlib figure from its SWC distribution).
 
@@ -76,7 +77,7 @@ def read_image(authorization: str = Header(None), content_url: str = "") -> Resp
 
     buffer = io.BytesIO()
 
-    fig.savefig(buffer, dpi=72, format="png")
+    fig.savefig(buffer, dpi=dpi, format="png")
 
     buffer.seek(0)
 

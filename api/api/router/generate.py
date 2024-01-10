@@ -5,7 +5,8 @@ This module defines a FastAPI router for handling requests related to morphology
 It includes an endpoint to get a preview image of a morphology.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.security import HTTPBearer
 from starlette.requests import Request
 from api.dependencies import retrieve_user
@@ -26,6 +27,7 @@ require_bearer = HTTPBearer()
 def get_morphology_image(
     content_url: str,
     request: Request,
+    dpi: Optional[int] = Query(None, ge=10, le=600),
 ) -> Response:
     """
     Endpoint to get a preview image of a morphology
@@ -34,7 +36,7 @@ def get_morphology_image(
     authorization = f"Bearer {user.access_token}"
 
     try:
-        image = read_image(authorization, content_url)
+        image = read_image(authorization, content_url, dpi)
 
         return image
     except InvalidUrlParameterException as exc:
