@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5] - 30/01/2024
+
+- API: Removed endpoint for morphology image generation
+- API: Target new version of inference library, which enables the specification of inference result sub-type
+
 ## [0.3.4] - 10/01/2024
 
 - API: Add DPI parameter for Generate endpoint
