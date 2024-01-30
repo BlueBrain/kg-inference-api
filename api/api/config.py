@@ -11,9 +11,6 @@ Usage:
 """
 
 import os
-import matplotlib
-
-matplotlib.use("agg")
 
 
 def get_env_vars():

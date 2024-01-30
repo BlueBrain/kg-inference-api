@@ -9,7 +9,7 @@ Initialization Steps:
     2. Set up metadata for API tags.
     3. Create a FastAPI application instance with specified title, debug mode, version, and tags.
     4. Configure CORS middleware with whitelisted URLs.
-    5. Include routers for rules, inference, and morphology image generation.
+    5. Include routers for rules, inference.
     6. Configure logging for Gunicorn, UVicorn, and FastAPI.
 
 """
@@ -19,7 +19,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.logger import logger as fastapi_logger
 from api import config
-from api.router import generate, rules, inference
+from api.router import rules, inference
 
 # Metadata for API tags
 tags_metadata = [
@@ -30,10 +30,6 @@ tags_metadata = [
     {
         "name": "Inference",
         "description": "Operations related to inferring resources from the knowledge graph",
-    },
-    {
-        "name": "Generate",
-        "description": "Generate a PNG image of a morphology",
     },
 ]
 
@@ -60,7 +56,6 @@ app.add_middleware(
 # Include routers
 app.include_router(rules.router, prefix="/rules")
 app.include_router(inference.router, prefix="/infer")
-app.include_router(generate.router, prefix="/generate")
 
 # Logging configuration
 gunicorn_error_logger = logging.getLogger("gunicorn.error")
