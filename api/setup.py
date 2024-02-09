@@ -48,7 +48,7 @@ setup(
         "pyJWT==2.6.0",
         "pydantic==1.10.6",
         "nexusforge@git+https://github.com/BlueBrain/nexus-forge",
-        f"inference_tools@git+https://{GITLAB_USERNAME}:{GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference@v0.1.0",
+        f"inference_tools@git+https://{GITLAB_USERNAME}:{GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference@v0.1.1",
         "black==23.11.0",
         "pylint==3.0.2",
     ],
