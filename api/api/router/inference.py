@@ -58,6 +58,7 @@ def infer_resources(
                 parameter_values=inference_body.input_filter,
                 premise_check=True,
                 debug=False,
+                use_resources=False,
             )
             # if there are results, add it to the returned inference results
             if results:

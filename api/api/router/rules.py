@@ -54,6 +54,7 @@ def get_all_rules(
         rule_types=rule_types,
         input_filters=input_filters,
         forge_factory=user_session.get_or_create_forge_session,
+        use_resources=False,
     )
 
     return RulesHandler(rules=rules).serialize_rules()
