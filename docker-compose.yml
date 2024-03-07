@@ -29,12 +29,3 @@ services:
       - "80:80"
     depends_on:
       - kg-inference-api
-  front:
-    build:
-      dockerfile: ./frontend/Dockerfile
-    ports:
-      - "8050:8050"
-    environment:
-      ENVIRONMENT: LOCAL
-    depends_on:
-      - kg-inference-api
