@@ -7,9 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0] - 07/03/2024
 
+- Server: Remove building of server in repository level (moved to Kubernetes/AWS)
 - Docs: Removed docs from this repository, moved to https://bbpgitlab.epfl.ch/dke/apps/kg-inference-client
 - Client: Removed client from this repository, moved to https://bbpgitlab.epfl.ch/dke/apps/kg-inference
-- 
+ 
 ## [0.3.7] - 19/02/2024
 
 - API: Use new version of kg-inference library 0.1.2
