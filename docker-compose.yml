@@ -1,6 +1,6 @@
 # docker-compose.yml
 
-version: '3.8'
+version: "3.8"
 
 services:
   kg-inference-api:
@@ -11,7 +11,7 @@ services:
         GITLAB_USERNAME: <MY_GITLAB_USERNAME>
         GITLAB_TOKEN: <MY_GITLAB_TOKEN>
     ports:
-      - "8086:8080"
+      - "8080:8080"
     environment:
       NEXUS_TOKEN: "TODO"
       BBP_NEXUS_ENDPOINT: "https://bbp.epfl.ch/nexus/v1"
@@ -21,20 +21,3 @@ services:
       RULES_BUCKET: "bbp/inference-rules"
       SPARQL_RULE_VIEW: "https://bbp.epfl.ch/neurosciencegraph/data/views/aggreg-sp/rule_view_no_tag"
       WHITELISTED_CORS_URLS: "http://localhost:3050,https://bluebrainatlas-refactoring.kcpdev.bbp.epfl.ch,https://bbp.epfl.ch/atlas"
-  nginx-server:
-    build:
-      context: server
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
-    depends_on:
-      - kg-inference-api
-  front:
-    build:
-      dockerfile: ./frontend/Dockerfile
-    ports:
-      - "8050:8050"
-    environment:
-      ENVIRONMENT: LOCAL
-    depends_on:
-      - kg-inference-api
