@@ -1,7 +1,6 @@
 """Setup.py file"""
 
 import os
-import re
 from setuptools import setup
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -10,35 +9,12 @@ GITLAB_USERNAME = os.environ.get("GITLAB_USERNAME")
 GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN")
 
 
-# Get the long description from the README file.
-with open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
-    long_description = f.read()
-
-with open(os.path.join(HERE, "../version.py"), encoding="utf-8") as f2:
-    version_content = f2.read()
-    version_template = "__version__ = '(.*)'\n"
-    m = re.match(version_template, version_content)
-    fallback_version = m.group(1)
-
 setup(
     name="kg-inference-api",
     author="Blue Brain Project, EPFL",
-    use_scm_version={
-        "relative_to": __file__,
-        "write_to": "../version.py",
-        "write_to_template": "__version__ = '{version}'\n",
-        "fallback_version": fallback_version,
-    },
     description="KG Inference API",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    keywords="ontology knowledge graph data science inference api",
     packages=["api"],
-    # package_dir={"api": "source"},
-    python_requires=">=3.8",
-    setup_requires=[
-        "setuptools_scm",
-    ],
+    python_requires=">=3.9",
     install_requires=[
         "fastapi==0.95.0",
         "uvicorn==0.21.1",
@@ -51,6 +27,7 @@ setup(
         f"inference_tools@git+https://{GITLAB_USERNAME}:{GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference@v0.1.3",
         "black==23.11.0",
         "pylint==3.0.2",
+        "python-dotenv==1.0.1"
     ],
     classifiers=[
         "Intended Audience :: Information Technology",

@@ -10,23 +10,24 @@ stages:
   - test
   - deploy
 
+
 black:
   stage: lint
   image: pyfound/black:23.11.0
   before_script:
-    - cd ./api/api
+    - cd ./api
     - black --version
   script:
     - black . --check
 
 pylint:
   stage: lint
-  image: python:3.8
+  image: python:3.9
   before_script:
-    - pip install api/
-    - cd ./api
+    - pip install .
   script:
     - pylint api
+
 
 
 build-on-push:
@@ -34,7 +35,7 @@ build-on-push:
   extends: .build-image-using-kaniko
   variables:
     CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/kg-inference-api-build
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$CI_JOB_TOKEN --build-arg GITLAB_USERNAME='gitlab-ci-token' -f ./api/Dockerfile
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$CI_JOB_TOKEN --build-arg GITLAB_USERNAME='gitlab-ci-token'
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
@@ -56,7 +57,7 @@ build-and-deploy-api-image-in-registry:
         CI_COMMIT_SHORT_SHA: $CI_COMMIT_SHORT_SHA
         REGISTRY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA-$(date +%s)
   variables:
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$CI_JOB_TOKEN --build-arg GITLAB_USERNAME='gitlab-ci-token' -f ./api/Dockerfile
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$CI_JOB_TOKEN --build-arg GITLAB_USERNAME='gitlab-ci-token'
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi
 
@@ -74,6 +75,6 @@ build-and-deploy-api-image-in-dockerhub:
     CI_REGISTRY_USER: bbpbuildbot
     CI_REGISTRY_PASSWORD: $CI_REGISTRY_PASSWORD_DOCKERHUB
     REGISTRY_IMAGE_TAG: latest
-    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$CI_JOB_TOKEN --build-arg GITLAB_USERNAME='gitlab-ci-token' -f ./api/Dockerfile
+    KANIKO_EXTRA_ARGS: --build-arg GITLAB_TOKEN=$CI_JOB_TOKEN --build-arg GITLAB_USERNAME='gitlab-ci-token'
     KUBERNETES_MEMORY_LIMIT: 4Gi
     KUBERNETES_MEMORY_REQUEST: 4Gi

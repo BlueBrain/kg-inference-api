@@ -1,6 +1,9 @@
 **/.idea/
+**/.vscode/**
 **/__pycache__/
 **/.DS_Store
 kg_inference_api.egg-info/
 build/
 .eggs/
+.venv/**
+.env
