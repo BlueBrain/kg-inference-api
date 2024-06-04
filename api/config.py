@@ -36,6 +36,7 @@ def get_env_vars():
         "SPARQL_RULE_VIEW": None,
         "WHITELISTED_CORS_URLS": "",  # can be optional
         "NEXUS_TOKEN": "",  # can be optional
+        "BASE_PATH": "",
     }
 
     environment_variables = dict(
@@ -61,5 +62,6 @@ def get_env_vars():
     SPARQL_RULE_VIEW,
     WHITELISTED_CORS_URLS,
     NEXUS_TOKEN,
+    BASE_PATH,
     DEBUG_MODE,
 ) = get_env_vars()
