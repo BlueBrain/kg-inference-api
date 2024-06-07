@@ -40,6 +40,7 @@ app = FastAPI(
     version="0.5.0",
     openapi_tags=tags_metadata,
     docs_url=f"{config.BASE_PATH}/docs",
+    openapi_url=f"{config.BASE_PATH}/openapi.json",
 )
 
 # Whitelisted CORS URLs
