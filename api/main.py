@@ -15,7 +15,7 @@ Initialization Steps:
 """
 
 import logging
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.logger import logger as fastapi_logger
 from api import config
@@ -37,8 +37,10 @@ tags_metadata = [
 app = FastAPI(
     title="KG Inference API",
     debug=config.DEBUG_MODE,
-    version="0.4.0",
+    version="0.5.0",
     openapi_tags=tags_metadata,
+    docs_url=f"{config.BASE_PATH}/docs",
+    openapi_url=f"{config.BASE_PATH}/openapi.json",
 )
 
 # Whitelisted CORS URLs
@@ -53,9 +55,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+base_router = APIRouter(prefix=config.BASE_PATH)
+
 # Include routers
-app.include_router(rules.router, prefix="/rules")
-app.include_router(inference.router, prefix="/infer")
+base_router.include_router(rules.router, prefix="/rules")
+base_router.include_router(inference.router, prefix="/infer")
+
+app.include_router(base_router)
 
 # Logging configuration
 gunicorn_error_logger = logging.getLogger("gunicorn.error")

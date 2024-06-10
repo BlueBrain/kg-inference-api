@@ -1,4 +1,3 @@
-
 [tool.pylint.FORMAT]
 max-line-length=120
 good-names=["version_template"]

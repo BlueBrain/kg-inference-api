@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+## [0.5.0] - 03/05/2024
+
+- Move `api` directory one level up
+- Install `python-dotenv` for environment variable management
+- Upgrade python version to 3.9
+- Add `base_path` environment variable to prefix URLs
+
 ## [0.4.0] - 03/04/2024
 
 - API: Update inference library version to v0.1.3
