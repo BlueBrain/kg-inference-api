@@ -24,6 +24,8 @@ pylint:
   stage: lint
   image: python:3.9
   before_script:
+    - export GITLAB_TOKEN=$CI_JOB_TOKEN
+    - export GITLAB_USERNAME='gitlab-ci-token'
     - pip install .
   script:
     - pylint api
