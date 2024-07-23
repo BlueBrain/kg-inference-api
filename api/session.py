@@ -41,16 +41,8 @@ class UserSession:
 
         with open(config_path, encoding="utf-8") as e:
             conf = yaml.safe_load(e)
-            if bucket == "neurosciencegraph/datamodels":
-                conf["Model"]["context"]["iri"] = "https://neuroshapes.org"
 
         conf["Store"]["file_resource_mapping"] = full_path(conf["Store"]["file_resource_mapping"])
-        conf["Resolvers"]["ontology"][0]["result_resource_mapping"] = full_path(
-            conf["Resolvers"]["ontology"][0]["result_resource_mapping"]
-        )
-        conf["Resolvers"]["agent"][0]["result_resource_mapping"] = full_path(
-            conf["Resolvers"]["agent"][0]["result_resource_mapping"]
-        )
 
         args = {
             "configuration": conf,
