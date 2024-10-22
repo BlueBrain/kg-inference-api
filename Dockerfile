@@ -1,8 +1,5 @@
 FROM python:3.9
 
-ARG GITLAB_USERNAME
-ARG GITLAB_TOKEN
-
 WORKDIR /code
 COPY . /code/api
 
