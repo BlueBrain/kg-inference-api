@@ -5,10 +5,6 @@ from setuptools import setup
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
-GITLAB_USERNAME = os.environ.get("GITLAB_USERNAME")
-GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN")
-
-
 setup(
     name="kg-inference-api",
     author="Blue Brain Project, EPFL",
@@ -24,10 +20,10 @@ setup(
         "pyJWT==2.6.0",
         "pydantic==1.10.6",
         "nexusforge@git+https://github.com/BlueBrain/nexus-forge",
-        f"inference_tools@git+https://{GITLAB_USERNAME}:{GITLAB_TOKEN}@bbpgitlab.epfl.ch/dke/apps/kg-inference@v0.1.3",
+        "knowledge-graph-inference==0.1.4",
         "black==23.11.0",
         "pylint==3.0.2",
-        "python-dotenv==1.0.1"
+        "python-dotenv==1.0.1",
     ],
     classifiers=[
         "Intended Audience :: Information Technology",
