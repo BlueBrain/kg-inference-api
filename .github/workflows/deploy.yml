@@ -1,0 +1,29 @@
+name: Publish Docker Image
+
+on:
+  push:
+    tags:
+      - '*'
+
+
+jobs:
+  deploy:
+    env:
+        REGISTRY_IMAGE_TAG: latest
+        CI_REGISTRY_IMAGE: bluebrain/kg-inference-api
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Docker Hub Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.BBPBUILDBOT_DOCKERHUB_USER }}
+          password: ${{ secrets.BBPBUILDBOT_DOCKERHUB_PASSWORD }}
+              
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: bluebrain/kg-inference-api:latest
