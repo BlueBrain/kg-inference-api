@@ -1,0 +1,51 @@
+name: Run linter, formatter check 
+
+# on: [pull_request]
+
+on:
+    push:
+      branches:
+        - '**'
+
+jobs:
+  lint_black:
+    name: Lint with Black
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install .
+
+      - name: Show Black version
+        run: black --version
+
+      - name: Lint with Black
+        run: black --check .
+
+#   lint_pylint:
+#     name: Lint with Pylint
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Set up Python 3.9
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.9'
+
+#       - name: Install Poetry
+#         uses: snok/install-poetry@v1
+
+#       - name: Install dependencies
+#         run: poetry config virtualenvs.create false && poetry install
+
+#       - name: Lint with Pylint
+#         run: pylint api
