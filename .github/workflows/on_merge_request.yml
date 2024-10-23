@@ -17,7 +17,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install .
+        run: pip install '.[dev]'
 
       - name: Show Black version
         run: black --version
@@ -38,7 +38,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install .
+        run: pip install '.[dev]'
 
       - name: Lint with Pylint
         run: pylint api

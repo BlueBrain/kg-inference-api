@@ -27,7 +27,7 @@ setup(
             "pytest==7.2.1",
             "black==23.11.0",
             "pylint==3.0.2",
-            ],
+        ],
     },
     classifiers=[
         "Intended Audience :: Information Technology",
