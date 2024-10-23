@@ -1,10 +1,14 @@
 name: Publish Docker Image
 
+# on:
+#   push:
+#     tags:
+#       - '*'
+
 on:
   push:
-    tags:
-      - '*'
-
+    branches:
+      - '**'  # This will trigger on any branch
 
 jobs:
   deploy:
