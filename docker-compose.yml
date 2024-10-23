@@ -7,8 +7,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    develop:
+      watch:
+      - action: sync+restart
+        path: ./api
+        target: /code/api
     ports:
-      - "8080:8080"
+      - "8080:80"
     environment:
       BBP_NEXUS_ENDPOINT: https://bbp.epfl.ch/nexus/v1
       ENVIRONMENT: LOCAL

@@ -16,15 +16,19 @@ setup(
         "uvicorn==0.21.1",
         "gunicorn==21.2.0",
         "fastapi-camelcase==1.0.5",
-        "pytest==7.2.1",
         "pyJWT==2.6.0",
         "pydantic==1.10.6",
         "nexusforge@git+https://github.com/BlueBrain/nexus-forge",
         "knowledge-graph-inference==0.1.4",
-        "black==23.11.0",
-        "pylint==3.0.2",
         "python-dotenv==1.0.1",
     ],
+    extras_require={
+        "dev": [
+            "pytest==7.2.1",
+            "black==23.11.0",
+            "pylint==3.0.2",
+        ],
+    },
     classifiers=[
         "Intended Audience :: Information Technology",
         "Intended Audience :: Science/Research",
