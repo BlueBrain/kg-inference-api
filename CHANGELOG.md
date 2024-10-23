@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.2] - 22/10/2024
 
 - Modify inference_tools dependency to be installed from `knowledge-graph-inference`
+- Add github actions for linting and deployment
 
 ## [0.5.1] - 09/07/2024
 
