@@ -1,11 +1,38 @@
-KG Inference API
-***********************
+# KG Inference API
 
-## Environment Variables
+The KG Inference API is designed to infer morphologies based on various input characteristics. This API leverages knowledge graphs and inference techniques to provide insights into the structure and form of entities within a defined context.
 
-- `BBP_NEXUS_ENDPOINT` The nexus endpoint (eg. `https://staging.nexus.ocp.bbp.epfl.ch/v1`)
-- `RULES_BUCKET` The bucket that the rules are located
-- `DATAMODELS_BUCKET` The bucket that holds the resource type ontology
-- `ENVIRONMENT` The environment that the application runs in (`LOCAL`/`DEV`/`PRODUCTION`)
-- `WHITELISTED_CORS_URLS` The allowed URLs to accept CORS requests from. The URLs should be passed as a comma-separated list (eg. `http://localhost:3050,http://test.com`) ***optional***
-- `NEXUS_TOKEN` The nexus authentication token, to run tests only, ***optional***
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/KG-Inference-API.git
+cd KG-Inference-API
+```
+
+2. Install the dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the API:
+
+```bash
+uvicorn main:app --reload
+```
+
+## Usage
+
+Once the API is running, you can access the Swagger UI at `http://localhost:8000/docs` to explore the endpoints and test the inference functionality.
+
+
+## Acknowledgements
+
+The development of this software was supported by funding to the Blue Brain Project, a research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss government’s ETH Board of the Swiss Federal Institutes of Technology.
+
+For license and authors, see LICENSE.txt and AUTHORS.txt respectively.
+
+Copyright &copy; 2022-2024 Blue Brain Project/**EPFL**
