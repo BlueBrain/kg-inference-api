@@ -8,17 +8,24 @@ The KG Inference API is designed to infer morphologies based on various input ch
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/KG-Inference-API.git
-cd KG-Inference-API
+git clone https://github.com/BlueBrain/kg-inference-api.git
+cd kg-inference-API
 ```
 
-2. Install the dependencies:
+2. Create and activate a virtual environment
 
 ```bash
-pip install -r requirements.txt
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-3. Run the API:
+3. Install the dependencies:
+
+```bash
+pip install .
+```
+
+4. Run the API:
 
 ```bash
 uvicorn main:app --reload
